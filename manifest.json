@@ -11,7 +11,7 @@
     "128": "assets/icon.png"
   },
   "action": {
-    "default_title": "World Time Aligner",
+    "default_title": "TimeMapper - World Clock Aligner",
     "default_popup": "src/popup/popup.html",
     "default_icon": {
       "16": "assets/icon.png",
