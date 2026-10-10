@@ -1,4 +1,4 @@
-# World Time Aligner
+# TimeMapper
 
 A Chrome Extension Popup to compare times across multiple timezones. Select cities by clicking on the world map and align their times on a 24-hour timeline.
 
@@ -51,7 +51,7 @@ Example:
 ---
 ---
 
-# World Time Aligner (中文說明)
+# TimeMapper (中文說明)
 
 一個用於比對多個時區時間的 Chrome Extension Popup。透過點擊世界地圖選取城市，並在 24 小時時間軸上對齊各時區時間。
 
