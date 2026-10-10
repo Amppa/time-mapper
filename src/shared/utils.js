@@ -8,6 +8,24 @@ const MathUtils = {
   }
 };
 
+const EscapeUtils = {
+  HTML_ENTITIES: {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  },
+
+  /**
+   * Escape a value for safe interpolation into an innerHTML template.
+   * Only needed for values from user input or remote APIs.
+   */
+  html(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (char) => EscapeUtils.HTML_ENTITIES[char]);
+  }
+};
+
 const TimeUtils = {
   _formatterCache: {},
   _resolvedCache: {},

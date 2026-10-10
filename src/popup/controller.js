@@ -142,10 +142,10 @@ const AppController = {
               card.innerHTML = `
                 <div class="search-result-info">
                   <div class="search-result-name-row">
-                    <span class="search-result-name">${result.name}</span>
-                    <span class="search-result-country">${subtitleText}</span>
+                    <span class="search-result-name">${EscapeUtils.html(result.name)}</span>
+                    <span class="search-result-country">${EscapeUtils.html(subtitleText)}</span>
                   </div>
-                  <div class="search-result-details">${result.timezone || "UTC"} (Lng: ${lng.toFixed(1)}, Lat: ${lat.toFixed(1)})</div>
+                  <div class="search-result-details">${EscapeUtils.html(result.timezone || "UTC")} (Lng: ${lng.toFixed(1)}, Lat: ${lat.toFixed(1)})</div>
                 </div>
               `;
 

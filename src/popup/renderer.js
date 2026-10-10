@@ -149,7 +149,7 @@ const Renderer = {
       const dstSuffix = TimeUtils.isCurrentlyDST(city.zone)
         ? ` <span title="${I18nUtils.getTranslation("dstTooltip")}">${I18nUtils.getTranslation("dstLabel")}</span>`
         : "";
-      labelText.innerHTML = `<span class="city-name">${cityName}</span><span class="city-time">${TimeUtils.utcOffsetText(new Date(), city.zone)} · ${TimeUtils.formatTime(new Date(), city.zone)}${dstSuffix}</span>`;
+      labelText.innerHTML = `<span class="city-name">${EscapeUtils.html(cityName)}</span><span class="city-time">${TimeUtils.utcOffsetText(new Date(), city.zone)} · ${TimeUtils.formatTime(new Date(), city.zone)}${dstSuffix}</span>`;
 
       label.append(labelText);
 
@@ -251,7 +251,7 @@ const Renderer = {
 
       this._cachedZoneDetails = zoneDetails;
       this._cachedTimezoneOptionsHTML = zoneDetails.map((detail) => {
-        return `<option value="${detail.zone}">${detail.label}</option>`;
+        return `<option value="${EscapeUtils.html(detail.zone)}">${EscapeUtils.html(detail.label)}</option>`;
       }).join('');
       this._zoneCacheSignature = this._computeZoneCacheSignature();
     }
@@ -274,13 +274,13 @@ const Renderer = {
 
       card.innerHTML = `
         <div class="drag-handle">⋮⋮</div>
-        <input class="city-name-input" type="text" value="${cityName.replaceAll('"', "&quot;")}" placeholder="Name">
+        <input class="city-name-input" type="text" value="${EscapeUtils.html(cityName)}" placeholder="Name">
         <select class="city-zone-select">
           ${timezoneOptionsHTML}
         </select>
         <input class="city-lng-input" type="number" step="any" value="${lng.toFixed(2)}" placeholder="Lng">
         <input class="city-lat-input" type="number" step="any" value="${lat.toFixed(2)}" placeholder="Lat">
-        <button type="button" class="remove-city-card-btn" aria-label="${I18nUtils.getTranslation("removeCity", { name: cityName })}">×</button>
+        <button type="button" class="remove-city-card-btn" aria-label="${EscapeUtils.html(I18nUtils.getTranslation("removeCity", { name: cityName }))}">×</button>
       `;
 
       const nameInput = card.querySelector(".city-name-input");
