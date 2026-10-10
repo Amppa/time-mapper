@@ -251,12 +251,7 @@ const Renderer = {
       if (!city) return;
 
       const cityName = I18nUtils.getCityName(city);
-      let lng = city.lng;
-      let lat = city.lat;
-      if (typeof lng !== "number" || typeof lat !== "number") {
-        lng = (city.x - 46.2357) / 0.2816;
-        lat = (city.y - 63.3239) / -0.5257;
-      }
+      const { lng, lat } = MapUtils.lngLatOf(city);
 
       const card = document.createElement("div");
       card.className = "current-city-card";
@@ -430,10 +425,8 @@ const Renderer = {
 
         if (!isValid) return;
 
-        const cx = 0.2816 * nextLng + 46.2357;
-        const cy = -0.5257 * nextLat + 63.3239;
-        const x = MathUtils.clamp(cx, 0, 100);
-        const y = MathUtils.clamp(cy, 0, 100);
+        const x = MathUtils.clamp(MapUtils.lngToX(nextLng), 0, 100);
+        const y = MathUtils.clamp(MapUtils.latToY(nextLat), 0, 100);
 
         let targetId = city.id;
         let isNewCustom = false;

@@ -1,4 +1,18 @@
 /**
+ * World Time Aligner - Map Projection Constants
+ *
+ * Linear conversion from geographic coordinates to base map percentages (0-100):
+ *   x = lngX * longitude + lngXOffset
+ *   y = latY * latitude  + latYOffset
+ */
+const PROJECTION = {
+  lngX: 0.2816,
+  lngXOffset: 46.2357,
+  latY: -0.5257,
+  latYOffset: 63.3239
+};
+
+/**
  * World Time Aligner - Configuration Module
  */
 const CONFIG = {

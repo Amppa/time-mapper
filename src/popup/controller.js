@@ -151,14 +151,12 @@ const AppController = {
               card.addEventListener("click", (evt) => {
                 evt.stopPropagation();
                 
-                const cx = 0.2816 * lng + 46.2357;
-                const cy = -0.5257 * lat + 63.3239;
                 const newCity = {
                   id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
                   name: result.name,
                   zone: result.timezone || "UTC",
-                  x: MathUtils.clamp(cx, 0, 100),
-                  y: MathUtils.clamp(cy, 0, 100),
+                  x: MathUtils.clamp(MapUtils.lngToX(lng), 0, 100),
+                  y: MathUtils.clamp(MapUtils.latToY(lat), 0, 100),
                   lng: lng,
                   lat: lat
                 };

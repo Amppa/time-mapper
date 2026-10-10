@@ -244,12 +244,35 @@ const PeriodUtils = {
 };
 
 const MapUtils = {
+  lngToX(lng) {
+    return PROJECTION.lngX * lng + PROJECTION.lngXOffset;
+  },
+
+  xToLng(x) {
+    return (x - PROJECTION.lngXOffset) / PROJECTION.lngX;
+  },
+
+  latToY(lat) {
+    return PROJECTION.latY * lat + PROJECTION.latYOffset;
+  },
+
+  yToLat(y) {
+    return (y - PROJECTION.latYOffset) / PROJECTION.latY;
+  },
+
+  lngLatOf(city) {
+    if (typeof city.lng === "number" && typeof city.lat === "number") {
+      return { lng: city.lng, lat: city.lat };
+    }
+    return { lng: this.xToLng(city.x), lat: this.yToLat(city.y) };
+  },
+
   mapPosition(city) {
     let cx = city.x;
     let cy = city.y;
     if (typeof city.lng === "number" && typeof city.lat === "number") {
-      cx = 0.2816 * city.lng + 46.2357;
-      cy = -0.5257 * city.lat + 63.3239;
+      cx = this.lngToX(city.lng);
+      cy = this.latToY(city.lat);
     }
     const screenPercentX = MathUtils.clamp(50 + (cx - 50) * State.mapSettings.widthScale + State.mapSettings.lngOffset, 0, 100);
     const screenPercentY = MathUtils.clamp(50 + (cy - 50) * State.mapSettings.heightScale - State.mapSettings.latOffset, 0, 100);
@@ -260,23 +283,17 @@ const MapUtils = {
   },
 
   getLongitudeX(lng) {
-    const cx = 0.2816 * lng + 46.2357;
+    const cx = this.lngToX(lng);
     return 50 + (cx - 50) * State.mapSettings.widthScale + State.mapSettings.lngOffset;
   },
 
   getXLongitude(x) {
     const cx = 50 + (x - 50 - State.mapSettings.lngOffset) / State.mapSettings.widthScale;
-    return (cx - 46.2357) / 0.2816;
+    return this.xToLng(cx);
   },
 
   getCityCoordinates(city) {
-    let lng = city.lng;
-    let lat = city.lat;
-    if (typeof lng !== "number" || typeof lat !== "number") {
-      // Reverse calculate from x, y
-      lng = (city.x - 46.2357) / 0.2816;
-      lat = (city.y - 63.3239) / -0.5257;
-    }
+    const { lng, lat } = this.lngLatOf(city);
     const lngText = lng >= 0 ? `${lng.toFixed(1)}°E` : `${Math.abs(lng).toFixed(1)}°W`;
     const latText = lat >= 0 ? `${lat.toFixed(1)}°N` : `${Math.abs(lat).toFixed(1)}°S`;
     return `${lngText}, ${latText}`;
