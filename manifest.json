@@ -12,7 +12,7 @@
   },
   "action": {
     "default_title": "World Time Aligner",
-    "default_popup": "popup.html",
+    "default_popup": "src/popup/popup.html",
     "default_icon": {
       "16": "assets/icon.png",
       "32": "assets/icon.png",

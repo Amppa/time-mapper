@@ -21,11 +21,10 @@ A Chrome Extension Popup to compare times across multiple timezones. Select citi
 ## Project Structure
 
 - manifest.json: Chrome Extension manifest file (MV3).
-- popup.html: Popup UI structure.
-- popup.js: Timezone logic, timeline rendering, and event handlers.
-- cities.js: Pre-defined city coordinates and timezone settings.
-- i18n.js: Translation maps for multi-language support.
-- assets: Map background image and settings icon.
+- assets/: Map background image and icons.
+- _locales/: Multi-language message catalogs.
+- src/popup/: Popup UI structure (`popup.html`), stylesheets (`*.css`), and UI logic (`controller.js`, `renderer.js`, `dom.js`).
+- src/shared/: Shared configuration (`config.js`), city database (`cities.js`), translations (`i18n.js`), state management (`state.js`), and utilities (`utils.js`).
 
 ---
 
@@ -75,11 +74,10 @@ Example:
 ## 專案檔案結構
 
 - manifest.json：Chrome Extension 核心設定檔 (MV3)。
-- popup.html：主畫面 HTML 結構。
-- popup.js：時區邏輯、時間軸渲染與事件控制。
-- cities.js：預設內建城市的經緯度座標與時區定義。
-- i18n.js：語系翻譯對照表。
-- assets：世界地圖背景圖檔及設定圖示。
+- assets/：世界地圖背景圖檔及圖示。
+- _locales/：多語系語系檔。
+- src/popup/：主畫面 HTML (`popup.html`)、樣式 (`*.css`) 與 UI 控制邏輯 (`controller.js`, `renderer.js`, `dom.js`)。
+- src/shared/：共用設定 (`config.js`)、城市資料庫 (`cities.js`)、翻譯字典 (`i18n.js`)、狀態管理 (`state.js`) 與工具函式 (`utils.js`)。
 
 ---
 
