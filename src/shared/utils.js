@@ -316,13 +316,6 @@ const MapUtils = {
   getXLongitude(x) {
     const cx = 50 + (x - 50 - State.mapSettings.lngOffset) / State.mapSettings.widthScale;
     return this.xToLng(cx);
-  },
-
-  getCityCoordinates(city) {
-    const { lng, lat } = this.lngLatOf(city);
-    const lngText = lng >= 0 ? `${lng.toFixed(1)}°E` : `${Math.abs(lng).toFixed(1)}°W`;
-    const latText = lat >= 0 ? `${lat.toFixed(1)}°N` : `${Math.abs(lat).toFixed(1)}°S`;
-    return `${lngText}, ${latText}`;
   }
 };
 
