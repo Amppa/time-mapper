@@ -46,6 +46,7 @@ const AppController = {
     State.customCities = [...State.customCities, newCity];
     State.saveCustomCities();
     State.toggleCity(newCity.id);
+    Renderer.render();
   },
 
   wireMapSettings() {
@@ -164,6 +165,7 @@ const AppController = {
                 State.customCities = [...State.customCities, newCity];
                 State.saveCustomCities();
                 State.toggleCity(newCity.id);
+                Renderer.render();
 
                 DOM.searchCityInput.value = "";
                 DOM.searchResultsList.hidden = true;
@@ -215,14 +217,16 @@ const AppController = {
     if (!DOM.cityLimitInput) return;
     DOM.cityLimitInput.addEventListener("input", (e) => {
       const val = parseInt(e.target.value, 10);
-      if (!isNaN(val) && val > 0) {
-        State.saveCityLimit(val);
+      if (!isNaN(val) && val > 0 && State.saveCityLimit(val)) {
+        Renderer.render();
       }
     });
     DOM.cityLimitInput.addEventListener("change", (e) => {
       const val = parseInt(e.target.value, 10);
       if (!isNaN(val) && val > 0) {
-        State.saveCityLimit(val);
+        if (State.saveCityLimit(val)) {
+          Renderer.render();
+        }
       } else {
         e.target.value = String(State.cityLimit);
       }
@@ -303,13 +307,6 @@ const AppController = {
           if (handleEl) handleEl.classList.add("is-dragging");
         }
 
-        // Update selected offset hours & night area
-        if (fraction !== null) {
-          const nowFraction = TimelineUtils.getNowFraction();
-          State.selectedOffsetHours = (fraction - nowFraction) * 24;
-          Renderer.renderNightArea(State.selectedOffsetHours);
-        }
-
         e.preventDefault();
       }
     });
@@ -335,8 +332,6 @@ const AppController = {
       }
 
       // Live-update map timeline and ref lines
-      const nowFraction = TimelineUtils.getNowFraction();
-      State.selectedOffsetHours = (fraction - nowFraction) * 24;
       Renderer.renderNightArea(State.selectedOffsetHours);
     });
 
@@ -368,15 +363,6 @@ const AppController = {
         } else {
           State.activeScrubId = null;
         }
-      }
-
-      // Recalculate selectedOffsetHours
-      const activeFraction = State.getActiveScrubFraction();
-      if (activeFraction !== null) {
-        const nowFraction = TimelineUtils.getNowFraction();
-        State.selectedOffsetHours = (activeFraction - nowFraction) * 24;
-      } else {
-        State.selectedOffsetHours = 0;
       }
 
       // Redraw UI
@@ -502,7 +488,6 @@ const AppController = {
         State.saveNowLineMode(e.target.value);
         State.scrubs = [];
         State.activeScrubId = null;
-        State.selectedOffsetHours = 0;
         Renderer.render();
       });
     }
@@ -511,7 +496,6 @@ const AppController = {
       State.selectedIds = [...CONFIG.defaultSelection].slice(0, State.cityLimit);
       State.scrubs = [];
       State.activeScrubId = null;
-      State.selectedOffsetHours = 0;
       State.saveSelection();
       Renderer.render();
     });
@@ -521,7 +505,6 @@ const AppController = {
       State.customCities = [];
       State.scrubs = [];
       State.activeScrubId = null;
-      State.selectedOffsetHours = 0;
       State.saveSelection();
       State.saveCustomCities();
       Renderer.render();

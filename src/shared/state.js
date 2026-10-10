@@ -9,7 +9,6 @@ const State = {
   timePeriods: [],
   currentLang: "zh",
   baseHours: [],
-  selectedOffsetHours: null,
   nowLineMode: "local",   // 'local' | 'firstCity'
   scrubs: [],             // array of { id, fraction } objects
   activeScrubId: null,    // id of the active scrub line
@@ -17,6 +16,16 @@ const State = {
   cityLimit: 6,
   lastActiveCard: null,
   _localCity: null,
+
+  /**
+   * Derived from the active scrub line; never assigned directly.
+   * Hours to shift "now" by so that it lines up with the active scrub.
+   */
+  get selectedOffsetHours() {
+    const activeFraction = this.getActiveScrubFraction();
+    if (activeFraction === null) return 0;
+    return (activeFraction - TimelineUtils.getNowFraction()) * 24;
+  },
 
   init() {
     this._localCity = null;
@@ -27,7 +36,6 @@ const State = {
     this.cityLimit = this.loadCityLimit();
     this.selectedIds = this.loadSelection();
     this.nowLineMode = this.loadNowLineMode();
-    this.selectedOffsetHours = 0;
     this.scrubs = [];
     this.activeScrubId = null;
     this.draggingId = null;
@@ -118,9 +126,6 @@ const State = {
 
   saveCustomCities() {
     localStorage.setItem(CONFIG.customCitiesKey, JSON.stringify(this.customCities));
-    if (typeof Renderer !== "undefined") {
-      Renderer._cachedZoneDetails = null;
-    }
   },
 
   loadSelection() {
@@ -137,9 +142,6 @@ const State = {
 
   saveSelection() {
     localStorage.setItem(CONFIG.storageKey, JSON.stringify(this.selectedIds));
-    if (typeof Renderer !== "undefined") {
-      Renderer._cachedZoneDetails = null;
-    }
   },
 
   getActiveScrubFraction() {
@@ -243,12 +245,11 @@ const State = {
       }
     }
     this.saveSelection();
-    Renderer.render();
   },
 
   loadCityLimit() {
     try {
-      const saved = localStorage.getItem("worldTimeAlignerCityLimit");
+      const saved = localStorage.getItem(CONFIG.cityLimitKey);
       if (saved !== null) {
         const val = parseInt(saved, 10);
         if (val > 0) return val;
@@ -257,18 +258,22 @@ const State = {
     return CONFIG.maxCities;
   },
 
+  /**
+   * @returns {boolean} true if the selection was truncated to the new limit
+   */
   saveCityLimit(val) {
     const limit = parseInt(val, 10);
-    if (isNaN(limit) || limit <= 0) return;
+    if (isNaN(limit) || limit <= 0) return false;
     this.cityLimit = limit;
     try {
-      localStorage.setItem("worldTimeAlignerCityLimit", String(limit));
+      localStorage.setItem(CONFIG.cityLimitKey, String(limit));
     } catch { }
 
     if (this.selectedIds.length > this.cityLimit) {
       this.selectedIds = this.selectedIds.slice(0, this.cityLimit);
       this.saveSelection();
-      Renderer.render();
+      return true;
     }
+    return false;
   }
 };

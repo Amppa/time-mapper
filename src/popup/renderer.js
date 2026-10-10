@@ -79,7 +79,10 @@ const Renderer = {
       const cityName = I18nUtils.getCityName(city);
       button.title = cityName;
       button.setAttribute("aria-label", I18nUtils.getTranslation("selectCity", { name: cityName }));
-      button.addEventListener("click", () => State.toggleCity(city.id));
+      button.addEventListener("click", () => {
+        State.toggleCity(city.id);
+        Renderer.render();
+      });
       DOM.cityLayer.append(button);
 
       if (isSelected && DOM.mapTimeLabelLayer) {
@@ -198,11 +201,20 @@ const Renderer = {
     });
   },
 
+  /**
+   * The timezone dropdown depends on the zones of the currently selected cities.
+   * Derived here so the cache invalidates itself whenever selection or a custom
+   * city's zone changes, instead of relying on every mutation site to clear it.
+   */
+  _computeZoneCacheSignature() {
+    return State.selectedIds.join(",") + "|" + State.customCities.map((city) => city.zone).join(",");
+  },
+
   renderCurrentCitiesList() {
     if (!DOM.currentCitiesList) return;
     DOM.currentCitiesList.innerHTML = "";
 
-    if (!this._cachedZoneDetails) {
+    if (this._zoneCacheSignature !== this._computeZoneCacheSignature()) {
       const supportedZones = (typeof Intl !== "undefined" && typeof Intl.supportedValuesOf === "function")
         ? Intl.supportedValuesOf("timeZone")
         : ["UTC", "Asia/Taipei", "Asia/Hong_Kong", "Asia/Tokyo", "Asia/Singapore", "Europe/London", "America/New_York", "America/Los_Angeles"];
@@ -241,9 +253,9 @@ const Renderer = {
       this._cachedTimezoneOptionsHTML = zoneDetails.map((detail) => {
         return `<option value="${detail.zone}">${detail.label}</option>`;
       }).join('');
+      this._zoneCacheSignature = this._computeZoneCacheSignature();
     }
 
-    const zoneDetails = this._cachedZoneDetails;
     const timezoneOptionsHTML = this._cachedTimezoneOptionsHTML;
 
     State.selectedIds.forEach((id) => {
@@ -493,6 +505,7 @@ const Renderer = {
 
       removeBtn.addEventListener("click", () => {
         State.toggleCity(city.id);
+        Renderer.render();
       });
 
       DOM.currentCitiesList.append(card);
@@ -697,15 +710,6 @@ const Renderer = {
 
     // Clear dynamic scrub lines
     DOM.scrubLinesContainer.innerHTML = "";
-
-    // Sync selectedOffsetHours based on active scrub
-    const activeFraction = State.getActiveScrubFraction();
-    const nowFraction = TimelineUtils.getNowFraction();
-    if (activeFraction !== null) {
-      State.selectedOffsetHours = (activeFraction - nowFraction) * 24;
-    } else {
-      State.selectedOffsetHours = 0;
-    }
 
     State.scrubs.forEach((scrub) => {
       const left = TimelineUtils.fractionToLeft(scrub.fraction);

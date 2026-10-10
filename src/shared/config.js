@@ -24,6 +24,7 @@ const CONFIG = {
   timePeriodsKey: "worldTimeAlignerTimePeriods",
   languageKey: "worldTimeAlignerLanguage",
   nowLineModeKey: "worldTimeAlignerNowLineMode",
+  cityLimitKey: "worldTimeAlignerCityLimit",
   defaultMapSettings: {
     lngOffset: 1.0,
     latOffset: 20.7,
