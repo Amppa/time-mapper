@@ -269,7 +269,7 @@ const AppController = {
         }
       } else {
         // Press to create a new scrub-line and start dragging immediately
-        if (State.scrubs && State.scrubs.length >= 4) {
+        if (State.scrubs && State.scrubs.length >= CONFIG.maxScrubs) {
           return;
         }
 
@@ -381,9 +381,9 @@ const AppController = {
           const lng = MapUtils.getXLongitude(x);
 
           const time = new Date();
-          const offsetHours = State.selectedOffsetHours || 0;
+          const offsetHours = State.selectedOffsetHours;
           time.setTime(time.getTime() + offsetHours * 60 * 60 * 1000);
-          const subsolarLng = -(time.getUTCHours() + time.getUTCMinutes() / 60 - 12) * 15;
+          const subsolarLng = MapUtils.subsolarLng(time);
 
           const k = Math.round((lng - subsolarLng) / 15);
 

@@ -18,6 +18,7 @@ const PROJECTION = {
 const CONFIG = {
   defaultSelection: ["local", "tokyo", "new-york", "los-angeles"],
   maxCities: 6,
+  maxScrubs: 4,
   storageKey: "worldTimeAlignerCities",
   mapSettingsKey: "worldTimeAlignerMapSettings_v4",
   customCitiesKey: "worldTimeAlignerCustomCities",

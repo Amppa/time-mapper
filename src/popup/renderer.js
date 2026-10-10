@@ -475,7 +475,7 @@ const Renderer = {
           Renderer.renderRows();
           Renderer.renderNowLine();
           Renderer.renderScrubLine();
-          Renderer.renderNightArea(State.selectedOffsetHours || 0);
+          Renderer.renderNightArea(State.selectedOffsetHours);
           Renderer.applyVisibilitySettings();
         }
       };
@@ -543,7 +543,7 @@ const Renderer = {
     const time = new Date();
     time.setTime(time.getTime() + offsetHours * 60 * 60 * 1000);
 
-    const subsolarLng = -(time.getUTCHours() + time.getUTCMinutes() / 60 - 12) * 15;
+    const subsolarLng = MapUtils.subsolarLng(time);
     const centerLng = MapUtils.getXLongitude(50);
 
     for (let h = 0; h < 24; h += 2) {
@@ -573,7 +573,7 @@ const Renderer = {
     const tanDec = Math.tan(DECLINATION_DEG * Math.PI / 180);
     const Y_SHIFT = 10;
 
-    const subsolarLng = -(time.getUTCHours() + time.getUTCMinutes() / 60 - 12) * 15;
+    const subsolarLng = MapUtils.subsolarLng(time);
 
     const points = [];
     for (let x = 0; x <= 100; x += 2) {
@@ -593,7 +593,7 @@ const Renderer = {
     const time = new Date();
     time.setTime(time.getTime() + offsetHours * 60 * 60 * 1000);
 
-    const subsolarLng = -(time.getUTCHours() + time.getUTCMinutes() / 60 - 12) * 15;
+    const subsolarLng = MapUtils.subsolarLng(time);
     const centerLng = MapUtils.getXLongitude(50);
 
     for (let h = 0; h < 24; h += 2) {
@@ -689,7 +689,7 @@ const Renderer = {
     // Render lines after layout is established
     this.renderNowLine();
     this.renderScrubLine();
-    this.renderNightArea(State.selectedOffsetHours || 0);
+    this.renderNightArea(State.selectedOffsetHours);
     this.applyVisibilitySettings();
   },
 

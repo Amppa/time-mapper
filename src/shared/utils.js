@@ -244,6 +244,14 @@ const PeriodUtils = {
 };
 
 const MapUtils = {
+  /**
+   * Longitude of the subsolar point (where the sun is directly overhead)
+   * for the given instant, in degrees.
+   */
+  subsolarLng(date) {
+    return -(date.getUTCHours() + date.getUTCMinutes() / 60 - 12) * 15;
+  },
+
   lngToX(lng) {
     return PROJECTION.lngX * lng + PROJECTION.lngXOffset;
   },
