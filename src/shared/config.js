@@ -1,5 +1,5 @@
 /**
- * World Time Aligner - Map Projection Constants
+ * TimeMapper - Map Projection Constants
  *
  * Linear conversion from geographic coordinates to base map percentages (0-100):
  *   x = lngX * longitude + lngXOffset
@@ -13,7 +13,7 @@ const PROJECTION = {
 };
 
 /**
- * World Time Aligner - Configuration Module
+ * TimeMapper - Configuration Module
  */
 const CONFIG = {
   defaultSelection: ["local", "tokyo", "new-york", "los-angeles"],

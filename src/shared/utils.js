@@ -1,5 +1,5 @@
 /**
- * World Time Aligner - Utilities Module
+ * TimeMapper - Utilities Module
  */
 
 const MathUtils = {

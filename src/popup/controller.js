@@ -1,5 +1,5 @@
 /**
- * World Time Aligner - Event Controller Module
+ * TimeMapper - Event Controller Module
  */
 
 const AppController = {

@@ -1,5 +1,5 @@
 /**
- * World Time Aligner - DOM Element Caching Module
+ * TimeMapper - DOM Element Caching Module
  */
 const DOM = {
   cityLayer: document.querySelector("#cityLayer"),

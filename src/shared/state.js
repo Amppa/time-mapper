@@ -1,5 +1,5 @@
 /**
- * World Time Aligner - Application State Management Module
+ * TimeMapper - Application State Management Module
  */
 
 const State = {

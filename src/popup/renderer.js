@@ -1,5 +1,5 @@
 /**
- * World Time Aligner - UI Renderer Module
+ * TimeMapper - UI Renderer Module
  */
 
 const Renderer = {
