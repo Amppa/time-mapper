@@ -1,15 +1,27 @@
+/* Dark is the default, mirroring src/shared/tokens.css where :root is dark and
+   [data-theme="light"] is the override. theme.js sets data-theme from the
+   appearance picker or the OS preference before first paint.
+   The light block below repeats the pre-theme values verbatim, so choosing
+   light reproduces the popup exactly as it looked before theming existed. */
 :root {
-  color-scheme: light;
-  --bg: #f6f7f3;
-  --panel: #ffffff;
-  --ink: #1d2528;
-  --muted: #637074;
-  --line: #d9ded8;
+  color-scheme: dark;
+  --bg: #121214;
+  --panel: #242429;
+  --ink: #f0f0f2;
+  --muted: #909099;
+  --line: #35353c;
+  /* Three surface steps: recessed strips, raised fields/hovers, button hover. */
+  --surface: #1d1d22;
+  --surface-raised: #2b2b31;
+  --surface-hover: #2f2f36;
+  --danger: #ef6b6d;
+  --danger-soft: #322022;
   --accent: var(--ink);
   --accent-dark: var(--ink);
   --unselected-pin: #ffc56f;
   --selected-pin: #de6b23;
-  --scrub-rgb: 9, 101, 105;
+  /* Teal needs to be brighter than the light theme's to stay legible on #121214. */
+  --scrub-rgb: 74, 222, 205;
   --scrub-color: rgba(var(--scrub-rgb), 0.8);
   --scrub-shadow: rgba(var(--scrub-rgb), 0.30);
   --scrub-active-color: rgba(var(--scrub-rgb), 1);
@@ -17,6 +29,21 @@
   --scrub-hover-bg: rgba(var(--scrub-rgb), 0.10);
   --scrub-reset-btn-bg: rgba(var(--scrub-rgb), 0.8);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f6f7f3;
+  --panel: #ffffff;
+  --ink: #1d2528;
+  --muted: #637074;
+  --line: #d9ded8;
+  --surface: #fbfcfa;
+  --surface-raised: #ffffff;
+  --surface-hover: #f4f7f5;
+  --danger: #d9383a;
+  --danger-soft: #fff8f8;
+  --scrub-rgb: 9, 101, 105;
 }
 
 * {
@@ -216,7 +243,7 @@ h1 {
 .text-button {
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #fbfcfa;
+  background: var(--surface);
   color: var(--accent-dark);
   cursor: pointer;
 }
@@ -267,7 +294,7 @@ h1 {
   padding: 6px 8px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fbfcfa;
+  background: var(--surface);
   font-size: 11px;
   transition: all 0.2s ease;
   user-select: none;
@@ -275,7 +302,7 @@ h1 {
 
 .current-city-card:hover {
   border-color: var(--muted);
-  background: #ffffff;
+  background: var(--surface-raised);
 }
 
 .current-city-card.is-dragging {
@@ -358,7 +385,7 @@ h1 {
   padding: 0 6px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--surface-raised);
   color: var(--ink);
   font-size: 11px;
   outline: none;
@@ -411,7 +438,7 @@ h1 {
   height: 28px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--surface-raised);
   color: var(--muted);
   cursor: pointer;
   display: flex;
@@ -423,9 +450,9 @@ h1 {
 }
 
 .remove-city-card-btn:hover {
-  color: #d9383a;
-  border-color: #d9383a;
-  background: #fff8f8;
+  color: var(--danger);
+  border-color: var(--danger);
+  background: var(--danger-soft);
 }
 
 .search-bar-row {
@@ -441,7 +468,7 @@ h1 {
   padding: 0 8px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--surface-raised);
   color: var(--ink);
   font-size: 12px;
   outline: none;
@@ -457,7 +484,7 @@ h1 {
   padding: 0 14px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #fbfcfa;
+  background: var(--surface);
   color: var(--accent-dark);
   font-size: 12px;
   font-weight: 600;
@@ -466,7 +493,7 @@ h1 {
 }
 
 .search-bar-row button:hover {
-  background: #f4f7f5;
+  background: var(--surface-hover);
   border-color: var(--muted);
 }
 
@@ -508,7 +535,7 @@ h1 {
 }
 
 .search-result-card:hover {
-  background: #ffffff;
+  background: var(--surface-raised);
   border-color: var(--line);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 }
@@ -646,7 +673,7 @@ h1 {
   padding: 0 6px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--surface-raised);
   color: var(--ink);
   font-size: 11px;
   outline: none;
