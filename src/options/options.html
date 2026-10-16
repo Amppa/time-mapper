@@ -97,98 +97,104 @@
           </label>
         </div>
 
-        <div class="divider"></div>
-
-        <!-- Sliders -->
-        <!-- 經度偏移 -->
-        <div class="control-group slider-control-group">
-          <div class="control-label-wrap">
-            <span class="control-label" data-i18n="longitude">經度偏移</span>
-            <span class="control-desc" data-i18n="lngOffsetDesc">調整世界地圖圖釘與經度水平對齊</span>
-          </div>
-          <div class="slider-control">
-            <button type="button" class="stepper-btn" data-adjust="lngOffset" data-delta="-0.1" aria-label="Decrease Longitude Offset">−</button>
-            <input type="range" class="settings-slider" min="-40" max="40" step="0.1" value="1.0" data-setting="lngOffset" aria-label="Longitude Offset Slider">
-            <button type="button" class="stepper-btn" data-adjust="lngOffset" data-delta="0.1" aria-label="Increase Longitude Offset">+</button>
-            <output class="val-badge" data-output="lngOffset">1.0</output>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- 緯度偏移 -->
-        <div class="control-group slider-control-group">
-          <div class="control-label-wrap">
-            <span class="control-label" data-i18n="latitude">緯度偏移</span>
-            <span class="control-desc" data-i18n="latOffsetDesc">調整世界地圖圖釘與緯度垂直對齊</span>
-          </div>
-          <div class="slider-control">
-            <button type="button" class="stepper-btn" data-adjust="latOffset" data-delta="-0.1" aria-label="Decrease Latitude Offset">−</button>
-            <input type="range" class="settings-slider" min="-40" max="40" step="0.1" value="20.7" data-setting="latOffset" aria-label="Latitude Offset Slider">
-            <button type="button" class="stepper-btn" data-adjust="latOffset" data-delta="0.1" aria-label="Increase Latitude Offset">+</button>
-            <output class="val-badge" data-output="latOffset">20.7</output>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- 寬度縮放 -->
-        <div class="control-group slider-control-group">
-          <div class="control-label-wrap">
-            <span class="control-label" data-i18n="width">寬度縮放</span>
-            <span class="control-desc" data-i18n="widthScaleDesc">調整世界地圖投影寬度縮放比例</span>
-          </div>
-          <div class="slider-control">
-            <button type="button" class="stepper-btn" data-adjust="widthScale" data-delta="-0.01" aria-label="Decrease Width Scale">−</button>
-            <input type="range" class="settings-slider" min="0.50" max="1.50" step="0.01" value="1.0" data-setting="widthScale" aria-label="Width Scale Slider">
-            <button type="button" class="stepper-btn" data-adjust="widthScale" data-delta="0.01" aria-label="Increase Width Scale">+</button>
-            <output class="val-badge" data-output="widthScale">1.00</output>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- 高度縮放 -->
-        <div class="control-group slider-control-group">
-          <div class="control-label-wrap">
-            <span class="control-label" data-i18n="height">高度縮放</span>
-            <span class="control-desc" data-i18n="heightScaleDesc">調整世界地圖投影高度縮放比例</span>
-          </div>
-          <div class="slider-control">
-            <button type="button" class="stepper-btn" data-adjust="heightScale" data-delta="-0.01" aria-label="Decrease Height Scale">−</button>
-            <input type="range" class="settings-slider" min="0.50" max="1.50" step="0.01" value="1.39" data-setting="heightScale" aria-label="Height Scale Slider">
-            <button type="button" class="stepper-btn" data-adjust="heightScale" data-delta="0.01" aria-label="Increase Height Scale">+</button>
-            <output class="val-badge" data-output="heightScale">1.39</output>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- 地圖 Y 偏移 -->
-        <div class="control-group slider-control-group">
-          <div class="control-label-wrap">
-            <span class="control-label" data-i18n="mapYOffset">地圖 Y 偏移</span>
-            <span class="control-desc" data-i18n="mapYOffsetDesc">調整地圖及圖釘整體垂直位置偏移</span>
-          </div>
-          <div class="slider-control">
-            <button type="button" class="stepper-btn" data-adjust="mapYOffset" data-delta="-1" aria-label="Decrease Map Y Offset">−</button>
-            <input type="range" class="settings-slider" min="-100" max="100" step="1" value="30" data-setting="mapYOffset" aria-label="Map Y Offset Slider">
-            <button type="button" class="stepper-btn" data-adjust="mapYOffset" data-delta="1" aria-label="Increase Map Y Offset">+</button>
-            <output class="val-badge" data-output="mapYOffset">30</output>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- 重設地圖 -->
-        <div class="control-group">
-          <div class="control-label-wrap">
-            <span class="control-label" data-i18n="resetMapParams">重設地圖設定</span>
-            <span class="control-desc" data-i18n="resetMapParamsDesc">恢復小地圖經緯度偏移與縮放設定至預設值</span>
-          </div>
-          <button type="button" class="reset-btn" id="resetMapButton" data-i18n="resetBtn">恢復預設</button>
-        </div>
       </section>
+
+      <!-- Card: 小地圖貼圖設定 / Map Texture (collapsible, default collapsed) -->
+      <details class="settings-card collapsible-card" id="cardMapTexture">
+        <summary class="collapsible-summary">
+          <span class="section-title" data-i18n="mapTextureCardTitle">小地圖貼圖設定</span>
+        </summary>
+        <div class="collapsible-body">
+          <!-- 經度偏移 -->
+          <div class="control-group slider-control-group">
+            <div class="control-label-wrap">
+              <span class="control-label" data-i18n="longitude">經度偏移</span>
+              <span class="control-desc" data-i18n="lngOffsetDesc">調整世界地圖圖釘與經度水平對齊</span>
+            </div>
+            <div class="slider-control">
+              <button type="button" class="stepper-btn" data-adjust="lngOffset" data-delta="-0.1" aria-label="Decrease Longitude Offset">−</button>
+              <input type="range" class="settings-slider" min="-40" max="40" step="0.1" value="1.0" data-setting="lngOffset" aria-label="Longitude Offset Slider">
+              <button type="button" class="stepper-btn" data-adjust="lngOffset" data-delta="0.1" aria-label="Increase Longitude Offset">+</button>
+              <output class="val-badge" data-output="lngOffset">1.0</output>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- 緯度偏移 -->
+          <div class="control-group slider-control-group">
+            <div class="control-label-wrap">
+              <span class="control-label" data-i18n="latitude">緯度偏移</span>
+              <span class="control-desc" data-i18n="latOffsetDesc">調整世界地圖圖釘與緯度垂直對齊</span>
+            </div>
+            <div class="slider-control">
+              <button type="button" class="stepper-btn" data-adjust="latOffset" data-delta="-0.1" aria-label="Decrease Latitude Offset">−</button>
+              <input type="range" class="settings-slider" min="-40" max="40" step="0.1" value="20.7" data-setting="latOffset" aria-label="Latitude Offset Slider">
+              <button type="button" class="stepper-btn" data-adjust="latOffset" data-delta="0.1" aria-label="Increase Latitude Offset">+</button>
+              <output class="val-badge" data-output="latOffset">20.7</output>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- 寬度縮放 -->
+          <div class="control-group slider-control-group">
+            <div class="control-label-wrap">
+              <span class="control-label" data-i18n="width">寬度縮放</span>
+              <span class="control-desc" data-i18n="widthScaleDesc">調整世界地圖投影寬度縮放比例</span>
+            </div>
+            <div class="slider-control">
+              <button type="button" class="stepper-btn" data-adjust="widthScale" data-delta="-0.01" aria-label="Decrease Width Scale">−</button>
+              <input type="range" class="settings-slider" min="0.50" max="1.50" step="0.01" value="1.0" data-setting="widthScale" aria-label="Width Scale Slider">
+              <button type="button" class="stepper-btn" data-adjust="widthScale" data-delta="0.01" aria-label="Increase Width Scale">+</button>
+              <output class="val-badge" data-output="widthScale">1.00</output>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- 高度縮放 -->
+          <div class="control-group slider-control-group">
+            <div class="control-label-wrap">
+              <span class="control-label" data-i18n="height">高度縮放</span>
+              <span class="control-desc" data-i18n="heightScaleDesc">調整世界地圖投影高度縮放比例</span>
+            </div>
+            <div class="slider-control">
+              <button type="button" class="stepper-btn" data-adjust="heightScale" data-delta="-0.01" aria-label="Decrease Height Scale">−</button>
+              <input type="range" class="settings-slider" min="0.50" max="1.50" step="0.01" value="1.39" data-setting="heightScale" aria-label="Height Scale Slider">
+              <button type="button" class="stepper-btn" data-adjust="heightScale" data-delta="0.01" aria-label="Increase Height Scale">+</button>
+              <output class="val-badge" data-output="heightScale">1.39</output>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- 地圖 Y 偏移 -->
+          <div class="control-group slider-control-group">
+            <div class="control-label-wrap">
+              <span class="control-label" data-i18n="mapYOffset">地圖 Y 偏移</span>
+              <span class="control-desc" data-i18n="mapYOffsetDesc">調整地圖及圖釘整體垂直位置偏移</span>
+            </div>
+            <div class="slider-control">
+              <button type="button" class="stepper-btn" data-adjust="mapYOffset" data-delta="-1" aria-label="Decrease Map Y Offset">−</button>
+              <input type="range" class="settings-slider" min="-100" max="100" step="1" value="30" data-setting="mapYOffset" aria-label="Map Y Offset Slider">
+              <button type="button" class="stepper-btn" data-adjust="mapYOffset" data-delta="1" aria-label="Increase Map Y Offset">+</button>
+              <output class="val-badge" data-output="mapYOffset">30</output>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- 重設地圖 -->
+          <div class="control-group">
+            <div class="control-label-wrap">
+              <span class="control-label" data-i18n="resetMapParams">重設地圖設定</span>
+              <span class="control-desc" data-i18n="resetMapParamsDesc">恢復小地圖經緯度偏移與縮放設定至預設值</span>
+            </div>
+            <button type="button" class="reset-btn" id="resetMapButton" data-i18n="resetBtn">恢復預設</button>
+          </div>
+        </div>
+      </details>
 
       <!-- Card 3: 時段設定 / Time Period Settings -->
       <section class="settings-card" id="cardPeriods">

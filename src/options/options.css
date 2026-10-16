@@ -126,6 +126,47 @@ body {
   margin: 0;
 }
 
+/* Collapsible card (native details/summary, e.g. map texture calibration) */
+.collapsible-card {
+  padding-bottom: var(--space-xl);
+}
+
+.collapsible-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+
+  & .section-title {
+    margin-bottom: 0;
+  }
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &::after {
+    content: "▼";
+    font-size: 10px;
+    color: var(--text-secondary);
+    transition: transform var(--transition-fast);
+    flex-shrink: 0;
+  }
+}
+
+details[open] > .collapsible-summary::after {
+  transform: rotate(180deg);
+}
+
+.collapsible-body {
+  margin-top: var(--space-lg);
+  border-top: 1px solid var(--divider);
+  padding-top: var(--space-md);
+}
+
 /* Segmented Picker (Theme / Lang / Mode) */
 .theme-segment {
   display: flex;
