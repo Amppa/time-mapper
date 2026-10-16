@@ -3,6 +3,7 @@
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .map-panel summary {
@@ -14,10 +15,11 @@
   justify-content: space-between;
   align-items: center;
   user-select: none;
-  background: #fbfcfa;
+  background: var(--sub-panel-bg);
   font-size: 13px;
   color: var(--ink);
   border-bottom: 1px solid transparent;
+  transition: background-color 0.2s ease;
 }
 
 .map-panel[open] summary {
@@ -49,7 +51,8 @@
   aspect-ratio: 629 / 263;
   overflow: hidden;
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--map-shell-bg);
+  transition: background-color 0.2s ease;
 }
 
 .map-timeline {
@@ -91,17 +94,15 @@
   width: 100%;
   height: auto;
   transform: translateY(-50%);
-  opacity: .96;
+  opacity: var(--map-opacity);
+  filter: var(--map-filter);
+  transition: opacity 0.2s ease, filter 0.2s ease;
 }
 
 .hour-lines {
   position: absolute;
   inset: 0;
-  background-image: repeating-linear-gradient(90deg,
-      rgba(8, 74, 96, .18) 0,
-      rgba(8, 74, 96, .18) 1px,
-      transparent 1px,
-      transparent calc(100% / 24));
+  background-image: var(--hour-lines-gradient);
   pointer-events: none;
 }
 
@@ -115,14 +116,14 @@
 }
 
 .night-area-overlay path {
-  fill: rgba(0, 0, 0, 0.32);
+  fill: var(--night-path-fill);
   stroke: none;
 }
 
 /* Static reference curve: shows the night area boundary at the true "now" time */
 .night-area-overlay #nightPathRef {
   fill: none;
-  stroke: rgba(0, 0, 0, 0.5);
+  stroke: var(--night-path-stroke);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
@@ -133,7 +134,7 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  background: rgba(15, 139, 141, 0.15);
+  background: var(--timezone-hover-bg);
   pointer-events: none;
   z-index: 1;
   transform-origin: left;
@@ -151,12 +152,12 @@
   height: 10px;
   margin: -5px 0 0 -5px;
   padding: 0;
-  border: 1.5px solid #ffffff;
+  border: 1.5px solid var(--city-pin-border);
   border-radius: 50%;
   background: var(--unselected-pin);
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s, background-color 0.2s;
+  transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
 }
 
 .city-pin::after {
@@ -182,13 +183,14 @@
   white-space: nowrap;
   font-size: 10px;
   font-weight: 700;
-  color: var(--selected-pin);
-  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--map-time-label-color);
+  background-color: var(--map-time-label-bg);
   padding: 1px 4px;
   border-radius: 3px;
-  border: 1px solid var(--selected-pin);
+  border: 1px solid var(--map-time-label-border);
   pointer-events: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .city-pin:hover {

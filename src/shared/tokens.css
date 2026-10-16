@@ -60,6 +60,25 @@
   --stat-number: #ffffff;
 }
 
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-primary: #121214;
+  --bg-card: #242429;
+  --bg-elevated: #23232a;
+  --bg-stat: #1d1d23;
+  --text-primary: #f0f0f2;
+  --text-secondary: #909099;
+  --divider: rgba(255, 255, 255, 0.08);
+
+  --btn-bg: rgba(255, 255, 255, 0.06);
+  --btn-bg-hover: rgba(255, 255, 255, 0.12);
+  --btn-border-hover: rgba(255, 255, 255, 0.22);
+
+  --track-off: #333338;
+  --knob: #ffffff;
+  --stat-number: #ffffff;
+}
+
 :root[data-theme="light"] {
   /* ------------------------------------------------------------------------
      Theme Palette: Light

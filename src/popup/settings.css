@@ -1,12 +1,25 @@
-:root {
+:root,
+:root[data-theme="light"] {
   color-scheme: light;
   --bg: #f6f7f3;
   --panel: #ffffff;
+  --sub-panel-bg: #fbfcfa;
+  --panel-hover: #ffffff;
+  --card-bg: #fbfcfa;
+  --card-hover: #ffffff;
+  --card-dragging: #eef2f0;
+  --input-bg: #ffffff;
+  --btn-bg: #fbfcfa;
+  --btn-hover: #f4f7f5;
+  --btn-circle-bg: #edf1ee;
+  --danger-hover-bg: #fff8f8;
   --ink: #1d2528;
   --muted: #637074;
   --line: #d9ded8;
   --accent: var(--ink);
   --accent-dark: var(--ink);
+  --accent-hover: #0ea5e9;
+  --now-meta-color: #8e9ca0;
   --unselected-pin: #ffc56f;
   --selected-pin: #de6b23;
   --scrub-rgb: 9, 101, 105;
@@ -16,7 +29,127 @@
   --scrub-active-shadow: rgba(var(--scrub-rgb), 0.45);
   --scrub-hover-bg: rgba(var(--scrub-rgb), 0.10);
   --scrub-reset-btn-bg: rgba(var(--scrub-rgb), 0.8);
+  --map-shell-bg: #ffffff;
+  --map-filter: none;
+  --map-opacity: .96;
+  --hour-lines-gradient: repeating-linear-gradient(90deg,
+      rgba(8, 74, 96, .18) 0,
+      rgba(8, 74, 96, .18) 1px,
+      transparent 1px,
+      transparent calc(100% / 24));
+  --night-path-fill: rgba(0, 0, 0, 0.32);
+  --night-path-stroke: rgba(0, 0, 0, 0.5);
+  --map-time-label-bg: rgba(255, 255, 255, 0.9);
+  --map-time-label-color: var(--selected-pin);
+  --map-time-label-border: var(--selected-pin);
+  --timezone-hover-bg: rgba(15, 139, 141, 0.15);
+  --city-pin-border: #ffffff;
+  --search-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --scroll-thumb: #c9ccd3;
+  --scroll-thumb-hover: #9ca3af;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121215;
+  --panel: #1e1e24;
+  --sub-panel-bg: #25252e;
+  --panel-hover: #2a2a34;
+  --card-bg: #25252e;
+  --card-hover: #2d2d38;
+  --card-dragging: #32323e;
+  --input-bg: #18181e;
+  --btn-bg: #25252e;
+  --btn-hover: #2f2f3a;
+  --btn-circle-bg: #2c2c36;
+  --danger-hover-bg: rgba(239, 68, 68, 0.15);
+  --ink: #f0f0f4;
+  --muted: #9ba0aa;
+  --line: #2e3038;
+  --accent: #38bdf8;
+  --accent-dark: #f0f0f4;
+  --accent-hover: #7dd3fc;
+  --now-meta-color: #8b949e;
+  --unselected-pin: #fbbf24;
+  --selected-pin: #fb923c;
+  --scrub-rgb: 45, 212, 191;
+  --scrub-color: rgba(var(--scrub-rgb), 0.9);
+  --scrub-shadow: rgba(var(--scrub-rgb), 0.45);
+  --scrub-active-color: rgba(var(--scrub-rgb), 1);
+  --scrub-active-shadow: rgba(var(--scrub-rgb), 0.65);
+  --scrub-hover-bg: rgba(var(--scrub-rgb), 0.15);
+  --scrub-reset-btn-bg: #0f766e;
+  --map-shell-bg: #15151a;
+  --map-filter: invert(0.88) brightness(0.92) contrast(1.1);
+  --map-opacity: .92;
+  --hour-lines-gradient: repeating-linear-gradient(90deg,
+      rgba(255, 255, 255, 0.09) 0,
+      rgba(255, 255, 255, 0.09) 1px,
+      transparent 1px,
+      transparent calc(100% / 24));
+  --night-path-fill: rgba(0, 0, 0, 0.52);
+  --night-path-stroke: rgba(255, 255, 255, 0.4);
+  --map-time-label-bg: rgba(24, 24, 30, 0.92);
+  --map-time-label-color: #fb923c;
+  --map-time-label-border: #fb923c;
+  --timezone-hover-bg: rgba(45, 212, 191, 0.22);
+  --city-pin-border: #1a1a20;
+  --search-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  --scroll-thumb: #3a3a46;
+  --scroll-thumb-hover: #525263;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #121215;
+    --panel: #1e1e24;
+    --sub-panel-bg: #25252e;
+    --panel-hover: #2a2a34;
+    --card-bg: #25252e;
+    --card-hover: #2d2d38;
+    --card-dragging: #32323e;
+    --input-bg: #18181e;
+    --btn-bg: #25252e;
+    --btn-hover: #2f2f3a;
+    --btn-circle-bg: #2c2c36;
+    --danger-hover-bg: rgba(239, 68, 68, 0.15);
+    --ink: #f0f0f4;
+    --muted: #9ba0aa;
+    --line: #2e3038;
+    --accent: #38bdf8;
+    --accent-dark: #f0f0f4;
+    --accent-hover: #7dd3fc;
+    --now-meta-color: #8b949e;
+    --unselected-pin: #fbbf24;
+    --selected-pin: #fb923c;
+    --scrub-rgb: 45, 212, 191;
+    --scrub-color: rgba(var(--scrub-rgb), 0.9);
+    --scrub-shadow: rgba(var(--scrub-rgb), 0.45);
+    --scrub-active-color: rgba(var(--scrub-rgb), 1);
+    --scrub-active-shadow: rgba(var(--scrub-rgb), 0.65);
+    --scrub-hover-bg: rgba(var(--scrub-rgb), 0.15);
+    --scrub-reset-btn-bg: #0f766e;
+    --map-shell-bg: #15151a;
+    --map-filter: invert(0.88) brightness(0.92) contrast(1.1);
+    --map-opacity: .92;
+    --hour-lines-gradient: repeating-linear-gradient(90deg,
+        rgba(255, 255, 255, 0.09) 0,
+        rgba(255, 255, 255, 0.09) 1px,
+        transparent 1px,
+        transparent calc(100% / 24));
+    --night-path-fill: rgba(0, 0, 0, 0.52);
+    --night-path-stroke: rgba(255, 255, 255, 0.4);
+    --map-time-label-bg: rgba(24, 24, 30, 0.92);
+    --map-time-label-color: #fb923c;
+    --map-time-label-border: #fb923c;
+    --timezone-hover-bg: rgba(45, 212, 191, 0.22);
+    --city-pin-border: #1a1a20;
+    --search-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    --scroll-thumb: #3a3a46;
+    --scroll-thumb-hover: #525263;
+  }
 }
 
 * {
@@ -72,7 +205,7 @@ h1 {
 }
 
 .now-date {
-  color: #8e9ca0;
+  color: var(--now-meta-color);
   font-size: 20px;
   margin-left: 4px;
   font-weight: 300;
@@ -84,7 +217,7 @@ h1 {
 }
 
 .now-brand {
-  color: #8e9ca0;
+  color: var(--now-meta-color);
   font-size: 18px;
   font-weight: 300;
   margin-left: auto;
@@ -109,11 +242,13 @@ h1 {
   align-items: center;
   justify-content: center;
   font-size: 22px;
+  transition: all 0.2s ease;
 }
 
 .icon-button:hover {
   border-color: var(--accent);
   color: var(--accent);
+  background: var(--btn-hover);
 }
 
 .settings-panel {
@@ -122,6 +257,7 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .settings-panel details,
@@ -131,6 +267,7 @@ h1 {
   margin-bottom: 8px;
   background: var(--panel);
   overflow: hidden;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .settings-panel details:last-child,
@@ -158,10 +295,11 @@ h1 {
   justify-content: space-between;
   align-items: center;
   user-select: none;
-  background: #fbfcfa;
+  background: var(--sub-panel-bg);
   font-size: 13px;
   color: var(--ink);
   border-bottom: 1px solid transparent;
+  transition: background-color 0.2s ease;
 }
 
 .settings-panel details[open] summary {
@@ -186,7 +324,7 @@ h1 {
 .settings-panel .details-content {
   padding: 12px;
   border-top: 1px solid var(--line);
-  background: #ffffff;
+  background: var(--panel);
 }
 
 .add-city-section {
@@ -216,9 +354,16 @@ h1 {
 .text-button {
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #fbfcfa;
+  background: var(--btn-bg);
   color: var(--accent-dark);
   cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.setting-control button:hover,
+.text-button:hover {
+  background: var(--btn-hover);
+  border-color: var(--muted);
 }
 
 .setting-control button {
@@ -267,7 +412,7 @@ h1 {
   padding: 6px 8px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fbfcfa;
+  background: var(--card-bg);
   font-size: 11px;
   transition: all 0.2s ease;
   user-select: none;
@@ -275,13 +420,13 @@ h1 {
 
 .current-city-card:hover {
   border-color: var(--muted);
-  background: #ffffff;
+  background: var(--card-hover);
 }
 
 .current-city-card.is-dragging {
   opacity: 0.4;
   border-style: dashed;
-  background: #eef2f0;
+  background: var(--card-dragging);
 }
 
 /* Pointer events disabled for children during active drag to avoid flicker */
@@ -358,11 +503,11 @@ h1 {
   padding: 0 6px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--input-bg);
   color: var(--ink);
   font-size: 11px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background-color 0.2s;
   user-select: text;
 }
 
@@ -393,7 +538,7 @@ h1 {
   padding: 0 10px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #fbfcfa;
+  background: var(--btn-bg);
   color: var(--accent-dark);
   font-size: 11px;
   font-weight: 600;
@@ -402,7 +547,7 @@ h1 {
 }
 
 .update-city-card-btn:hover {
-  background: #f4f7f5;
+  background: var(--btn-hover);
   border-color: var(--muted);
 }
 
@@ -411,7 +556,7 @@ h1 {
   height: 28px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--input-bg);
   color: var(--muted);
   cursor: pointer;
   display: flex;
@@ -423,9 +568,9 @@ h1 {
 }
 
 .remove-city-card-btn:hover {
-  color: #d9383a;
-  border-color: #d9383a;
-  background: #fff8f8;
+  color: #ef4444;
+  border-color: #ef4444;
+  background: var(--danger-hover-bg);
 }
 
 .search-bar-row {
@@ -441,11 +586,11 @@ h1 {
   padding: 0 8px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--input-bg);
   color: var(--ink);
   font-size: 12px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background-color 0.2s;
 }
 
 .search-bar-row input:focus {
@@ -457,7 +602,7 @@ h1 {
   padding: 0 14px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #fbfcfa;
+  background: var(--btn-bg);
   color: var(--accent-dark);
   font-size: 12px;
   font-weight: 600;
@@ -466,7 +611,7 @@ h1 {
 }
 
 .search-bar-row button:hover {
-  background: #f4f7f5;
+  background: var(--btn-hover);
   border-color: var(--muted);
 }
 
@@ -487,7 +632,7 @@ h1 {
   border-radius: 8px;
   padding: 6px;
   background: var(--panel);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--search-shadow);
   z-index: 1000;
 }
 
@@ -508,9 +653,9 @@ h1 {
 }
 
 .search-result-card:hover {
-  background: #ffffff;
+  background: var(--panel-hover);
   border-color: var(--line);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .search-result-info {
@@ -570,7 +715,7 @@ h1 {
   padding: 6px 8px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fbfcfa;
+  background: var(--card-bg);
 }
 
 .period-label {
@@ -589,7 +734,7 @@ h1 {
   padding: 2px 4px;
   border: 1px solid var(--line);
   border-radius: 4px;
-  background: #ffffff;
+  background: var(--input-bg);
   color: var(--ink);
 }
 
@@ -646,11 +791,11 @@ h1 {
   padding: 0 6px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--input-bg);
   color: var(--ink);
   font-size: 11px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background-color 0.2s;
 }
 
 .city-limit-input:focus {
@@ -695,4 +840,35 @@ h1 {
   gap: 6px;
   cursor: pointer;
   color: var(--accent);
+  transition: color 0.2s ease;
+}
+
+.options-link-btn:hover {
+  color: var(--accent-hover);
+}
+
+/* Scrollbar polish */
+.timeline-rows::-webkit-scrollbar,
+.current-cities-list::-webkit-scrollbar,
+.search-results-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.timeline-rows::-webkit-scrollbar-track,
+.current-cities-list::-webkit-scrollbar-track,
+.search-results-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.timeline-rows::-webkit-scrollbar-thumb,
+.current-cities-list::-webkit-scrollbar-thumb,
+.search-results-list::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border-radius: 3px;
+}
+
+.timeline-rows::-webkit-scrollbar-thumb:hover,
+.current-cities-list::-webkit-scrollbar-thumb:hover,
+.search-results-list::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-thumb-hover);
 }

@@ -32,5 +32,16 @@
     } catch { }
   });
 
+  // Follow theme updates from options / other extension pages
+  window.addEventListener('storage', (e) => {
+    if (!e || e.key === 'theme') {
+      try {
+        apply(localStorage.getItem('theme') || 'auto');
+      } catch {
+        apply('auto');
+      }
+    }
+  });
+
   globalThis.TimeMapperTheme = { apply, resolve };
 })();

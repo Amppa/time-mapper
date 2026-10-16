@@ -525,6 +525,12 @@ const AppController = {
     window.addEventListener("storage", () => {
       State.init();
       I18nUtils.applyAttributes();
+      // resolve() only reads, so we never write localStorage back and cause a
+      // second storage event in the options page.
+      if (globalThis.TimeMapperTheme) {
+        document.documentElement.dataset.theme =
+          TimeMapperTheme.resolve(localStorage.getItem("theme") || "auto");
+      }
       Renderer.renderSettingsControls();
       Renderer.render();
     });
