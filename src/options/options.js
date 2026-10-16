@@ -18,6 +18,47 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetMapButton = document.getElementById("resetMapButton");
   const resetPeriodsButton = document.getElementById("resetPeriodsButton");
 
+  // Live minimap preview (shares MapPreview with the popup)
+  const mapPreviewMount = document.getElementById("mapPreviewMount");
+  const mapPreviewRefs = mapPreviewMount ? MapPreview.buildPreview(mapPreviewMount) : null;
+
+  /**
+   * Repaint the minimap preview from current State (ranges need base hours).
+   */
+  function renderMapPreview() {
+    if (!mapPreviewRefs) return;
+    State.makeBaseHours();
+    MapPreview.renderAll(mapPreviewRefs, renderPreviews, State.selectedOffsetHours);
+  }
+
+  // Live timeline preview (shares TimelinePreview with the popup)
+  const timelinePreviewMount = document.getElementById("timelinePreviewMount");
+  const timelinePreviewRefs = timelinePreviewMount ? TimelinePreview.buildPreview(timelinePreviewMount) : null;
+
+  /**
+   * Repaint the timeline preview (rows + now-line + scrub markers).
+   */
+  function renderTimelinePreview() {
+    if (!timelinePreviewRefs) return;
+    State.makeBaseHours();
+    TimelinePreview.renderAll(timelinePreviewRefs);
+  }
+
+  /** Repaint both previews (selection / language / periods / storage). */
+  function renderPreviews() {
+    renderMapPreview();
+    renderTimelinePreview();
+  }
+
+  // Scrub interaction inside the timeline preview; night ref curve follows
+  // on the map preview, mirroring the popup wiring.
+  if (timelinePreviewRefs && mapPreviewRefs) {
+    TimelinePreview.wireScrub(timelinePreviewRefs, {
+      renderScrubLine: () => TimelinePreview.renderScrubLine(timelinePreviewRefs),
+      renderNightArea: (offsetHours) => MapPreview.renderNightArea(mapPreviewRefs, offsetHours),
+    });
+  }
+
   /**
    * Apply translations across the options page based on State.currentLang
    */
@@ -33,6 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Refresh period preview strings and labels
     renderPeriodControls();
+    renderTimelinePreview();
   }
 
   /**
@@ -96,6 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (output) {
       output.textContent = formatSettingValue(key, State.mapSettings[key]);
     }
+    renderMapPreview();
   }
 
   /**
@@ -175,6 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const key = checkbox.dataset.setting;
       State.mapSettings[key] = checkbox.checked;
       State.saveMapSettings();
+      renderMapPreview();
     });
   });
 
@@ -201,6 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
       State.mapSettings = { ...CONFIG.defaultMapSettings };
       State.saveMapSettings();
       renderMapControls();
+      renderMapPreview();
     });
   }
 
@@ -214,6 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
       nowLineModeSegment.querySelectorAll(".theme-option").forEach((b) => {
         b.classList.toggle("active", b === btn);
       });
+      renderTimelinePreview();
     });
   }
 
@@ -230,6 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
       State.timePeriods[idx].start = Number(startSelect.value);
       State.timePeriods[idx].end = Number(endSelect.value);
       State.saveTimePeriods();
+      renderTimelinePreview();
 
       if (previewBadge) {
         const colors = PeriodUtils.getPeriodColors(idx);
@@ -251,6 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
       State.timePeriods = JSON.parse(JSON.stringify(CONFIG.defaultTimePeriods));
       State.saveTimePeriods();
       renderPeriodControls();
+      renderTimelinePreview();
     });
   }
 
@@ -271,6 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderMapControls();
     renderPeriodControls();
     renderThemeSegment();
+    renderPreviews();
   });
 
   // Initial UI Render
@@ -279,4 +328,8 @@ document.addEventListener("DOMContentLoaded", () => {
   renderMapControls();
   renderPeriodControls();
   renderThemeSegment();
+  renderPreviews();
+
+  // Keep clock labels fresh like the popup does
+  setInterval(() => renderPreviews(), 60 * 1000);
 });

@@ -15,64 +15,7 @@ const Renderer = {
   },
 
   renderMap() {
-    if (DOM.mapImg) {
-      DOM.mapImg.style.transform = `translateY(calc(-50% + ${State.mapSettings.mapYOffset || 0}px))`;
-    }
-    if (DOM.cityLayer) {
-      DOM.cityLayer.style.transform = `translateY(${State.mapSettings.mapYOffset || 0}px)`;
-    }
-    DOM.cityLayer.innerHTML = "";
-
-    if (DOM.mapTimeLabelLayer) {
-      DOM.mapTimeLabelLayer.style.transform = `translateY(${State.mapSettings.mapYOffset || 0}px)`;
-      DOM.mapTimeLabelLayer.innerHTML = "";
-    }
-
-    const activeFraction = State.getActiveScrubFraction();
-    const useFraction = activeFraction !== null ? activeFraction : TimelineUtils.getNowFraction();
-    let targetDate = null;
-    if (useFraction !== null && State.baseHours && State.baseHours[0]) {
-      targetDate = new Date(State.baseHours[0].getTime() + useFraction * 24 * 3600000);
-    }
-
-    State.allCities().forEach((city) => {
-      const position = MapUtils.mapPosition(city);
-      const button = document.createElement("button");
-      button.type = "button";
-      const isSelected = State.selectedIds.includes(city.id);
-      button.className = `city-pin${isSelected ? " is-selected" : ""}`;
-      button.style.left = `${position.x}%`;
-      button.style.top = `${position.y}%`;
-      button.dataset.id = city.id;
-      button.dataset.zone = city.zone;
-
-      const cityName = I18nUtils.getCityName(city);
-      button.title = cityName;
-      button.setAttribute("aria-label", I18nUtils.getTranslation("selectCity", { name: cityName }));
-      button.addEventListener("click", () => {
-        State.toggleCity(city.id);
-        Renderer.render();
-      });
-      DOM.cityLayer.append(button);
-
-      if (isSelected && DOM.mapTimeLabelLayer) {
-        const label = document.createElement("div");
-        label.className = "map-time-label";
-        label.style.left = `${position.x}%`;
-        label.style.top = `${position.y}%`;
-        label.dataset.id = city.id;
-        label.dataset.zone = city.zone;
-
-        if (targetDate) {
-          label.textContent = TimeUtils.formatTime(targetDate, city.zone);
-          label.style.display = "";
-        } else {
-          label.style.display = "none";
-        }
-
-        DOM.mapTimeLabelLayer.append(label);
-      }
-    });
+    MapPreview.renderPins(MapPreview.collectRefs(document), () => Renderer.render());
   },
 
   formatSettingValue(key) {
@@ -103,72 +46,7 @@ const Renderer = {
   },
 
   renderRows() {
-    DOM.timelineRows.innerHTML = "";
-    State.selectedIds.forEach((id) => {
-      const city = State.findCity(id);
-      if (!city) return;
-      const row = document.createElement("article");
-      row.className = "timeline-row";
-
-      const label = document.createElement("div");
-      label.className = "city-label";
-
-      const cityName = I18nUtils.getCityName(city);
-      const labelText = document.createElement("div");
-      labelText.className = "city-label-text";
-      const dstSuffix = TimeUtils.isCurrentlyDST(city.zone)
-        ? ` <span title="${I18nUtils.getTranslation("dstTooltip")}">${I18nUtils.getTranslation("dstLabel")}</span>`
-        : "";
-      labelText.innerHTML = `<span class="city-name">${EscapeUtils.html(cityName)}</span><span class="city-time">${TimeUtils.utcOffsetText(new Date(), city.zone)} · ${TimeUtils.formatTime(new Date(), city.zone)}${dstSuffix}</span>`;
-
-      label.append(labelText);
-
-      const hours = document.createElement("div");
-      hours.className = "hours";
-
-      // Calculate offset difference in hours relative to the first (reference) city
-      const firstCity = State.selectedIds.length > 0 ? State.findCity(State.selectedIds[0]) : null;
-      const refZone = firstCity ? firstCity.zone : Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const refOffset = TimeUtils.getOffsetMinutes(State.baseHours[0], refZone);
-      const cityOffset = TimeUtils.getOffsetMinutes(State.baseHours[0], city.zone);
-      const diffHours = (cityOffset - refOffset) / 60;
-      const I = Math.floor(diffHours);
-      const F = diffHours - I;
-
-      // Render 25 cells if there's a fractional hour offset, otherwise 24
-      const numCells = F > 0 ? 25 : 24;
-      for (let index = 0; index < numCells; index++) {
-        const cellDate = new Date(State.baseHours[0].getTime() + (index - F) * 3600000);
-        const cityHour = TimeUtils.hourInZone(cellDate, city.zone);
-        const cell = document.createElement("div");
-        cell.className = "hour-cell";
-        cell.dataset.index = String(index);
-        cell.textContent = String(cityHour).padStart(2, "0");
-        cell.title = `${cityName} ${TimeUtils.formatTime(cellDate, city.zone)}`;
-
-        // Show date badge at the transition of the day (00:00) OR at the very first cell (index 0)
-        if (cityHour === 0 || index === 0) {
-          const dateStr = TimeUtils.dateInZone(cellDate, city.zone);
-          const dateBadge = document.createElement("span");
-          dateBadge.className = "date-badge";
-          dateBadge.textContent = dateStr;
-          cell.appendChild(dateBadge);
-        }
-
-        const styleInfo = PeriodUtils.getHourStyle(cityHour);
-        cell.style.backgroundColor = styleInfo.color;
-        cell.style.color = styleInfo.fontColor;
-
-        if (index === 0) {
-          cell.style.marginLeft = `calc(-${F} * 100% / 24)`;
-        }
-
-        hours.append(cell);
-      }
-
-      row.append(label, hours);
-      DOM.timelineRows.append(row);
-    });
+    TimelinePreview.renderRows(TimelinePreview.collectRefs(document));
   },
 
   /**
@@ -483,147 +361,27 @@ const Renderer = {
   },
 
   renderHourLines(offsetHours = 0) {
-    if (!DOM.hourLines) return;
-    DOM.hourLines.innerHTML = "";
-    DOM.hourLines.style.backgroundImage = "none";
-
-    const time = new Date();
-    time.setTime(time.getTime() + offsetHours * 60 * 60 * 1000);
-
-    const subsolarLng = MapUtils.subsolarLng(time);
-    const centerLng = MapUtils.getXLongitude(50);
-
-    for (let h = 0; h < 24; h += 2) {
-      const baseLng = subsolarLng + (h - 12) * 15;
-      let diff = baseLng - centerLng;
-      diff = ((diff + 180) % 360 + 360) % 360 - 180;
-      const lng = centerLng + diff;
-
-      const x = MathUtils.clamp(MapUtils.getLongitudeX(lng), 0, 100);
-
-      const line = document.createElement("div");
-      line.style.position = "absolute";
-      line.style.left = `${x}%`;
-      line.style.top = "0";
-      line.style.bottom = "0";
-      line.style.width = "1px";
-      line.style.backgroundColor = "rgba(8, 74, 96, 0.18)";
-      DOM.hourLines.append(line);
-    }
+    MapPreview.renderHourLines(MapPreview.collectRefs(document), offsetHours);
   },
 
   _calcNightAreaBoundaryPoints(offsetHours) {
-    const time = new Date();
-    time.setTime(time.getTime() + offsetHours * 60 * 60 * 1000);
-
-    const DECLINATION_DEG = 35.0;
-    const tanDec = Math.tan(DECLINATION_DEG * Math.PI / 180);
-    const Y_SHIFT = 10;
-
-    const subsolarLng = MapUtils.subsolarLng(time);
-
-    const points = [];
-    for (let x = 0; x <= 100; x += 2) {
-      const lng = MapUtils.getXLongitude(x);
-      const lat = Math.atan(-Math.cos((lng - subsolarLng) * Math.PI / 180) / tanDec)
-        * 180 / Math.PI + Y_SHIFT;
-      const { x: px, y: py } = MapUtils.mapPosition({ lng, lat });
-      points.push(`${px.toFixed(1)},${py.toFixed(1)}`);
-    }
-    return points;
+    return MapPreview.calcNightPoints(offsetHours);
   },
 
   renderMapTimeline(offsetHours = 0) {
-    if (!DOM.mapTimeline) return;
-    DOM.mapTimeline.innerHTML = "";
-
-    const time = new Date();
-    time.setTime(time.getTime() + offsetHours * 60 * 60 * 1000);
-
-    const subsolarLng = MapUtils.subsolarLng(time);
-    const centerLng = MapUtils.getXLongitude(50);
-
-    for (let h = 0; h < 24; h += 2) {
-      const baseLng = subsolarLng + (h - 12) * 15;
-      let diff = baseLng - centerLng;
-      diff = ((diff + 180) % 360 + 360) % 360 - 180;
-      const lng = centerLng + diff;
-
-      const x = MapUtils.getLongitudeX(lng);
-      if (x >= 0 && x <= 100) {
-        const tick = document.createElement("div");
-        tick.className = "map-timeline-tick";
-        tick.style.left = `${x}%`;
-
-        const label = document.createElement("div");
-        label.className = "map-timeline-label";
-        label.style.left = `${x}%`;
-        label.textContent = `${String(h).padStart(2, "0")}:00`;
-
-        DOM.mapTimeline.append(tick, label);
-      }
-    }
+    MapPreview.renderMapTimeline(MapPreview.collectRefs(document), offsetHours);
   },
 
   renderNightArea(offsetHours = 0) {
-    if (!DOM.nightPath) return;
-
-    this.renderMapTimeline(offsetHours);
-    this.renderHourLines(offsetHours);
-
-    if (DOM.nightAreaOverlay) {
-      DOM.nightAreaOverlay.style.transform = `translateY(${State.mapSettings.mapYOffset || 0}px)`;
-    }
-
-    // Filled night area — always at the true "now" position (offset = 0)
-    const realNowPts = this._calcNightAreaBoundaryPoints(0);
-    DOM.nightPath.setAttribute("d", `M 0,100 L ${realNowPts.join(" L ")} L 100,100 Z`);
-
-    // Dynamic reference curve — follows the active scrub line offset
-    if (DOM.nightPathRef) {
-      const activePts = this._calcNightAreaBoundaryPoints(offsetHours);
-      DOM.nightPathRef.setAttribute("d", `M ${activePts.join(" L ")}`);
-    }
-
-    // Live update local times for selected cities on the map
-    const activeFraction = State.getActiveScrubFraction();
-    this.updateMapCityTimes(activeFraction);
+    MapPreview.renderNightArea(MapPreview.collectRefs(document), offsetHours);
   },
 
   updateMapCityTimes(activeFraction) {
-    if (!DOM.mapTimeLabelLayer) return;
-
-    const useFraction = activeFraction !== null ? activeFraction : TimelineUtils.getNowFraction();
-
-    if (useFraction === null || !State.baseHours || !State.baseHours[0]) {
-      DOM.mapTimeLabelLayer.querySelectorAll(".map-time-label").forEach((label) => {
-        label.style.display = "none";
-        label.textContent = "";
-      });
-      return;
-    }
-
-    const targetDate = new Date(State.baseHours[0].getTime() + useFraction * 24 * 3600000);
-
-    DOM.mapTimeLabelLayer.querySelectorAll(".map-time-label").forEach((label) => {
-      const zone = label.dataset.zone;
-      if (zone) {
-        label.textContent = TimeUtils.formatTime(targetDate, zone);
-        label.style.display = "";
-      }
-    });
+    MapPreview.updateMapCityTimes(MapPreview.collectRefs(document), activeFraction);
   },
 
   applyVisibilitySettings() {
-    if (DOM.nightAreaOverlay) {
-      DOM.nightAreaOverlay.style.display = State.mapSettings.showNightArea ? "" : "none";
-    }
-    if (DOM.hourLines) {
-      DOM.hourLines.style.display = State.mapSettings.showHourLines ? "" : "none";
-    }
-    if (DOM.mapTimeLabelLayer) {
-      DOM.mapTimeLabelLayer.style.display = State.mapSettings.showCityTimes ? "" : "none";
-    }
+    MapPreview.applyVisibility(MapPreview.collectRefs(document));
   },
 
   render() {
@@ -640,67 +398,10 @@ const Renderer = {
   },
 
   renderNowLine() {
-    if (!DOM.nowLine) return;
-    const fraction = TimelineUtils.getNowFraction();
-    const left = TimelineUtils.fractionToLeft(fraction);
-    if (left === 0) {
-      DOM.nowLine.style.display = "none";
-      return;
-    }
-    DOM.nowLine.style.display = "";
-    DOM.nowLine.style.left = `${left}px`;
+    TimelinePreview.renderNowLine(TimelinePreview.collectRefs(document));
   },
 
   renderScrubLine() {
-    if (!DOM.scrubLinesContainer) return;
-
-    // Clear dynamic scrub lines
-    DOM.scrubLinesContainer.innerHTML = "";
-
-    State.scrubs.forEach((scrub) => {
-      const left = TimelineUtils.fractionToLeft(scrub.fraction);
-      if (left === 0) return;
-
-      const isActive = (scrub.id === State.activeScrubId);
-
-      // Create line group
-      const group = document.createElement("div");
-      group.className = "scrub-line-group";
-      group.dataset.id = scrub.id;
-      group.style.left = `${left}px`;
-
-      // Create dashed vertical line
-      const line = document.createElement("div");
-      line.className = "timeline-vline scrub-line";
-      if (isActive) {
-        line.classList.add("is-dragging");
-      }
-
-      // Create drag handle
-      const handle = document.createElement("div");
-      handle.className = "scrub-handle";
-      if (isActive) {
-        handle.classList.add("is-dragging");
-      }
-      handle.setAttribute("aria-label", "Drag to shift night area view");
-
-      // Create remove button
-      const removeTitle = (typeof I18nUtils !== "undefined" && typeof I18nUtils.getTranslation === "function")
-        ? I18nUtils.getTranslation("removeScrubLine")
-        : "Remove";
-
-      const resetBtn = document.createElement("button");
-      resetBtn.className = "scrub-reset-btn is-visible";
-      resetBtn.type = "button";
-      resetBtn.title = removeTitle;
-      resetBtn.setAttribute("aria-label", removeTitle);
-      resetBtn.textContent = "×";
-
-      group.appendChild(line);
-      group.appendChild(handle);
-      group.appendChild(resetBtn);
-
-      DOM.scrubLinesContainer.appendChild(group);
-    });
+    TimelinePreview.renderScrubLine(TimelinePreview.collectRefs(document));
   }
 };

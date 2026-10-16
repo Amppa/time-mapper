@@ -7,6 +7,9 @@
   <title>TimeMapper - Settings</title>
   <link rel="icon" type="image/png" href="../../assets/icon.png">
   <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="../shared/map-tokens.css">
+  <link rel="stylesheet" href="../popup/map.css">
+  <link rel="stylesheet" href="../popup/timeline.css">
   <link rel="stylesheet" href="options.css">
   <script src="../shared/theme.js"></script>
 </head>
@@ -18,41 +21,30 @@
         <img src="../../assets/icon.png" alt="TimeMapper Logo" class="logo-badge">
         <div>
           <h1 class="title">TimeMapper</h1>
-          <p class="subtitle" data-i18n="optionsSubtitle">World Clock Aligner Settings</p>
         </div>
+      </div>
+      <div class="header-actions">
+        <label class="header-field"><span data-i18n="langSection">語言</span>：<select class="styled-select header-select" id="langSelect" aria-label="Language" title="Language">
+          <option value="auto" data-lang-value="auto" data-i18n="langAuto">自動</option>
+          <option value="en" data-lang-value="en">English</option>
+          <option value="es" data-lang-value="es">Español</option>
+          <option value="zh" data-lang-value="zh">中文</option>
+        </select></label>
+        <label class="header-field"><span data-i18n="themeLabel">佈景主題</span>：<select class="styled-select header-select" id="themeSelect" aria-label="Theme" title="Theme">
+          <option value="auto" data-i18n="themeAuto">自動</option>
+          <option value="light" data-i18n="themeLight">淺色</option>
+          <option value="dark" data-i18n="themeDark">深色</option>
+        </select></label>
       </div>
     </header>
 
     <div class="main-layout">
-      <!-- Card 1: 外觀 / Appearance -->
-      <section class="settings-card" id="cardAppearance">
-        <h2 class="section-title" data-i18n="appearanceCardTitle">外觀</h2>
-        <div class="control-group">
-          <div class="control-label-wrap">
-            <span class="control-label" data-i18n="langSection">語言</span>
-            <span class="control-desc" data-i18n="langCardDesc">選擇擴充功能的介面語言</span>
-          </div>
-          <select class="styled-select setting-select" id="langSelect" aria-label="Language">
-            <option value="auto" data-lang-value="auto" data-i18n="langAuto">自動</option>
-            <option value="en" data-lang-value="en">English</option>
-            <option value="es" data-lang-value="es">Español</option>
-            <option value="zh" data-lang-value="zh">中文</option>
-          </select>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="control-group">
-          <div class="control-label-wrap">
-            <span class="control-label" data-i18n="themeLabel">佈景主題</span>
-            <span class="control-desc" data-i18n="themeDesc">自動跟隨系統偏好設定</span>
-          </div>
-          <select class="styled-select setting-select" id="themeSelect" aria-label="Theme">
-            <option value="auto" data-i18n="themeAuto">自動</option>
-            <option value="light" data-i18n="themeLight">淺色</option>
-            <option value="dark" data-i18n="themeDark">深色</option>
-          </select>
-        </div>
+      <!-- Card: 預覽 / Live Preview -->
+      <section class="settings-card" id="cardPreview">
+        <h2 class="section-title" data-i18n="previewCardTitle">預覽</h2>
+        <div id="mapPreviewMount"></div>
+        <div class="preview-divider"></div>
+        <div id="timelinePreviewMount"></div>
       </section>
 
       <!-- Card 2: 小地圖設定 / Minimap Settings -->
@@ -300,6 +292,8 @@
   <script src="../shared/utils.js"></script>
   <script src="../shared/state.js"></script>
   <script src="../shared/version.js"></script>
+  <script src="../shared/map-preview.js"></script>
+  <script src="../shared/timeline-preview.js"></script>
   <script src="options.js"></script>
 </body>
 

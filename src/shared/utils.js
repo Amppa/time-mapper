@@ -410,20 +410,32 @@ const TimelineUtils = {
     return (hours + minutes / 60) / 24;
   },
 
-  fractionToLeft(fraction) {
-    const hoursEl = document.querySelector(".timeline-row .hours");
-    if (!hoursEl || !DOM.timelinePanel) return 0;
+  /**
+   * Convert a 0-1 day fraction to a pixel offset inside the timeline panel.
+   * `scope` is the timeline panel element (or an ancestor of it); defaults
+   * to `document` for the popup. Needed because the options page hosts a
+   * second, independent timeline that must measure its own geometry.
+   */
+  fractionToLeft(fraction, scope) {
+    const root = scope && scope.querySelector ? scope : (typeof document !== "undefined" ? document : null);
+    if (!root) return 0;
+    const hoursEl = root.querySelector(".timeline-row .hours");
+    const panelEl = root.matches && root.matches(".timeline-panel") ? root : root.querySelector(".timeline-panel");
+    if (!hoursEl || !panelEl || !hoursEl.getBoundingClientRect || !panelEl.getBoundingClientRect) return 0;
     const gridRect = hoursEl.getBoundingClientRect();
-    const panelRect = DOM.timelinePanel.getBoundingClientRect();
+    const panelRect = panelEl.getBoundingClientRect();
     const gridLeft = gridRect.left - panelRect.left;
     return gridLeft + fraction * gridRect.width;
   },
 
-  leftToFraction(pxLeft) {
-    const hoursEl = document.querySelector(".timeline-row .hours");
-    if (!hoursEl || !DOM.timelinePanel) return 0;
+  leftToFraction(pxLeft, scope) {
+    const root = scope && scope.querySelector ? scope : (typeof document !== "undefined" ? document : null);
+    if (!root) return 0;
+    const hoursEl = root.querySelector(".timeline-row .hours");
+    const panelEl = root.matches && root.matches(".timeline-panel") ? root : root.querySelector(".timeline-panel");
+    if (!hoursEl || !panelEl || !hoursEl.getBoundingClientRect || !panelEl.getBoundingClientRect) return 0;
     const gridRect = hoursEl.getBoundingClientRect();
-    const panelRect = DOM.timelinePanel.getBoundingClientRect();
+    const panelRect = panelEl.getBoundingClientRect();
     const gridLeft = gridRect.left - panelRect.left;
     return MathUtils.clamp((pxLeft - gridLeft) / gridRect.width, 0, 1);
   }
