@@ -482,29 +482,6 @@ const Renderer = {
     });
   },
 
-  populatePeriodSelectors() {
-    document.querySelectorAll(".period-start, .period-end").forEach((select) => {
-      select.innerHTML = "";
-      for (let h = 0; h < 24; h++) {
-        const opt = document.createElement("option");
-        opt.value = h;
-        opt.textContent = String(h).padStart(2, "0");
-        select.appendChild(opt);
-      }
-    });
-  },
-
-  renderPeriodSettings() {
-    State.timePeriods.forEach((period, idx) => {
-      const row = document.querySelector(`.period-setting-row[data-period="${idx}"]`);
-      if (!row) return;
-      row.querySelector(".period-start").value = period.start;
-      row.querySelector(".period-end").value = period.end;
-      row.querySelector(".period-bg-color").value = ColorUtils.toHex7(period.color);
-      row.querySelector(".period-text-color").value = ColorUtils.toHex7(period.fontColor);
-    });
-  },
-
   renderHourLines(offsetHours = 0) {
     if (!DOM.hourLines) return;
     DOM.hourLines.innerHTML = "";
@@ -655,7 +632,6 @@ const Renderer = {
     this.renderMap();
     this.renderRows();
     this.renderCurrentCitiesList();
-    this.renderPeriodSettings();
     // Render lines after layout is established
     this.renderNowLine();
     this.renderScrubLine();

@@ -126,35 +126,25 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // 3 Periods
+    // 3 Periods (ranges editable; colors fixed per theme)
     State.timePeriods.forEach((period, idx) => {
       const block = document.querySelector(`.period-card-block[data-period="${idx}"]`);
       if (!block) return;
 
       const startSelect = block.querySelector(".period-start");
       const endSelect = block.querySelector(".period-end");
-      const bgInput = block.querySelector(".period-bg-color");
-      const textInput = block.querySelector(".period-text-color");
-      const bgHexLabel = block.querySelector(".bg-hex");
-      const textHexLabel = block.querySelector(".text-hex");
       const previewBadge = document.getElementById(`periodPreview${idx}`);
-
-      const hexBg = ColorUtils.toHex7(period.color).toUpperCase();
-      const hexText = ColorUtils.toHex7(period.fontColor).toUpperCase();
+      const colors = PeriodUtils.getPeriodColors(idx);
 
       if (startSelect) startSelect.value = period.start;
       if (endSelect) endSelect.value = period.end;
-      if (bgInput) bgInput.value = hexBg;
-      if (textInput) textInput.value = hexText;
-      if (bgHexLabel) bgHexLabel.textContent = hexBg;
-      if (textHexLabel) textHexLabel.textContent = hexText;
 
       if (previewBadge) {
         const startStr = `${String(period.start).padStart(2, "0")}:00`;
         const endStr = `${String(period.end).padStart(2, "0")}:00`;
         previewBadge.textContent = `${startStr} - ${endStr}`;
-        previewBadge.style.backgroundColor = period.color;
-        previewBadge.style.color = period.fontColor;
+        previewBadge.style.backgroundColor = colors.color;
+        previewBadge.style.color = colors.fontColor;
       }
     });
   }
@@ -227,42 +217,32 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Period Settings Selects & Color Pickers
+  // Period Settings Range Selects (colors are fixed per theme)
   State.timePeriods.forEach((_, idx) => {
     const block = document.querySelector(`.period-card-block[data-period="${idx}"]`);
     if (!block) return;
 
     const startSelect = block.querySelector(".period-start");
     const endSelect = block.querySelector(".period-end");
-    const bgInput = block.querySelector(".period-bg-color");
-    const textInput = block.querySelector(".period-text-color");
-    const bgHexLabel = block.querySelector(".bg-hex");
-    const textHexLabel = block.querySelector(".text-hex");
     const previewBadge = document.getElementById(`periodPreview${idx}`);
 
     function updatePeriodState() {
       State.timePeriods[idx].start = Number(startSelect.value);
       State.timePeriods[idx].end = Number(endSelect.value);
-      State.timePeriods[idx].color = bgInput.value;
-      State.timePeriods[idx].fontColor = textInput.value;
       State.saveTimePeriods();
 
-      if (bgHexLabel) bgHexLabel.textContent = bgInput.value.toUpperCase();
-      if (textHexLabel) textHexLabel.textContent = textInput.value.toUpperCase();
-
       if (previewBadge) {
+        const colors = PeriodUtils.getPeriodColors(idx);
         const startStr = `${String(State.timePeriods[idx].start).padStart(2, "0")}:00`;
         const endStr = `${String(State.timePeriods[idx].end).padStart(2, "0")}:00`;
         previewBadge.textContent = `${startStr} - ${endStr}`;
-        previewBadge.style.backgroundColor = State.timePeriods[idx].color;
-        previewBadge.style.color = State.timePeriods[idx].fontColor;
+        previewBadge.style.backgroundColor = colors.color;
+        previewBadge.style.color = colors.fontColor;
       }
     }
 
     startSelect.addEventListener("change", updatePeriodState);
     endSelect.addEventListener("change", updatePeriodState);
-    bgInput.addEventListener("input", updatePeriodState);
-    textInput.addEventListener("input", updatePeriodState);
   });
 
   // Reset Periods Button

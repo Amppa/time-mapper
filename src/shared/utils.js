@@ -293,15 +293,31 @@ const I18nUtils = {
 };
 
 const PeriodUtils = {
+  /** Active theme, following theme.js; falls back to light. */
+  currentTheme() {
+    try {
+      if (globalThis.TimeMapperTheme) {
+        return globalThis.TimeMapperTheme.resolve(localStorage.getItem("theme") || "auto");
+      }
+    } catch { }
+    return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+  },
+  /** Fixed palette entry for a period index under the active theme. */
+  getPeriodColors(idx) {
+    const set = CONFIG.periodColors[this.currentTheme()] || CONFIG.periodColors.light;
+    return set[idx] || set[set.length - 1];
+  },
   getHourStyle(hour) {
-    const period = State.timePeriods.find((p) => {
+    let idx = State.timePeriods.findIndex((p) => {
       if (p.start <= p.end) {
         return hour >= p.start && hour <= p.end;
       } else {
         return hour >= p.start || hour <= p.end;
       }
     });
-    return period || State.timePeriods[2];
+    if (idx < 0) idx = State.timePeriods.length - 1;
+    const period = State.timePeriods[idx];
+    return { ...period, ...this.getPeriodColors(idx) };
   }
 };
 

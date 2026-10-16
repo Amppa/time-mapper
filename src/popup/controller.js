@@ -93,7 +93,6 @@ const AppController = {
       DOM.resetPeriodsButton.addEventListener("click", () => {
         State.timePeriods = JSON.parse(JSON.stringify(CONFIG.defaultTimePeriods));
         State.saveTimePeriods();
-        Renderer.renderPeriodSettings();
         Renderer.render();
       });
     }
@@ -448,37 +447,6 @@ const AppController = {
     }
   },
 
-  wirePeriodSettings() {
-    State.timePeriods.forEach((period, idx) => {
-      const row = document.querySelector(`.period-setting-row[data-period="${idx}"]`);
-      if (!row) return;
-
-      row.querySelector(".period-start").addEventListener("change", (e) => {
-        State.timePeriods[idx].start = Number(e.target.value);
-        State.saveTimePeriods();
-        Renderer.render();
-      });
-
-      row.querySelector(".period-end").addEventListener("change", (e) => {
-        State.timePeriods[idx].end = Number(e.target.value);
-        State.saveTimePeriods();
-        Renderer.render();
-      });
-
-      row.querySelector(".period-bg-color").addEventListener("change", (e) => {
-        State.timePeriods[idx].color = e.target.value;
-        State.saveTimePeriods();
-        Renderer.render();
-      });
-
-      row.querySelector(".period-text-color").addEventListener("change", (e) => {
-        State.timePeriods[idx].fontColor = e.target.value;
-        State.saveTimePeriods();
-        Renderer.render();
-      });
-    });
-  },
-
   init() {
     State.init();
 
@@ -505,8 +473,6 @@ const AppController = {
       Renderer.render();
     });
 
-    Renderer.populatePeriodSelectors();
-    this.wirePeriodSettings();
     I18nUtils.applyAttributes();
     Renderer.render();
 

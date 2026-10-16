@@ -41,8 +41,24 @@ const CONFIG = {
     showCityTimes: true
   },
   defaultTimePeriods: [
-    { name: "period1", start: 8, end: 17, color: "rgba(255, 231, 163, 1)", fontColor: "#000000ff" },
-    { name: "period2", start: 18, end: 23, color: "rgba(249, 190, 108, 1)", fontColor: "#000000ff" },
-    { name: "period3", start: 0, end: 7, color: "rgba(133, 108, 96, 1)", fontColor: "#ffffff" }
-  ]
+    { name: "period1", start: 8, end: 17 },
+    { name: "period2", start: 18, end: 23 },
+    { name: "period3", start: 0, end: 7 }
+  ],
+  /**
+   * Fixed timeline cell palette per theme. Users customize ranges only;
+   * light matches the pre-hardcode defaults.
+   */
+  periodColors: {
+    light: [
+      { color: "#FFE7A3", fontColor: "#000000" },
+      { color: "#F9BE6C", fontColor: "#000000" },
+      { color: "#856C60", fontColor: "#FFFFFF" }
+    ],
+    dark: [
+      { color: "#EEB422", fontColor: "#000000" },
+      { color: "#B8860B", fontColor: "#000000" },
+      { color: "#38302E", fontColor: "#D9C8C2" }
+    ]
+  }
 };

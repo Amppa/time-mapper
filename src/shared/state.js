@@ -80,13 +80,20 @@ const State = {
   },
 
   loadTimePeriods() {
+    const fallback = () => JSON.parse(JSON.stringify(CONFIG.defaultTimePeriods));
     try {
       const saved = JSON.parse(localStorage.getItem(CONFIG.timePeriodsKey));
-      if (Array.isArray(saved) && saved.length === 3) {
-        return saved;
+      // Colors were user-customizable before hardcode; keep ranges only.
+      if (Array.isArray(saved) && saved.length === 3 &&
+        saved.every((p) => p && Number.isFinite(Number(p.start)) && Number.isFinite(Number(p.end)))) {
+        return saved.map((p, i) => ({
+          name: CONFIG.defaultTimePeriods[i].name,
+          start: Number(p.start),
+          end: Number(p.end)
+        }));
       }
     } catch { }
-    return JSON.parse(JSON.stringify(CONFIG.defaultTimePeriods));
+    return fallback();
   },
 
   saveTimePeriods() {
