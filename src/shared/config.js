@@ -24,6 +24,10 @@ const CONFIG = {
   customCitiesKey: "worldTimeAlignerCustomCities",
   timePeriodsKey: "worldTimeAlignerTimePeriods",
   languageKey: "worldTimeAlignerLanguage",
+  /** Internal UI language codes offered in the options page. */
+  supportedLanguages: ["zh", "en", "es"],
+  /** Maps an internal UI language code to the BCP-47 locale used for date/time formatting. */
+  localeMap: { zh: "zh-TW", en: "en-US", es: "es-ES" },
   nowLineModeKey: "worldTimeAlignerNowLineMode",
   cityLimitKey: "worldTimeAlignerCityLimit",
   defaultMapSettings: {

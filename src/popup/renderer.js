@@ -3,36 +3,6 @@
  */
 
 const Renderer = {
-  applyLanguage() {
-    document.querySelectorAll("[data-i18n]").forEach((elem) => {
-      const key = elem.dataset.i18n;
-      if (i18nTranslations[State.currentLang]?.[key]) {
-        elem.textContent = i18nTranslations[State.currentLang][key];
-      }
-    });
-
-    document.querySelectorAll("[data-i18n-placeholder]").forEach((elem) => {
-      const key = elem.dataset.i18nPlaceholder;
-      if (i18nTranslations[State.currentLang]?.[key]) {
-        elem.placeholder = i18nTranslations[State.currentLang][key];
-      }
-    });
-
-    document.querySelectorAll("[data-i18n-title]").forEach((elem) => {
-      const key = elem.dataset.i18nTitle;
-      if (i18nTranslations[State.currentLang]?.[key]) {
-        elem.title = i18nTranslations[State.currentLang][key];
-      }
-    });
-
-    document.querySelectorAll("[data-i18n-aria-label]").forEach((elem) => {
-      const key = elem.dataset.i18nAriaLabel;
-      if (i18nTranslations[State.currentLang]?.[key]) {
-        elem.setAttribute("aria-label", i18nTranslations[State.currentLang][key]);
-      }
-    });
-  },
-
   renderNowText() {
     const localZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const now = new Date();

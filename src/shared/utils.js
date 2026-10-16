@@ -110,7 +110,7 @@ const TimeUtils = {
   formatTime(date, zone, options = {}) {
     try {
       const resolved = this.resolveZone(zone);
-      const locale = State.currentLang === "zh" ? "zh-TW" : "en-US";
+      const locale = CONFIG.localeMap[State.currentLang] || "en-US";
       const formatter = this.getFormatter(locale, {
         timeZone: resolved,
         hour: "2-digit",
@@ -224,6 +224,50 @@ const TimeUtils = {
 };
 
 const I18nUtils = {
+  /**
+   * The one place that maps translation keys onto the DOM. Both the popup and
+   * the options page call applyAttributes(); neither should re-implement it.
+   * `pick`/`put` describe how each attribute type reads its key and writes its
+   * value, because textContent and an attribute are not interchangeable.
+   */
+  _attributes: [
+    { selector: "[data-i18n]", pick: (el) => el.dataset.i18n, put: (el, text) => { el.textContent = text; } },
+    { selector: "[data-i18n-placeholder]", pick: (el) => el.dataset.i18nPlaceholder, put: (el, text) => { el.placeholder = text; } },
+    { selector: "[data-i18n-title]", pick: (el) => el.dataset.i18nTitle, put: (el, text) => { el.title = text; } },
+    { selector: "[data-i18n-aria-label]", pick: (el) => el.dataset.i18nAriaLabel, put: (el, text) => { el.setAttribute("aria-label", text); } }
+  ],
+
+  /**
+   * Translate every marked element under `root` and announce the language to
+   * assistive tech via <html lang>.
+   *
+   * A key missing from the active dictionary is reported rather than silently
+   * left as the hard-coded text in the HTML, which would otherwise render as a
+   * random language inside an otherwise translated page.
+   */
+  applyAttributes(root = document) {
+    const lang = State.currentLang;
+    const dict = i18nTranslations[lang];
+
+    if (!dict) {
+      console.warn(`[i18n] no dictionary for language "${lang}"; leaving all marked text untranslated`);
+    } else {
+      for (const { selector, pick, put } of this._attributes) {
+        root.querySelectorAll(selector).forEach((elem) => {
+          const key = pick(elem);
+          const text = dict[key];
+          if (text === undefined || text === "") {
+            console.warn(`[i18n] missing key "${key}" for language "${lang}" (${selector}); showing HTML fallback: "${(elem.textContent || "").trim()}"`);
+            return;
+          }
+          put(elem, text);
+        });
+      }
+    }
+
+    document.documentElement.lang = CONFIG.localeMap[lang] || lang;
+  },
+
   getTranslation(key, params = {}) {
     let text = i18nTranslations[State.currentLang]?.[key] || "";
     for (const [pKey, pVal] of Object.entries(params)) {

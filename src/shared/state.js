@@ -46,13 +46,33 @@ const State = {
   loadLanguage() {
     try {
       const saved = localStorage.getItem(CONFIG.languageKey);
-      if (saved === "zh" || saved === "en") return saved;
+      if (saved && CONFIG.supportedLanguages.includes(saved)) return saved;
     } catch { }
-    const navLang = navigator.language || navigator.userLanguage || "zh";
-    return navLang.toLowerCase().startsWith("en") ? "en" : "zh";
+    const navLang = (navigator.language || navigator.userLanguage || "zh").toLowerCase();
+    if (navLang.startsWith("en")) return "en";
+    if (navLang.startsWith("es")) return "es";
+    return "zh";
+  },
+
+  /** Stored preference for the options-page dropdown: "auto" when unset. */
+  getLanguagePreference() {
+    try {
+      const saved = localStorage.getItem(CONFIG.languageKey);
+      if (saved === "auto") return "auto";
+      if (saved && CONFIG.supportedLanguages.includes(saved)) return saved;
+    } catch { }
+    return "auto";
   },
 
   saveLanguage(lang) {
+    if (lang === "auto") {
+      try {
+        localStorage.setItem(CONFIG.languageKey, "auto");
+      } catch { }
+      this.currentLang = this.loadLanguage();
+      return;
+    }
+    if (!CONFIG.supportedLanguages.includes(lang)) return;
     this.currentLang = lang;
     try {
       localStorage.setItem(CONFIG.languageKey, lang);

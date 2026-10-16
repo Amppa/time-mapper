@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TimeMapper - Settings</title>
+  <link rel="icon" type="image/png" href="../../assets/icon.png">
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="options.css">
+  <script src="../shared/theme.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand">
+        <img src="../../assets/icon.png" alt="TimeMapper Logo" class="logo-badge">
+        <div>
+          <h1 class="title">TimeMapper</h1>
+          <p class="subtitle" data-i18n="optionsSubtitle">World Clock Aligner Settings</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Card 1: 外觀 / Appearance -->
+      <section class="settings-card" id="cardAppearance">
+        <h2 class="section-title" data-i18n="appearanceCardTitle">外觀</h2>
+        <div class="control-group">
+          <div class="control-label-wrap">
+            <span class="control-label" data-i18n="langSection">語言</span>
+            <span class="control-desc" data-i18n="langCardDesc">選擇擴充功能的介面語言</span>
+          </div>
+          <select class="styled-select setting-select" id="langSelect" aria-label="Language">
+            <option value="auto" data-lang-value="auto" data-i18n="langAuto">自動</option>
+            <option value="en" data-lang-value="en">English</option>
+            <option value="es" data-lang-value="es">Español</option>
+            <option value="zh" data-lang-value="zh">中文</option>
+          </select>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="control-group">
+          <div class="control-label-wrap">
+            <span class="control-label" data-i18n="themeLabel">佈景主題</span>
+            <span class="control-desc" data-i18n="themeDesc">自動跟隨系統偏好設定</span>
+          </div>
+          <select class="styled-select setting-select" id="themeSelect" aria-label="Theme">
+            <option value="auto" data-i18n="themeAuto">自動</option>
+            <option value="light" data-i18n="themeLight">淺色</option>
+            <option value="dark" data-i18n="themeDark">深色</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Card 2: 小地圖設定 / Minimap Settings -->
+      <section class="settings-card" id="cardMinimap">
+        <h2 class="section-title" data-i18n="mapCardTitle">小地圖設定</h2>
+
+        <!-- Toggles -->
+        <div class="control-group">
+          <div class="control-label-wrap">
+            <span class="control-label" data-i18n="showNightArea">顯示夜間範圍</span>
+            <span class="control-desc" data-i18n="showNightAreaDesc">在世界地圖上繪製當前夜間陰影範圍</span>
+          </div>
+          <label class="switch" title="Show Night Area">
+            <input type="checkbox" id="showNightArea" data-setting="showNightArea" aria-label="Show Night Area Switch">
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="control-group">
+          <div class="control-label-wrap">
+            <span class="control-label" data-i18n="showHourLines">顯示小時線</span>
+            <span class="control-desc" data-i18n="showHourLinesDesc">在世界地圖上繪製各時區的小時垂直經度線</span>
+          </div>
+          <label class="switch" title="Show Hour Lines">
+            <input type="checkbox" id="showHourLines" data-setting="showHourLines" aria-label="Show Hour Lines Switch">
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="control-group">
+          <div class="control-label-wrap">
+            <span class="control-label" data-i18n="showCityTimes">顯示已選城市時間</span>
+            <span class="control-desc" data-i18n="showCityTimesDesc">在地圖城市圖釘旁即時顯示對應時間標籤</span>
+          </div>
+          <label class="switch" title="Show City Times">
+            <input type="checkbox" id="showCityTimes" data-setting="showCityTimes" aria-label="Show City Times Switch">
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Sliders -->
+        <!-- 經度偏移 -->
+        <div class="control-group slider-control-group">
+          <div class="control-label-wrap">
+            <span class="control-label" data-i18n="longitude">經度偏移</span>
+            <span class="control-desc" data-i18n="lngOffsetDesc">調整世界地圖圖釘與經度水平對齊</span>
+          </div>
+          <div class="slider-control">
+            <button type="button" class="stepper-btn" data-adjust="lngOffset" data-delta="-0.1" aria-label="Decrease Longitude Offset">−</button>
+            <input type="range" class="settings-slider" min="-40" max="40" step="0.1" value="1.0" data-setting="lngOffset" aria-label="Longitude Offset Slider">
+            <button type="button" class="stepper-btn" data-adjust="lngOffset" data-delta="0.1" aria-label="Increase Longitude Offset">+</button>
+            <output class="val-badge" data-output="lngOffset">1.0</output>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 緯度偏移 -->
+        <div class="control-group slider-control-group">
+          <div class="control-label-wrap">
+            <span class="control-label" data-i18n="latitude">緯度偏移</span>
+            <span class="control-desc" data-i18n="latOffsetDesc">調整世界地圖圖釘與緯度垂直對齊</span>
+          </div>
+          <div class="slider-control">
+            <button type="button" class="stepper-btn" data-adjust="latOffset" data-delta="-0.1" aria-label="Decrease Latitude Offset">−</button>
+            <input type="range" class="settings-slider" min="-40" max="40" step="0.1" value="20.7" data-setting="latOffset" aria-label="Latitude Offset Slider">
+            <button type="button" class="stepper-btn" data-adjust="latOffset" data-delta="0.1" aria-label="Increase Latitude Offset">+</button>
+            <output class="val-badge" data-output="latOffset">20.7</output>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 寬度縮放 -->
+        <div class="control-group slider-control-group">
+          <div class="control-label-wrap">
+            <span class="control-label" data-i18n="width">寬度縮放</span>
+            <span class="control-desc" data-i18n="widthScaleDesc">調整世界地圖投影寬度縮放比例</span>
+          </div>
+          <div class="slider-control">
+            <button type="button" class="stepper-btn" data-adjust="widthScale" data-delta="-0.01" aria-label="Decrease Width Scale">−</button>
+            <input type="range" class="settings-slider" min="0.50" max="1.50" step="0.01" value="1.0" data-setting="widthScale" aria-label="Width Scale Slider">
+            <button type="button" class="stepper-btn" data-adjust="widthScale" data-delta="0.01" aria-label="Increase Width Scale">+</button>
+            <output class="val-badge" data-output="widthScale">1.00</output>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 高度縮放 -->
+        <div class="control-group slider-control-group">
+          <div class="control-label-wrap">
+            <span class="control-label" data-i18n="height">高度縮放</span>
+            <span class="control-desc" data-i18n="heightScaleDesc">調整世界地圖投影高度縮放比例</span>
+          </div>
+          <div class="slider-control">
+            <button type="button" class="stepper-btn" data-adjust="heightScale" data-delta="-0.01" aria-label="Decrease Height Scale">−</button>
+            <input type="range" class="settings-slider" min="0.50" max="1.50" step="0.01" value="1.39" data-setting="heightScale" aria-label="Height Scale Slider">
+            <button type="button" class="stepper-btn" data-adjust="heightScale" data-delta="0.01" aria-label="Increase Height Scale">+</button>
+            <output class="val-badge" data-output="heightScale">1.39</output>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 地圖 Y 偏移 -->
+        <div class="control-group slider-control-group">
+          <div class="control-label-wrap">
+            <span class="control-label" data-i18n="mapYOffset">地圖 Y 偏移</span>
+            <span class="control-desc" data-i18n="mapYOffsetDesc">調整地圖及圖釘整體垂直位置偏移</span>
+          </div>
+          <div class="slider-control">
+            <button type="button" class="stepper-btn" data-adjust="mapYOffset" data-delta="-1" aria-label="Decrease Map Y Offset">−</button>
+            <input type="range" class="settings-slider" min="-100" max="100" step="1" value="30" data-setting="mapYOffset" aria-label="Map Y Offset Slider">
+            <button type="button" class="stepper-btn" data-adjust="mapYOffset" data-delta="1" aria-label="Increase Map Y Offset">+</button>
+            <output class="val-badge" data-output="mapYOffset">30</output>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 重設地圖 -->
+        <div class="control-group">
+          <div class="control-label-wrap">
+            <span class="control-label" data-i18n="resetMapParams">重設地圖設定</span>
+            <span class="control-desc" data-i18n="resetMapParamsDesc">恢復小地圖經緯度偏移與縮放設定至預設值</span>
+          </div>
+          <button type="button" class="reset-btn" id="resetMapButton" data-i18n="resetBtn">恢復預設</button>
+        </div>
+      </section>
+
+      <!-- Card 3: 時段設定 / Time Period Settings -->
+      <section class="settings-card" id="cardPeriods">
+        <h2 class="section-title" data-i18n="periodCardTitle">時段設定</h2>
+
+        <!-- 時間軸基準 -->
+        <div class="control-group">
+          <div class="control-label-wrap">
+            <span class="control-label" data-i18n="nowLineMode">時間軸基準</span>
+            <span class="control-desc" data-i18n="nowLineModeDesc">設定時間軸中線 (Now-line) 的參考時間依據</span>
+          </div>
+          <div class="theme-segment" id="nowLineModeSegment" role="group" aria-label="Now Line Mode">
+            <button type="button" class="theme-option" data-nowline-value="local" data-i18n="nowLineModeLocal">瀏覽器本地時間</button>
+            <button type="button" class="theme-option" data-nowline-value="firstCity" data-i18n="nowLineModeFirstCity">第一個城市時間</button>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 3 Periods Blocks -->
+        <div class="periods-cards-container">
+          <!-- Period 1 -->
+          <div class="period-card-block" data-period="0">
+            <div class="period-card-header">
+              <span class="period-card-title" data-i18n="period1">時段一</span>
+              <div class="period-preview-badge" id="periodPreview0">08:00 - 17:00</div>
+            </div>
+            <div class="period-card-controls">
+              <div class="period-field">
+                <span class="period-field-label" data-i18n="periodTimeRange">時間範圍</span>
+                <div class="period-range-selects">
+                  <select class="period-start styled-select" aria-label="Start Hour"></select>
+                  <span class="period-range-sep" data-i18n="rangeTo">至</span>
+                  <select class="period-end styled-select" aria-label="End Hour"></select>
+                </div>
+              </div>
+              <div class="period-field">
+                <span class="period-field-label" data-i18n="bgColor">背景</span>
+                <div class="color-picker-wrap">
+                  <input type="color" class="period-bg-color styled-color-input" aria-label="Background Color">
+                  <span class="color-hex-label bg-hex">#FFE7A3</span>
+                </div>
+              </div>
+              <div class="period-field">
+                <span class="period-field-label" data-i18n="textColor">文字</span>
+                <div class="color-picker-wrap">
+                  <input type="color" class="period-text-color styled-color-input" aria-label="Text Color">
+                  <span class="color-hex-label text-hex">#000000</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Period 2 -->
+          <div class="period-card-block" data-period="1">
+            <div class="period-card-header">
+              <span class="period-card-title" data-i18n="period2">時段二</span>
+              <div class="period-preview-badge" id="periodPreview1">18:00 - 23:00</div>
+            </div>
+            <div class="period-card-controls">
+              <div class="period-field">
+                <span class="period-field-label" data-i18n="periodTimeRange">時間範圍</span>
+                <div class="period-range-selects">
+                  <select class="period-start styled-select" aria-label="Start Hour"></select>
+                  <span class="period-range-sep" data-i18n="rangeTo">至</span>
+                  <select class="period-end styled-select" aria-label="End Hour"></select>
+                </div>
+              </div>
+              <div class="period-field">
+                <span class="period-field-label" data-i18n="bgColor">背景</span>
+                <div class="color-picker-wrap">
+                  <input type="color" class="period-bg-color styled-color-input" aria-label="Background Color">
+                  <span class="color-hex-label bg-hex">#F9BE6C</span>
+                </div>
+              </div>
+              <div class="period-field">
+                <span class="period-field-label" data-i18n="textColor">文字</span>
+                <div class="color-picker-wrap">
+                  <input type="color" class="period-text-color styled-color-input" aria-label="Text Color">
+                  <span class="color-hex-label text-hex">#000000</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Period 3 -->
+          <div class="period-card-block" data-period="2">
+            <div class="period-card-header">
+              <span class="period-card-title" data-i18n="period3">時段三</span>
+              <div class="period-preview-badge" id="periodPreview2">00:00 - 07:00</div>
+            </div>
+            <div class="period-card-controls">
+              <div class="period-field">
+                <span class="period-field-label" data-i18n="periodTimeRange">時間範圍</span>
+                <div class="period-range-selects">
+                  <select class="period-start styled-select" aria-label="Start Hour"></select>
+                  <span class="period-range-sep" data-i18n="rangeTo">至</span>
+                  <select class="period-end styled-select" aria-label="End Hour"></select>
+                </div>
+              </div>
+              <div class="period-field">
+                <span class="period-field-label" data-i18n="bgColor">背景</span>
+                <div class="color-picker-wrap">
+                  <input type="color" class="period-bg-color styled-color-input" aria-label="Background Color">
+                  <span class="color-hex-label bg-hex">#856C60</span>
+                </div>
+              </div>
+              <div class="period-field">
+                <span class="period-field-label" data-i18n="textColor">文字</span>
+                <div class="color-picker-wrap">
+                  <input type="color" class="period-text-color styled-color-input" aria-label="Text Color">
+                  <span class="color-hex-label text-hex">#FFFFFF</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 重設時段 -->
+        <div class="control-group">
+          <div class="control-label-wrap">
+            <span class="control-label" data-i18n="resetTimePeriods">重設時段色彩與時間</span>
+            <span class="control-desc" data-i18n="resetTimePeriodsDesc">恢復三段時段的時間範圍與色彩至預設值</span>
+          </div>
+          <button type="button" class="reset-btn" id="resetPeriodsButton" data-i18n="resetBtn">恢復預設</button>
+        </div>
+      </section>
+
+    </div>
+
+    <footer class="footer">
+      <span class="version-label" id="versionLabel"></span>
+    </footer>
+  </div>
+
+  <script src="../shared/i18n.js"></script>
+  <script src="../shared/cities.js"></script>
+  <script src="../shared/config.js"></script>
+  <script src="../shared/utils.js"></script>
+  <script src="../shared/state.js"></script>
+  <script src="../shared/version.js"></script>
+  <script src="options.js"></script>
+</body>
+
+</html>

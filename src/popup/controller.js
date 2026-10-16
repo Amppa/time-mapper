@@ -79,16 +79,18 @@ const AppController = {
       });
     });
 
-    DOM.resetMapButton.addEventListener("click", () => {
-      State.mapSettings = { ...CONFIG.defaultMapSettings };
-      State.saveMapSettings();
-      if (DOM.mapPanel) {
-        DOM.mapPanel.open = !State.mapSettings.mapCollapsed;
-      }
-      Renderer.renderSettingsControls();
-      Renderer.renderMap();
-      Renderer.render();
-    });
+    if (DOM.resetMapButton) {
+      DOM.resetMapButton.addEventListener("click", () => {
+        State.mapSettings = { ...CONFIG.defaultMapSettings };
+        State.saveMapSettings();
+        if (DOM.mapPanel) {
+          DOM.mapPanel.open = !State.mapSettings.mapCollapsed;
+        }
+        Renderer.renderSettingsControls();
+        Renderer.renderMap();
+        Renderer.render();
+      });
+    }
 
     if (DOM.resetPeriodsButton) {
       DOM.resetPeriodsButton.addEventListener("click", () => {
@@ -97,6 +99,36 @@ const AppController = {
         Renderer.renderPeriodSettings();
         Renderer.render();
       });
+    }
+
+    const handleOpenOptions = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const targetUrl = chrome.runtime?.getURL ? chrome.runtime.getURL("src/options/options.html") : "../options/options.html";
+      try {
+        if (chrome.tabs && chrome.tabs.create) {
+          chrome.tabs.create({ url: targetUrl });
+        } else if (chrome.runtime && chrome.runtime.openOptionsPage) {
+          chrome.runtime.openOptionsPage(() => {
+            if (chrome.runtime.lastError) {
+              window.open(targetUrl, "_blank");
+            }
+          });
+        } else {
+          window.open(targetUrl, "_blank");
+        }
+      } catch (err) {
+        window.open(targetUrl, "_blank");
+      }
+    };
+
+    if (DOM.openOptionsBtn) {
+      DOM.openOptionsBtn.addEventListener("click", handleOpenOptions);
+    }
+    if (DOM.topbarOptionsButton) {
+      DOM.topbarOptionsButton.addEventListener("click", handleOpenOptions);
     }
   },
 
@@ -466,32 +498,6 @@ const AppController = {
     this.wireMapTimezoneHover();
     Renderer.renderSettingsControls();
 
-    DOM.langButtons.forEach((btn) => {
-      if (btn.dataset.lang === State.currentLang) {
-        btn.classList.add("active");
-      } else {
-        btn.classList.remove("active");
-      }
-      btn.addEventListener("click", () => {
-        DOM.langButtons.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        State.saveLanguage(btn.dataset.lang);
-        Renderer.applyLanguage();
-        Renderer.render();
-      });
-    });
-
-    // Now-line reference mode toggle
-    if (DOM.nowLineModeSelect) {
-      DOM.nowLineModeSelect.value = State.nowLineMode;
-      DOM.nowLineModeSelect.addEventListener("change", (e) => {
-        State.saveNowLineMode(e.target.value);
-        State.scrubs = [];
-        State.activeScrubId = null;
-        Renderer.render();
-      });
-    }
-
     DOM.resetButton.addEventListener("click", () => {
       State.selectedIds = [...CONFIG.defaultSelection].slice(0, State.cityLimit);
       State.scrubs = [];
@@ -512,8 +518,16 @@ const AppController = {
 
     Renderer.populatePeriodSelectors();
     this.wirePeriodSettings();
-    Renderer.applyLanguage();
+    I18nUtils.applyAttributes();
     Renderer.render();
+
+    // Listen to settings changes from Options page
+    window.addEventListener("storage", () => {
+      State.init();
+      I18nUtils.applyAttributes();
+      Renderer.renderSettingsControls();
+      Renderer.render();
+    });
 
     setInterval(() => Renderer.render(), 60 * 1000);
   }

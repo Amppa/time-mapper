@@ -17,193 +17,51 @@
         <h1 id="nowText" data-i18n="nowTextLoading">Loading current time...</h1>
       </div>
       <div class="top-actions">
-        <button id="settingsButton" class="icon-button" type="button" title="Settings" aria-label="Settings"
-          aria-expanded="false" data-i18n-title="mapSettings" data-i18n-aria-label="mapSettings">
+        <button id="settingsButton" class="icon-button" type="button" title="Cities" aria-label="Cities"
+          aria-expanded="false" data-i18n-title="customCitySection" data-i18n-aria-label="customCitySection">
+          <span aria-hidden="true">🏙️</span>
+        </button>
+        <button id="topbarOptionsButton" class="icon-button" type="button" title="Settings" aria-label="Settings"
+          data-i18n-title="mapSettings" data-i18n-aria-label="mapSettings">
           <span aria-hidden="true">⚙</span>
         </button>
       </div>
     </header>
 
-    <section id="settingsPanel" class="settings-panel" aria-label="Map Settings" data-i18n-aria-label="mapParams"
+    <section id="settingsPanel" class="settings-panel" aria-label="Cities List" data-i18n-aria-label="customCitySection"
       hidden>
-      <!-- 1. Language -->
-      <div class="settings-group lang-group">
-        <span class="settings-group-title" data-i18n="langSection">1. Language</span>
-        <div class="lang-buttons">
-          <button type="button" class="lang-btn" data-lang="en">English</button>
-          <button type="button" class="lang-btn" data-lang="zh">繁體中文</button>
+      <div class="current-cities-container">
+        <h4 data-i18n="currentCitiesTitle">Current Cities</h4>
+        <div id="currentCitiesList" class="current-cities-list"></div>
+      </div>
+
+      <div class="add-city-section">
+        <h4 data-i18n="addCityTitle">Add City</h4>
+        <div class="search-container">
+          <div class="search-bar-row">
+            <input id="searchCityInput" type="text" placeholder="e.g. London"
+              data-i18n-placeholder="searchPlaceholder" maxlength="40">
+            <button id="searchCityBtn" type="button" data-i18n="searchBtn">Search</button>
+          </div>
+          <div id="searchResultsList" class="search-results-list" hidden></div>
         </div>
       </div>
 
-      <!-- 2. City Position Offset -->
-      <details>
-        <summary data-i18n="mapCalibrationSection">2. City Position Offset</summary>
-        <div class="details-content">
-          <div class="settings-grid">
-            <label class="setting-control">
-              <span data-i18n="longitude">Longitude</span>
-              <button type="button" data-adjust="lngOffset" data-delta="-0.1">−</button>
-              <input type="range" min="-40" max="40" step="0.1" value="1.0" data-setting="lngOffset">
-              <button type="button" data-adjust="lngOffset" data-delta="0.1">+</button>
-              <output data-output="lngOffset">1.0</output>
-            </label>
-            <label class="setting-control">
-              <span data-i18n="latitude">Latitude</span>
-              <button type="button" data-adjust="latOffset" data-delta="-0.1">−</button>
-              <input type="range" min="-40" max="40" step="0.1" value="20.7" data-setting="latOffset">
-              <button type="button" data-adjust="latOffset" data-delta="0.1">+</button>
-              <output data-output="latOffset">20.7</output>
-            </label>
-            <label class="setting-control">
-              <span data-i18n="width">Width</span>
-              <button type="button" data-adjust="widthScale" data-delta="-0.01">−</button>
-              <input type="range" min="0.50" max="1.50" step="0.01" value="1.0" data-setting="widthScale">
-              <button type="button" data-adjust="widthScale" data-delta="0.01">+</button>
-              <output data-output="widthScale">1.00</output>
-            </label>
-            <label class="setting-control">
-              <span data-i18n="height">Height</span>
-              <button type="button" data-adjust="heightScale" data-delta="-0.01">−</button>
-              <input type="range" min="0.50" max="1.50" step="0.01" value="1.39" data-setting="heightScale">
-              <button type="button" data-adjust="heightScale" data-delta="0.01">+</button>
-              <output data-output="heightScale">1.39</output>
-            </label>
-            <div></div>
-            <label class="setting-control">
-              <span data-i18n="mapYOffset">Map Y Offset</span>
-              <button type="button" data-adjust="mapYOffset" data-delta="-1">−</button>
-              <input type="range" min="-100" max="100" step="1" value="30" data-setting="mapYOffset">
-              <button type="button" data-adjust="mapYOffset" data-delta="1">+</button>
-              <output data-output="mapYOffset">30</output>
-            </label>
-          </div>
-          <div class="settings-actions">
-            <button id="resetMapButton" class="text-button" type="button" data-i18n="resetMapParams">Reset Map
-              Params</button>
-          </div>
-          <div class="checkbox-group">
-            <label class="checkbox-control">
-              <input type="checkbox" data-setting="showNightArea" checked>
-              <span data-i18n="showNightArea">Show Night Area</span>
-            </label>
-            <label class="checkbox-control">
-              <input type="checkbox" data-setting="showHourLines" checked>
-              <span data-i18n="showHourLines">Show Hour Lines</span>
-            </label>
-            <label class="checkbox-control">
-              <input type="checkbox" data-setting="showCityTimes" checked>
-              <span data-i18n="showCityTimes">Show Selected City Times</span>
-            </label>
-          </div>
-        </div>
-      </details>
+      <div class="settings-actions settings-actions-wide">
+        <label class="city-limit-control">
+          <span data-i18n="cityLimitLabel">城市數量上限：</span>
+          <input id="cityLimitInput" type="number" min="1" max="100" class="city-limit-input">
+        </label>
+        <div class="settings-actions-spacer"></div>
+        <button id="clearAllButton" class="text-button" type="button" data-i18n="clearAllBtn">Clear All</button>
+        <button id="resetButton" class="text-button" type="button" data-i18n="resetCitiesBtn">Reset Cities</button>
+      </div>
 
-      <!-- 3. Cities Timeline -->
-      <details>
-        <summary data-i18n="customCitySection">3. Cities Timeline</summary>
-        <div class="details-content">
-          <div class="current-cities-container">
-            <h4 data-i18n="currentCitiesTitle">Current Cities</h4>
-            <div id="currentCitiesList" class="current-cities-list"></div>
-          </div>
-
-          <div class="add-city-section">
-            <h4 data-i18n="addCityTitle">Add City</h4>
-            <div class="search-container">
-              <div class="search-bar-row">
-                <input id="searchCityInput" type="text" placeholder="e.g. London"
-                  data-i18n-placeholder="searchPlaceholder" maxlength="40">
-                <button id="searchCityBtn" type="button" data-i18n="searchBtn">Search</button>
-              </div>
-              <div id="searchResultsList" class="search-results-list" hidden></div>
-            </div>
-          </div>
-
-          <div class="settings-actions settings-actions-wide">
-            <label class="city-limit-control">
-              <span data-i18n="cityLimitLabel">城市數量上限：</span>
-              <input id="cityLimitInput" type="number" min="1" max="100" class="city-limit-input">
-            </label>
-            <div class="settings-actions-spacer"></div>
-            <button id="clearAllButton" class="text-button" type="button" data-i18n="clearAllBtn">Clear All</button>
-            <button id="resetButton" class="text-button" type="button" data-i18n="resetCitiesBtn">Reset Cities</button>
-          </div>
-        </div>
-      </details>
-
-      <!-- 4. Time Period Settings -->
-      <details>
-        <summary data-i18n="timePeriodSection">4. Time Period Settings</summary>
-        <div class="details-content">
-          <div class="time-periods-list">
-            <div class="period-setting-row" data-period="0">
-              <span class="period-label" data-i18n="period1">Period 1</span>
-              <div class="period-range">
-                <select class="period-start"></select>
-                <span>-</span>
-                <select class="period-end"></select>
-              </div>
-              <div class="period-colors">
-                <label>
-                  <span data-i18n="bgColor">BG</span>
-                  <input type="color" class="period-bg-color">
-                </label>
-                <label>
-                  <span data-i18n="textColor">Text</span>
-                  <input type="color" class="period-text-color">
-                </label>
-              </div>
-            </div>
-            <div class="period-setting-row" data-period="1">
-              <span class="period-label" data-i18n="period2">Period 2</span>
-              <div class="period-range">
-                <select class="period-start"></select>
-                <span>-</span>
-                <select class="period-end"></select>
-              </div>
-              <div class="period-colors">
-                <label>
-                  <span data-i18n="bgColor">BG</span>
-                  <input type="color" class="period-bg-color">
-                </label>
-                <label>
-                  <span data-i18n="textColor">Text</span>
-                  <input type="color" class="period-text-color">
-                </label>
-              </div>
-            </div>
-            <div class="period-setting-row" data-period="2">
-              <span class="period-label" data-i18n="period3">Period 3</span>
-              <div class="period-range">
-                <select class="period-start"></select>
-                <span>-</span>
-                <select class="period-end"></select>
-              </div>
-              <div class="period-colors">
-                <label>
-                  <span data-i18n="bgColor">BG</span>
-                  <input type="color" class="period-bg-color">
-                </label>
-                <label>
-                  <span data-i18n="textColor">Text</span>
-                  <input type="color" class="period-text-color">
-                </label>
-              </div>
-            </div>
-          </div>
-          <label class="lang-control">
-            <span data-i18n="nowLineMode">Now-line reference</span>
-            <select id="nowLineModeSelect">
-              <option value="local" data-i18n="nowLineModeLocal">Browser local time</option>
-              <option value="firstCity" data-i18n="nowLineModeFirstCity">First city time</option>
-            </select>
-          </label>
-          <div class="settings-actions">
-            <button id="resetPeriodsButton" class="text-button" type="button" data-i18n="resetTimePeriods">Reset Period
-              Colors</button>
-          </div>
-        </div>
-      </details>
+      <div class="panel-options-link-row">
+        <button id="openOptionsBtn" class="text-button options-link-btn" type="button" data-i18n="openOptionsBtn">
+          ⚙️ 開啟設定頁面 (Options)
+        </button>
+      </div>
     </section>
 
     <details class="map-panel" open>
