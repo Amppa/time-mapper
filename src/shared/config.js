@@ -38,8 +38,7 @@ const CONFIG = {
     mapYOffset: 30,
     showNightArea: true,
     showHourLines: true,
-    showCityTimes: true,
-    mapCollapsed: false
+    showCityTimes: true
   },
   defaultTimePeriods: [
     { name: "period1", start: 8, end: 17, color: "rgba(255, 231, 163, 1)", fontColor: "#000000ff" },

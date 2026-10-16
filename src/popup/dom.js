@@ -29,6 +29,5 @@ const DOM = {
   nightAreaOverlay: document.querySelector("#nightAreaOverlay"),
   nightPath: document.querySelector("#nightPath"),
   nightPathRef: document.querySelector("#nightPathRef"),
-  mapTimeline: document.querySelector("#mapTimeline"),
-  mapPanel: document.querySelector(".map-panel")
+  mapTimeline: document.querySelector("#mapTimeline")
 };

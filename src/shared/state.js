@@ -108,8 +108,7 @@ const State = {
           mapYOffset: Number.isFinite(Number(saved.mapYOffset)) ? Number(saved.mapYOffset) : CONFIG.defaultMapSettings.mapYOffset,
           showNightArea: saved.showNightArea !== undefined ? !!saved.showNightArea : CONFIG.defaultMapSettings.showNightArea,
           showHourLines: saved.showHourLines !== undefined ? !!saved.showHourLines : CONFIG.defaultMapSettings.showHourLines,
-          showCityTimes: saved.showCityTimes !== undefined ? !!saved.showCityTimes : CONFIG.defaultMapSettings.showCityTimes,
-          mapCollapsed: saved.mapCollapsed !== undefined ? !!saved.mapCollapsed : CONFIG.defaultMapSettings.mapCollapsed
+          showCityTimes: saved.showCityTimes !== undefined ? !!saved.showCityTimes : CONFIG.defaultMapSettings.showCityTimes
         };
       }
     } catch {
