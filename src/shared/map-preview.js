@@ -13,6 +13,11 @@
 const MapPreview = {
   ASSET_PATH: "../../assets/world-map.jpg",
 
+  /** "Now" shifted by `offsetHours`; every sun-driven layer shares this. */
+  shiftedNow(offsetHours) {
+    return new Date(Date.now() + offsetHours * 60 * 60 * 1000);
+  },
+
   /**
    * Collect the nodes this module renders into. `root` is `document`
    * in the popup or the mount element built by buildPreview().
@@ -151,10 +156,7 @@ const MapPreview = {
     refs.hourLines.innerHTML = "";
     refs.hourLines.style.backgroundImage = "none";
 
-    const time = new Date();
-    time.setTime(time.getTime() + offsetHours * 60 * 60 * 1000);
-
-    const subsolarLng = MapUtils.subsolarLng(time);
+    const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(offsetHours));
     const centerLng = MapUtils.getXLongitude(50);
 
     for (let h = 0; h < 24; h += 2) {
@@ -177,14 +179,11 @@ const MapPreview = {
   },
 
   calcNightPoints(offsetHours) {
-    const time = new Date();
-    time.setTime(time.getTime() + offsetHours * 60 * 60 * 1000);
-
     const DECLINATION_DEG = 35.0;
     const tanDec = Math.tan(DECLINATION_DEG * Math.PI / 180);
     const Y_SHIFT = 10;
 
-    const subsolarLng = MapUtils.subsolarLng(time);
+    const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(offsetHours));
 
     const points = [];
     for (let x = 0; x <= 100; x += 2) {
@@ -201,10 +200,7 @@ const MapPreview = {
     if (!refs.mapTimeline) return;
     refs.mapTimeline.innerHTML = "";
 
-    const time = new Date();
-    time.setTime(time.getTime() + offsetHours * 60 * 60 * 1000);
-
-    const subsolarLng = MapUtils.subsolarLng(time);
+    const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(offsetHours));
     const centerLng = MapUtils.getXLongitude(50);
 
     for (let h = 0; h < 24; h += 2) {

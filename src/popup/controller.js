@@ -161,10 +161,7 @@ const AppController = {
           const x = relativeX * 100;
           const lng = MapUtils.getXLongitude(x);
 
-          const time = new Date();
-          const offsetHours = State.selectedOffsetHours;
-          time.setTime(time.getTime() + offsetHours * 60 * 60 * 1000);
-          const subsolarLng = MapUtils.subsolarLng(time);
+          const subsolarLng = MapUtils.subsolarLng(MapPreview.shiftedNow(State.selectedOffsetHours));
 
           const k = Math.round((lng - subsolarLng) / 15);
 

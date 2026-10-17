@@ -28,6 +28,19 @@ const CityPreview = {
     };
   },
 
+  /** Clear drag state on every city card. */
+  clearCardDragState(refs) {
+    if (refs.currentCitiesList) {
+      refs.currentCitiesList.classList.remove("is-dragging-active");
+    }
+    document.querySelectorAll(".current-city-card").forEach((c) => {
+      c.classList.remove("drag-over-top", "drag-over-bottom");
+      c._cachedRect = null;
+    });
+    State.draggingId = null;
+    State.lastActiveCard = null;
+  },
+
   /**
    * Render the current-cities list from State.
    * `onReorder` is invoked after a drag-reorder so the page can repaint
@@ -162,15 +175,7 @@ const CityPreview = {
 
       card.addEventListener("dragend", () => {
         card.classList.remove("is-dragging");
-        if (refs.currentCitiesList) {
-          refs.currentCitiesList.classList.remove("is-dragging-active");
-        }
-        document.querySelectorAll(".current-city-card").forEach((c) => {
-          c.classList.remove("drag-over-top", "drag-over-bottom");
-          c._cachedRect = null;
-        });
-        State.draggingId = null;
-        State.lastActiveCard = null;
+        CityPreview.clearCardDragState(refs);
       });
 
       card.addEventListener("drop", (e) => {
@@ -202,15 +207,7 @@ const CityPreview = {
             }
           }
         }
-        if (refs.currentCitiesList) {
-          refs.currentCitiesList.classList.remove("is-dragging-active");
-        }
-        document.querySelectorAll(".current-city-card").forEach((c) => {
-          c.classList.remove("drag-over-top", "drag-over-bottom");
-          c._cachedRect = null;
-        });
-        State.draggingId = null;
-        State.lastActiveCard = null;
+        CityPreview.clearCardDragState(refs);
       });
 
       const handleAutoSave = () => {
