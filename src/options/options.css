@@ -18,7 +18,8 @@ body {
 
 .container {
   width: 100%;
-  max-width: 760px; /* match popup body width so the preview map renders 1:1 */
+  max-width: 760px;
+  /* match popup body width so the preview map renders 1:1 */
 }
 
 /* Header & Brand */
@@ -184,7 +185,7 @@ body {
   }
 }
 
-details[open] > .collapsible-summary::after {
+details[open]>.collapsible-summary::after {
   transform: rotate(180deg);
 }
 
@@ -393,17 +394,8 @@ details[open] > .collapsible-summary::after {
   overflow: hidden;
 }
 
+/* Interactive Hour Cell inherits layout, sizing and typography from .hour-cell */
 .interactive-hour-cell {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 calc(100% / 24);
-  min-width: 0;
-  box-sizing: border-box;
-  border-right: 1px solid rgba(255, 255, 255, 0.28);
-  font-size: 11px;
-  font-weight: 700;
   cursor: pointer;
   transition: background-color 0.15s ease, filter 0.15s ease;
 }
@@ -460,20 +452,19 @@ details[open] > .collapsible-summary::after {
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm, 4px);
-  background: #ffffff;
-  color: #111111;
-  border: 1px solid rgba(0, 0, 0, 0.25);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  background: var(--timeline-knob-bg);
+  color: var(--timeline-knob-color);
+  border: var(--timeline-knob-border);
+  box-shadow: var(--timeline-knob-shadow);
+  font-size: var(--timeline-knob-font-size);
+  font-weight: var(--timeline-knob-font-weight);
+  font-variant-numeric: tabular-nums;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .timeline-divider-knob.top-knob {
   padding: 2px 6px;
-  font-size: 10px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
   top: -4px;
-  color: #111111;
 }
 
 .timeline-divider-knob.bottom-knob {
@@ -535,6 +526,6 @@ details[open] > .collapsible-summary::after {
 /* Options switch ON state: solid swatch color instead of the shared accent
    gradient defined in tokens.css (.switch input:checked + .slider). Kept here
    so the popup's toggle keeps its own palette. */
-.switch input:checked + .slider {
+.switch input:checked+.slider {
   background: #F9BE6C;
 }
