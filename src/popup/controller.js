@@ -16,8 +16,8 @@ const AppController = {
       zone = `Etc/GMT+${Math.abs(offset)}`;
     }
 
-    const x = MathUtils.clamp(50 + (clickX - 50 - State.mapSettings.lngOffset) / State.mapSettings.widthScale, 0, 100);
-    const y = MathUtils.clamp(50 + (clickY - 50 + State.mapSettings.latOffset) / State.mapSettings.heightScale, 0, 100);
+    const x = MathUtils.clamp(MapUtils.uncalibrateX(clickX), 0, 100);
+    const y = MathUtils.clamp(MapUtils.uncalibrateY(clickY), 0, 100);
 
     const newCity = {
       id: `custom-utc-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,

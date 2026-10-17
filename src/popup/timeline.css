@@ -97,17 +97,6 @@
   white-space: nowrap;
 }
 
-/*
-.hour-cell.is-now::before {
-  content: "";
-  position: absolute;
-  inset: 5px 3px;
-  border: 2px solid rgba(255, 255, 255, .82);
-  border-radius: 5px;
-  pointer-events: none;
-}
-*/
-
 /* ======================================
    Timeline Vertical Lines & Knobs
    ====================================== */

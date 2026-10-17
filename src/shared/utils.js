@@ -355,29 +355,44 @@ const MapUtils = {
     return { lng: this.xToLng(city.x), lat: this.yToLat(city.y) };
   },
 
+  /**
+   * Apply the user's calibration (scale + offset) to a base-map percentage.
+   * `uncalibrate*` are the exact inverses, so a screen percentage can be
+   * mapped back to the uncalibrated base map.
+   */
+  calibrateX(x) {
+    return 50 + (x - 50) * State.mapSettings.widthScale + State.mapSettings.lngOffset;
+  },
+
+  calibrateY(y) {
+    return 50 + (y - 50) * State.mapSettings.heightScale - State.mapSettings.latOffset;
+  },
+
+  uncalibrateX(screenX) {
+    return 50 + (screenX - 50 - State.mapSettings.lngOffset) / State.mapSettings.widthScale;
+  },
+
+  uncalibrateY(screenY) {
+    return 50 + (screenY - 50 + State.mapSettings.latOffset) / State.mapSettings.heightScale;
+  },
+
   mapPosition(city) {
-    let cx = city.x;
-    let cy = city.y;
-    if (typeof city.lng === "number" && typeof city.lat === "number") {
-      cx = this.lngToX(city.lng);
-      cy = this.latToY(city.lat);
-    }
-    const screenPercentX = MathUtils.clamp(50 + (cx - 50) * State.mapSettings.widthScale + State.mapSettings.lngOffset, 0, 100);
-    const screenPercentY = MathUtils.clamp(50 + (cy - 50) * State.mapSettings.heightScale - State.mapSettings.latOffset, 0, 100);
+    const hasLngLat = typeof city.lng === "number" && typeof city.lat === "number";
+    const cx = hasLngLat ? this.lngToX(city.lng) : city.x;
+    const cy = hasLngLat ? this.latToY(city.lat) : city.y;
     return {
-      x: screenPercentX,
-      y: screenPercentY
+      x: MathUtils.clamp(this.calibrateX(cx), 0, 100),
+      y: MathUtils.clamp(this.calibrateY(cy), 0, 100)
     };
   },
 
+  /** Unclamped screen-x percentage for a longitude. */
   getLongitudeX(lng) {
-    const cx = this.lngToX(lng);
-    return 50 + (cx - 50) * State.mapSettings.widthScale + State.mapSettings.lngOffset;
+    return this.calibrateX(this.lngToX(lng));
   },
 
-  getXLongitude(x) {
-    const cx = 50 + (x - 50 - State.mapSettings.lngOffset) / State.mapSettings.widthScale;
-    return this.xToLng(cx);
+  getXLongitude(screenX) {
+    return this.xToLng(this.uncalibrateX(screenX));
   }
 };
 
@@ -413,33 +428,39 @@ const TimelineUtils = {
   },
 
   /**
-   * Convert a 0-1 day fraction to a pixel offset inside the timeline panel.
-   * `scope` is the timeline panel element (or an ancestor of it); defaults
+   * Grid geometry of the hours row, expressed relative to the timeline panel:
+   * where the grid starts and how wide it is. Returns null when the timeline
+   * has not been laid out yet (or `scope` is not a searchable root).
+   *
+   * `scope` is the timeline panel element (or an ancestor of it); it defaults
    * to `document` for the popup. Needed because the options page hosts a
    * second, independent timeline that must measure its own geometry.
    */
-  fractionToLeft(fraction, scope) {
+  gridGeometry(scope) {
     const root = scope && scope.querySelector ? scope : (typeof document !== "undefined" ? document : null);
-    if (!root) return 0;
+    if (!root) return null;
     const hoursEl = root.querySelector(".timeline-row .hours");
     const panelEl = root.matches && root.matches(".timeline-panel") ? root : root.querySelector(".timeline-panel");
-    if (!hoursEl || !panelEl || !hoursEl.getBoundingClientRect || !panelEl.getBoundingClientRect) return 0;
+    if (!hoursEl || !panelEl || !hoursEl.getBoundingClientRect || !panelEl.getBoundingClientRect) return null;
     const gridRect = hoursEl.getBoundingClientRect();
     const panelRect = panelEl.getBoundingClientRect();
-    const gridLeft = gridRect.left - panelRect.left;
-    return gridLeft + fraction * gridRect.width;
+    return {
+      gridLeft: gridRect.left - panelRect.left,
+      gridWidth: gridRect.width
+    };
+  },
+
+  /** Convert a 0-1 day fraction to a pixel offset inside the timeline panel. */
+  fractionToLeft(fraction, scope) {
+    const geo = this.gridGeometry(scope);
+    if (!geo) return 0;
+    return geo.gridLeft + fraction * geo.gridWidth;
   },
 
   leftToFraction(pxLeft, scope) {
-    const root = scope && scope.querySelector ? scope : (typeof document !== "undefined" ? document : null);
-    if (!root) return 0;
-    const hoursEl = root.querySelector(".timeline-row .hours");
-    const panelEl = root.matches && root.matches(".timeline-panel") ? root : root.querySelector(".timeline-panel");
-    if (!hoursEl || !panelEl || !hoursEl.getBoundingClientRect || !panelEl.getBoundingClientRect) return 0;
-    const gridRect = hoursEl.getBoundingClientRect();
-    const panelRect = panelEl.getBoundingClientRect();
-    const gridLeft = gridRect.left - panelRect.left;
-    return MathUtils.clamp((pxLeft - gridLeft) / gridRect.width, 0, 1);
+    const geo = this.gridGeometry(scope);
+    if (!geo) return 0;
+    return MathUtils.clamp((pxLeft - geo.gridLeft) / geo.gridWidth, 0, 1);
   },
 
   formatFractionTime(fraction) {
