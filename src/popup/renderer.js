@@ -18,28 +18,6 @@ const Renderer = {
     MapPreview.renderPins(MapPreview.collectRefs(document), () => Renderer.render());
   },
 
-  formatSettingValue(key) {
-    if (key.endsWith("Scale")) return State.mapSettings[key].toFixed(2);
-    if (key === "mapYOffset") return String(Math.round(State.mapSettings[key]));
-    return State.mapSettings[key].toFixed(1);
-  },
-
-  renderSettingsControls() {
-    document.querySelectorAll("[data-setting]").forEach((input) => {
-      const key = input.dataset.setting;
-      if (input.type === "checkbox") {
-        input.checked = !!State.mapSettings[key];
-      } else {
-        input.value = String(State.mapSettings[key]);
-      }
-    });
-
-    document.querySelectorAll("[data-output]").forEach((output) => {
-      const key = output.dataset.output;
-      output.textContent = this.formatSettingValue(key);
-    });
-  },
-
   renderRows() {
     TimelinePreview.renderRows(TimelinePreview.collectRefs(document));
   },

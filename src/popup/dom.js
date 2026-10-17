@@ -10,8 +10,6 @@ const DOM = {
   settingsPanel: document.querySelector("#settingsPanel"),
   openOptionsBtn: document.querySelector("#openOptionsBtn"),
   topbarOptionsButton: document.querySelector("#topbarOptionsButton"),
-  resetMapButton: document.querySelector("#resetMapButton"),
-  resetPeriodsButton: document.querySelector("#resetPeriodsButton"),
   currentCitiesList: document.querySelector("#currentCitiesList"),
   mapShell: document.querySelector(".map-shell"),
   timezoneHoverBar: document.querySelector("#timezoneHoverBar"),

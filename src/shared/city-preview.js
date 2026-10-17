@@ -24,7 +24,6 @@ const CityPreview = {
       searchResultsList: q("#searchResultsList"),
       clearAllButton: q("#clearAllButton"),
       resetButton: q("#resetButton"),
-      openOptionsBtn: q("#openOptionsBtn"),
     };
   },
 

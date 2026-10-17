@@ -3,22 +3,6 @@
  */
 
 const AppController = {
-  updateMapSetting(key, value) {
-    const input = document.querySelector(`[data-setting="${key}"]`);
-    if (!input) return;
-
-    const min = Number(input.min);
-    const max = Number(input.max);
-    const next = MathUtils.clamp(Number(value), min, max);
-    State.mapSettings = {
-      ...State.mapSettings,
-      [key]: key.endsWith("Scale") ? Number(next.toFixed(2)) : Number(next.toFixed(1))
-    };
-    State.saveMapSettings();
-    Renderer.renderSettingsControls();
-    Renderer.renderMap();
-  },
-
   addGeneratedTimezone(offset, clickX, clickY) {
     const offsetText = offset >= 0 ? `+${offset}` : `${offset}`;
     const name = `UTC${offsetText}`;
@@ -49,53 +33,17 @@ const AppController = {
     Renderer.render();
   },
 
-  wireMapSettings() {
+  /**
+   * Wire the popup's own chrome: the collapsible cities/settings panel and the
+   * hand-off to the options page. Map projection settings are edited on the
+   * options page only, so there is nothing to bind here for them.
+   */
+  wireSettingsPanel() {
     DOM.settingsButton.addEventListener("click", () => {
       const isOpen = DOM.settingsPanel.hidden;
       DOM.settingsPanel.hidden = !isOpen;
       DOM.settingsButton.setAttribute("aria-expanded", String(isOpen));
     });
-
-    document.querySelectorAll("[data-setting]:not([type='checkbox'])").forEach((input) => {
-      input.addEventListener("input", () => {
-        this.updateMapSetting(input.dataset.setting, input.value);
-      });
-    });
-
-    document.querySelectorAll("input[type='checkbox'][data-setting]").forEach((checkbox) => {
-      checkbox.addEventListener("change", () => {
-        const key = checkbox.dataset.setting;
-        State.mapSettings[key] = checkbox.checked;
-        State.saveMapSettings();
-        Renderer.applyVisibilitySettings();
-      });
-    });
-
-    document.querySelectorAll("[data-adjust]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const key = button.dataset.adjust;
-        const delta = Number(button.dataset.delta);
-        this.updateMapSetting(key, State.mapSettings[key] + delta);
-      });
-    });
-
-    if (DOM.resetMapButton) {
-      DOM.resetMapButton.addEventListener("click", () => {
-        State.mapSettings = { ...CONFIG.defaultMapSettings };
-        State.saveMapSettings();
-        Renderer.renderSettingsControls();
-        Renderer.renderMap();
-        Renderer.render();
-      });
-    }
-
-    if (DOM.resetPeriodsButton) {
-      DOM.resetPeriodsButton.addEventListener("click", () => {
-        State.timePeriods = JSON.parse(JSON.stringify(CONFIG.defaultTimePeriods));
-        State.saveTimePeriods();
-        Renderer.render();
-      });
-    }
 
     const handleOpenOptions = (e) => {
       if (e) {
@@ -140,7 +88,7 @@ const AppController = {
   },
 
   wireSettings() {
-    this.wireMapSettings();
+    this.wireSettingsPanel();
     CityPreview.wireCitySearch(CityPreview.collectRefs(document), () => Renderer.render());
     this.wireCitiesDragOver();
   },
@@ -203,7 +151,6 @@ const AppController = {
     this.wireSettings();
     this.wireScrubLine();
     this.wireMapTimezoneHover();
-    Renderer.renderSettingsControls();
 
     CityPreview.wireResetButtons(CityPreview.collectRefs(document), () => {
       State.scrubs = [];
@@ -224,7 +171,6 @@ const AppController = {
         document.documentElement.dataset.theme =
           TimeMapperTheme.resolve(localStorage.getItem("theme") || "auto");
       }
-      Renderer.renderSettingsControls();
       Renderer.render();
     });
 
