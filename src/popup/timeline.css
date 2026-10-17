@@ -217,12 +217,12 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm, 4px);
-  background: var(--timeline-knob-bg);
-  color: var(--timeline-knob-color);
-  border: var(--timeline-knob-border);
-  box-shadow: var(--timeline-knob-shadow);
-  font-size: var(--timeline-knob-font-size);
-  font-weight: var(--timeline-knob-font-weight);
+  background: #ffffff;
+  color: #111111;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  font-size: 10px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   line-height: 1;
   white-space: nowrap;
