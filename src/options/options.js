@@ -468,8 +468,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       renderThemeSegment();
       renderPeriodControls();
+      renderPreviews();
     });
   }
+
+  // Follow OS theme changes when theme is auto
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if ((localStorage.getItem("theme") || "auto") === "auto") {
+      renderPeriodControls();
+      renderPreviews();
+    }
+  });
 
   // Cities: search, limit, reset (shares CityPreview with the popup)
   if (cityRefs) {
