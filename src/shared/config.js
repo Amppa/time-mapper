@@ -70,7 +70,7 @@ const CONFIG = {
       ],
       dark: [
         { color: "#EEB422", fontColor: "#000000" },
-        { color: "#38302E", fontColor: "#D9C8C2" }
+        { color: "#38302E", fontColor: "#FFFFFF" }
       ]
     },
     3: {
@@ -82,7 +82,7 @@ const CONFIG = {
       dark: [
         { color: "#EEB422", fontColor: "#000000" },
         { color: "#B8860B", fontColor: "#000000" },
-        { color: "#38302E", fontColor: "#D9C8C2" }
+        { color: "#38302E", fontColor: "#FFFFFF" }
       ]
     },
     4: {
@@ -96,7 +96,7 @@ const CONFIG = {
         { color: "#B8860B", fontColor: "#000000" },
         { color: "#EEB422", fontColor: "#000000" },
         { color: "#B8860B", fontColor: "#000000" },
-        { color: "#38302E", fontColor: "#D9C8C2" }
+        { color: "#38302E", fontColor: "#FFFFFF" }
       ]
     }
   },
@@ -113,7 +113,7 @@ const CONFIG = {
     dark: [
       { color: "#EEB422", fontColor: "#000000" },
       { color: "#B8860B", fontColor: "#000000" },
-      { color: "#38302E", fontColor: "#D9C8C2" }
+      { color: "#38302E", fontColor: "#FFFFFF" }
     ]
   }
 };

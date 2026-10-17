@@ -146,7 +146,7 @@
   transform: translate(-50%, -100%);
   margin-top: -12px;
   white-space: nowrap;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--map-time-label-color);
   background-color: var(--map-time-label-bg);
