@@ -458,3 +458,10 @@ details[open] > .collapsible-summary::after {
   margin-top: 16px;
   padding: 8px 0;
 }
+
+/* Options switch ON state: solid swatch color instead of the shared accent
+   gradient defined in tokens.css (.switch input:checked + .slider). Kept here
+   so the popup's toggle keeps its own palette. */
+.switch input:checked + .slider {
+  background: #F9BE6C;
+}
