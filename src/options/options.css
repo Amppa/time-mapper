@@ -26,9 +26,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
-  padding-bottom: var(--space-xl);
-  border-bottom: 1px solid var(--divider);
+  margin-bottom: 20px;
 
   & .brand {
     display: flex;
@@ -147,13 +145,6 @@ body {
   --muted: var(--text-secondary);
 }
 
-/* Gap between the map and timeline previews */
-.preview-divider {
-  border: 0;
-  border-top: 1px solid var(--divider);
-  margin: var(--space-lg) 0 0;
-  padding-top: var(--space-lg);
-}
 
 /* Explicit divider object */
 .divider {
@@ -367,14 +358,17 @@ details[open] > .collapsible-summary::after {
   font-weight: 600;
 }
 
+.period-timeline-header {
+  padding-bottom: 0;
+}
+
 /* ==========================================================================
    Interactive 24-Hour Grid Timeline (Matches Preview Timeline Style)
    ========================================================================== */
 .time-periods-timeline-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 4px 0 16px 0;
+  padding: 0 0 var(--space-md) 0;
   user-select: none;
 }
 
@@ -387,7 +381,7 @@ details[open] > .collapsible-summary::after {
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   padding: 0;
-  margin: 12px 0 6px 0;
+  margin: 12px 0 0 0;
 }
 
 .interactive-hours {

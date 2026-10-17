@@ -43,7 +43,6 @@
       <section class="settings-card" id="cardPreview">
         <h2 class="section-title" data-i18n="previewCardTitle">預覽</h2>
         <div id="mapPreviewMount"></div>
-        <div class="preview-divider"></div>
         <div id="timelinePreviewMount"></div>
       </section>
 
@@ -192,39 +191,30 @@
       <section class="settings-card" id="cardPeriods">
         <h2 class="section-title" data-i18n="periodCardTitle">時段設定</h2>
 
-        <!-- 現在時間基準 -->
+        <!-- 1. 時段數量 -->
         <div class="control-group">
           <div class="control-label-wrap">
-            <span class="control-label" data-i18n="nowLineMode">現在時間</span>
-            <span class="control-desc" data-i18n="nowLineModeDesc">設定時間軸中線 (Now-line) 的參考時間依據</span>
+            <span class="control-label" id="periodCountLabel">時段數量</span>
+            <span class="control-desc" id="periodCountDesc">設定一天劃分的時段</span>
           </div>
-          <select class="styled-select" id="nowLineModeSelect" aria-label="Now Line Mode">
-            <option value="local" data-i18n="nowLineModeLocal">瀏覽器本地時間</option>
-            <option value="firstCity" data-i18n="nowLineModeFirstCity">第一個城市時間</option>
+          <select class="styled-select period-count-select" id="periodCountSelect" aria-label="Period Count">
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
           </select>
         </div>
 
         <div class="divider"></div>
 
-        <!-- Period Count Selector & Reset Button -->
-        <div class="control-group">
+        <!-- 2. 時段設定 (時間軸與右上角恢復預設按鈕) -->
+        <div class="control-group period-timeline-header">
           <div class="control-label-wrap">
-            <span class="control-label" id="periodCountLabel">時段數量</span>
-            <span class="control-desc" id="periodCountDesc">設定一天劃分的時段數量</span>
+            <span class="control-label">時段設定</span>
+            <span class="control-desc">在時間軸上拖曳手柄調整各時段範圍</span>
           </div>
-          <div class="control-actions-wrap">
-            <select class="styled-select period-count-select" id="periodCountSelect" aria-label="Period Count">
-              <option value="2">2</option>
-              <option value="3" selected>3</option>
-              <option value="4">4</option>
-            </select>
-            <button type="button" class="reset-btn" id="resetPeriodsButton" data-i18n="resetBtn">恢復預設</button>
-          </div>
+          <button type="button" class="reset-btn" id="resetPeriodsButton" data-i18n="resetBtn">恢復預設</button>
         </div>
 
-        <div class="divider"></div>
-
-        <!-- Single Axis 24-Hour Grid Timeline (Matches Preview Timeline Style) -->
         <div class="time-periods-timeline-container">
           <!-- Interactive 24-Hour Grid Panel -->
           <div class="interactive-timeline-panel" id="interactiveTimelinePanel">
@@ -235,6 +225,20 @@
               <!-- Draggable divider handles rendered at period boundaries -->
             </div>
           </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 3. 現在時間線 -->
+        <div class="control-group">
+          <div class="control-label-wrap">
+            <span class="control-label" data-i18n="nowLineMode">現在時間線</span>
+            <span class="control-desc" data-i18n="nowLineModeDesc">設定時間軸中線 (Now-line) 的參考時間依據</span>
+          </div>
+          <select class="styled-select" id="nowLineModeSelect" aria-label="Now Line Mode">
+            <option value="local" data-i18n="nowLineModeLocal">瀏覽器本地時間</option>
+            <option value="firstCity" data-i18n="nowLineModeFirstCity">第一個城市時間</option>
+          </select>
         </div>
       </section>
 
