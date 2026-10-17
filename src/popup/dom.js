@@ -1,16 +1,11 @@
 /**
  * TimeMapper - DOM Element Caching Module
+ *
+ * Only nodes the popup controller wires directly are cached here; everything
+ * the shared preview modules touch is resolved by their own collectRefs().
  */
 const DOM = {
-  cityLayer: document.querySelector("#cityLayer"),
-  mapTimeLabelLayer: document.querySelector("#mapTimeLabelLayer"),
-  timelineRows: document.querySelector("#timelineRows"),
-  nowLine: document.querySelector("#nowLine"),
-  scrubLinesContainer: document.querySelector("#scrubLinesContainer"),
-  timelinePanel: document.querySelector(".timeline-panel"),
   nowText: document.querySelector("#nowText"),
-  resetButton: document.querySelector("#resetButton"),
-  clearAllButton: document.querySelector("#clearAllButton"),
   settingsButton: document.querySelector("#settingsButton"),
   settingsPanel: document.querySelector("#settingsPanel"),
   openOptionsBtn: document.querySelector("#openOptionsBtn"),
@@ -18,16 +13,7 @@ const DOM = {
   resetMapButton: document.querySelector("#resetMapButton"),
   resetPeriodsButton: document.querySelector("#resetPeriodsButton"),
   currentCitiesList: document.querySelector("#currentCitiesList"),
-  searchCityInput: document.querySelector("#searchCityInput"),
-  cityLimitInput: document.querySelector("#cityLimitInput"),
-  searchCityBtn: document.querySelector("#searchCityBtn"),
-  searchResultsList: document.querySelector("#searchResultsList"),
-  mapImg: document.querySelector(".world-map"),
   mapShell: document.querySelector(".map-shell"),
   timezoneHoverBar: document.querySelector("#timezoneHoverBar"),
-  hourLines: document.querySelector(".hour-lines"),
-  nightAreaOverlay: document.querySelector("#nightAreaOverlay"),
-  nightPath: document.querySelector("#nightPath"),
-  nightPathRef: document.querySelector("#nightPathRef"),
-  mapTimeline: document.querySelector("#mapTimeline")
+  cityLayer: document.querySelector("#cityLayer")
 };

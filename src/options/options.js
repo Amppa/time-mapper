@@ -483,7 +483,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Cities: search, limit, reset (shares CityPreview with the popup)
   if (cityRefs) {
     CityPreview.wireCitySearch(cityRefs, renderPreviews);
-    CityPreview.wireCityLimit(cityRefs, renderPreviews);
     CityPreview.wireResetButtons(cityRefs, renderPreviews);
   }
 

@@ -38,48 +38,14 @@ const Renderer = {
       const key = output.dataset.output;
       output.textContent = this.formatSettingValue(key);
     });
-
-    const cityLimitInput = document.querySelector("#cityLimitInput");
-    if (cityLimitInput) {
-      cityLimitInput.value = String(State.cityLimit);
-    }
   },
 
   renderRows() {
     TimelinePreview.renderRows(TimelinePreview.collectRefs(document));
   },
 
-  renderCurrentCitiesList() {
-    CityPreview.renderCurrentCitiesList(CityPreview.collectRefs(document), () => Renderer.render());
-  },
-
-  /**
-   * The timezone dropdown depends on the zones of the currently selected cities.
-   * Derived here so the cache invalidates itself whenever selection or a custom
-   * city's zone changes, instead of relying on every mutation site to clear it.
-   */
-  _computeZoneCacheSignature() {
-    return State.selectedIds.join(",") + "|" + State.customCities.map((city) => city.zone).join(",");
-  },
-
-  renderHourLines(offsetHours = 0) {
-    MapPreview.renderHourLines(MapPreview.collectRefs(document), offsetHours);
-  },
-
-  _calcNightAreaBoundaryPoints(offsetHours) {
-    return MapPreview.calcNightPoints(offsetHours);
-  },
-
-  renderMapTimeline(offsetHours = 0) {
-    MapPreview.renderMapTimeline(MapPreview.collectRefs(document), offsetHours);
-  },
-
   renderNightArea(offsetHours = 0) {
     MapPreview.renderNightArea(MapPreview.collectRefs(document), offsetHours);
-  },
-
-  updateMapCityTimes(activeFraction) {
-    MapPreview.updateMapCityTimes(MapPreview.collectRefs(document), activeFraction);
   },
 
   applyVisibilitySettings() {

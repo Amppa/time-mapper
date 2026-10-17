@@ -114,7 +114,7 @@ const TimeUtils = {
       const formatter = this.getFormatter(locale, {
         timeZone: resolved,
         hour: "2-digit",
-        minute: options.withMinutes === false ? undefined : "2-digit",
+        minute: "2-digit",
         hour12: false,
         weekday: options.weekday ? "short" : undefined
       });
@@ -305,11 +305,8 @@ const PeriodUtils = {
   /** Fixed palette entry for a period index under the active theme. */
   getPeriodColors(idx) {
     const count = (typeof State !== "undefined" && State.timePeriods && State.timePeriods.length) || 3;
-    const byCount = CONFIG.periodColorsByCount && CONFIG.periodColorsByCount[count];
-    const theme = this.currentTheme();
-    const set = (byCount && byCount[theme]) || (byCount && byCount.light) ||
-      (CONFIG.periodColors && CONFIG.periodColors[theme]) ||
-      CONFIG.periodColors.light;
+    const byCount = CONFIG.periodColorsByCount[count] || CONFIG.periodColorsByCount[3];
+    const set = byCount[this.currentTheme()] || byCount.light;
     return set[idx] || set[set.length - 1];
   },
   getHourStyle(hour) {
@@ -459,26 +456,5 @@ const TimelineUtils = {
     const totalMinutes = Math.round(fraction * 24 * 60);
     const snappedMinutes = Math.round(totalMinutes / 5) * 5;
     return MathUtils.clamp(snappedMinutes / (24 * 60), 0, 1);
-  }
-};
-
-const ColorUtils = {
-  toHex7(colorStr) {
-    if (!colorStr) return "#000000";
-    colorStr = colorStr.trim();
-    if (colorStr.startsWith("#")) {
-      if (colorStr.length >= 7) {
-        return colorStr.slice(0, 7);
-      }
-      return colorStr;
-    }
-    const match = colorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
-    if (match) {
-      const r = Number(match[1]).toString(16).padStart(2, "0");
-      const g = Number(match[2]).toString(16).padStart(2, "0");
-      const b = Number(match[3]).toString(16).padStart(2, "0");
-      return `#${r}${g}${b}`;
-    }
-    return "#000000";
   }
 };

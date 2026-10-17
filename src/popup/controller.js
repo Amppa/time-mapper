@@ -143,7 +143,6 @@ const AppController = {
     this.wireMapSettings();
     CityPreview.wireCitySearch(CityPreview.collectRefs(document), () => Renderer.render());
     this.wireCitiesDragOver();
-    CityPreview.wireCityLimit(CityPreview.collectRefs(document), () => Renderer.render());
   },
 
   wireScrubLine() {
