@@ -3,22 +3,6 @@
  */
 
 const AppController = {
-  updateMapSetting(key, value) {
-    const input = document.querySelector(`[data-setting="${key}"]`);
-    if (!input) return;
-
-    const min = Number(input.min);
-    const max = Number(input.max);
-    const next = MathUtils.clamp(Number(value), min, max);
-    State.mapSettings = {
-      ...State.mapSettings,
-      [key]: key.endsWith("Scale") ? Number(next.toFixed(2)) : Number(next.toFixed(1))
-    };
-    State.saveMapSettings();
-    Renderer.renderSettingsControls();
-    Renderer.renderMap();
-  },
-
   addGeneratedTimezone(offset, clickX, clickY) {
     const offsetText = offset >= 0 ? `+${offset}` : `${offset}`;
     const name = `UTC${offsetText}`;
@@ -32,8 +16,8 @@ const AppController = {
       zone = `Etc/GMT+${Math.abs(offset)}`;
     }
 
-    const x = MathUtils.clamp(50 + (clickX - 50 - State.mapSettings.lngOffset) / State.mapSettings.widthScale, 0, 100);
-    const y = MathUtils.clamp(50 + (clickY - 50 + State.mapSettings.latOffset) / State.mapSettings.heightScale, 0, 100);
+    const x = MathUtils.clamp(MapUtils.uncalibrateX(clickX), 0, 100);
+    const y = MathUtils.clamp(MapUtils.uncalibrateY(clickY), 0, 100);
 
     const newCity = {
       id: `custom-utc-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -49,54 +33,11 @@ const AppController = {
     Renderer.render();
   },
 
-  wireMapSettings() {
-    DOM.settingsButton.addEventListener("click", () => {
-      const isOpen = DOM.settingsPanel.hidden;
-      DOM.settingsPanel.hidden = !isOpen;
-      DOM.settingsButton.setAttribute("aria-expanded", String(isOpen));
-    });
-
-    document.querySelectorAll("[data-setting]:not([type='checkbox'])").forEach((input) => {
-      input.addEventListener("input", () => {
-        this.updateMapSetting(input.dataset.setting, input.value);
-      });
-    });
-
-    document.querySelectorAll("input[type='checkbox'][data-setting]").forEach((checkbox) => {
-      checkbox.addEventListener("change", () => {
-        const key = checkbox.dataset.setting;
-        State.mapSettings[key] = checkbox.checked;
-        State.saveMapSettings();
-        Renderer.applyVisibilitySettings();
-      });
-    });
-
-    document.querySelectorAll("[data-adjust]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const key = button.dataset.adjust;
-        const delta = Number(button.dataset.delta);
-        this.updateMapSetting(key, State.mapSettings[key] + delta);
-      });
-    });
-
-    if (DOM.resetMapButton) {
-      DOM.resetMapButton.addEventListener("click", () => {
-        State.mapSettings = { ...CONFIG.defaultMapSettings };
-        State.saveMapSettings();
-        Renderer.renderSettingsControls();
-        Renderer.renderMap();
-        Renderer.render();
-      });
-    }
-
-    if (DOM.resetPeriodsButton) {
-      DOM.resetPeriodsButton.addEventListener("click", () => {
-        State.timePeriods = JSON.parse(JSON.stringify(CONFIG.defaultTimePeriods));
-        State.saveTimePeriods();
-        Renderer.render();
-      });
-    }
-
+  /**
+   * Wire the gear button that hands off to the options page. The popup itself
+   * is read-only: cities are added, reordered and reset there.
+   */
+  wireOptionsButton() {
     const handleOpenOptions = (e) => {
       if (e) {
         e.preventDefault();
@@ -120,30 +61,9 @@ const AppController = {
       }
     };
 
-    if (DOM.openOptionsBtn) {
-      DOM.openOptionsBtn.addEventListener("click", handleOpenOptions);
-    }
     if (DOM.topbarOptionsButton) {
       DOM.topbarOptionsButton.addEventListener("click", handleOpenOptions);
     }
-  },
-
-  wireCitiesDragOver() {
-    if (!DOM.currentCitiesList) return;
-    DOM.currentCitiesList.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-    });
-    DOM.currentCitiesList.addEventListener("dragenter", (e) => {
-      e.preventDefault();
-    });
-  },
-
-  wireSettings() {
-    this.wireMapSettings();
-    CityPreview.wireCitySearch(CityPreview.collectRefs(document), () => Renderer.render());
-    this.wireCitiesDragOver();
-    CityPreview.wireCityLimit(CityPreview.collectRefs(document), () => Renderer.render());
   },
 
   wireScrubLine() {
@@ -162,10 +82,7 @@ const AppController = {
           const x = relativeX * 100;
           const lng = MapUtils.getXLongitude(x);
 
-          const time = new Date();
-          const offsetHours = State.selectedOffsetHours;
-          time.setTime(time.getTime() + offsetHours * 60 * 60 * 1000);
-          const subsolarLng = MapUtils.subsolarLng(time);
+          const subsolarLng = MapUtils.subsolarLng(MapPreview.shiftedNow(State.selectedOffsetHours));
 
           const k = Math.round((lng - subsolarLng) / 15);
 
@@ -204,16 +121,9 @@ const AppController = {
   init() {
     State.init();
 
-    this.wireSettings();
+    this.wireOptionsButton();
     this.wireScrubLine();
     this.wireMapTimezoneHover();
-    Renderer.renderSettingsControls();
-
-    CityPreview.wireResetButtons(CityPreview.collectRefs(document), () => {
-      State.scrubs = [];
-      State.activeScrubId = null;
-      Renderer.render();
-    });
 
     I18nUtils.applyAttributes();
     Renderer.render();
@@ -228,7 +138,6 @@ const AppController = {
         document.documentElement.dataset.theme =
           TimeMapperTheme.resolve(localStorage.getItem("theme") || "auto");
       }
-      Renderer.renderSettingsControls();
       Renderer.render();
     });
 

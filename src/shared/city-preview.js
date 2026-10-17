@@ -22,11 +22,22 @@ const CityPreview = {
       searchCityInput: q("#searchCityInput"),
       searchCityBtn: q("#searchCityBtn"),
       searchResultsList: q("#searchResultsList"),
-      cityLimitInput: q("#cityLimitInput"),
       clearAllButton: q("#clearAllButton"),
       resetButton: q("#resetButton"),
-      openOptionsBtn: q("#openOptionsBtn"),
     };
+  },
+
+  /** Clear drag state on every city card. */
+  clearCardDragState(refs) {
+    if (refs.currentCitiesList) {
+      refs.currentCitiesList.classList.remove("is-dragging-active");
+    }
+    document.querySelectorAll(".current-city-card").forEach((c) => {
+      c.classList.remove("drag-over-top", "drag-over-bottom");
+      c._cachedRect = null;
+    });
+    State.draggingId = null;
+    State.lastActiveCard = null;
   },
 
   /**
@@ -163,15 +174,7 @@ const CityPreview = {
 
       card.addEventListener("dragend", () => {
         card.classList.remove("is-dragging");
-        if (refs.currentCitiesList) {
-          refs.currentCitiesList.classList.remove("is-dragging-active");
-        }
-        document.querySelectorAll(".current-city-card").forEach((c) => {
-          c.classList.remove("drag-over-top", "drag-over-bottom");
-          c._cachedRect = null;
-        });
-        State.draggingId = null;
-        State.lastActiveCard = null;
+        CityPreview.clearCardDragState(refs);
       });
 
       card.addEventListener("drop", (e) => {
@@ -203,15 +206,7 @@ const CityPreview = {
             }
           }
         }
-        if (refs.currentCitiesList) {
-          refs.currentCitiesList.classList.remove("is-dragging-active");
-        }
-        document.querySelectorAll(".current-city-card").forEach((c) => {
-          c.classList.remove("drag-over-top", "drag-over-bottom");
-          c._cachedRect = null;
-        });
-        State.draggingId = null;
-        State.lastActiveCard = null;
+        CityPreview.clearCardDragState(refs);
       });
 
       const handleAutoSave = () => {
@@ -421,30 +416,6 @@ const CityPreview = {
       if (e.key === "Enter") {
         e.preventDefault();
         triggerSearch();
-      }
-    });
-  },
-
-  /**
-   * Wire the city-limit input.
-   * `onLimitChanged` is called after the limit is saved.
-   */
-  wireCityLimit(refs, onLimitChanged) {
-    if (!refs.cityLimitInput) return;
-    refs.cityLimitInput.addEventListener("input", (e) => {
-      const val = parseInt(e.target.value, 10);
-      if (!isNaN(val) && val > 0 && State.saveCityLimit(val)) {
-        if (onLimitChanged) onLimitChanged();
-      }
-    });
-    refs.cityLimitInput.addEventListener("change", (e) => {
-      const val = parseInt(e.target.value, 10);
-      if (!isNaN(val) && val > 0) {
-        if (State.saveCityLimit(val)) {
-          if (onLimitChanged) onLimitChanged();
-        }
-      } else {
-        e.target.value = String(State.cityLimit);
       }
     });
   },

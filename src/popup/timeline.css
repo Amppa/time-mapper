@@ -69,29 +69,6 @@
   text-overflow: ellipsis;
 }
 
-.remove-city-btn {
-  display: grid;
-  place-items: center;
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: var(--btn-circle-bg);
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background-color 0.2s, color 0.2s;
-}
-
-.remove-city-btn:hover {
-  background: var(--danger-hover-bg);
-  color: #ef4444;
-}
-
-
 .hour-cell {
   position: relative;
   display: flex;
@@ -119,17 +96,6 @@
   pointer-events: none;
   white-space: nowrap;
 }
-
-/*
-.hour-cell.is-now::before {
-  content: "";
-  position: absolute;
-  inset: 5px 3px;
-  border: 2px solid rgba(255, 255, 255, .82);
-  border-radius: 5px;
-  pointer-events: none;
-}
-*/
 
 /* ======================================
    Timeline Vertical Lines & Knobs

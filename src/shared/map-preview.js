@@ -13,6 +13,11 @@
 const MapPreview = {
   ASSET_PATH: "../../assets/world-map.jpg",
 
+  /** "Now" shifted by `offsetHours`; every sun-driven layer shares this. */
+  shiftedNow(offsetHours) {
+    return new Date(Date.now() + offsetHours * 60 * 60 * 1000);
+  },
+
   /**
    * Collect the nodes this module renders into. `root` is `document`
    * in the popup or the mount element built by buildPreview().
@@ -146,28 +151,33 @@ const MapPreview = {
     });
   },
 
+  /**
+   * Screen-x position of each 2-hour solar terminator line, wrapped into the
+   * visible span around the map centre. `x` is intentionally unclamped so each
+   * caller can pick its own policy: the hour lines pin to the edges, the
+   * timeline strip drops off-map ticks.
+   */
+  hourLinePositions(offsetHours) {
+    const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(offsetHours));
+    const centerLng = MapUtils.getXLongitude(50);
+    const out = [];
+    for (let h = 0; h < 24; h += 2) {
+      let diff = subsolarLng + (h - 12) * 15 - centerLng;
+      diff = ((diff + 180) % 360 + 360) % 360 - 180;
+      out.push({ hour: h, x: MapUtils.getLongitudeX(centerLng + diff) });
+    }
+    return out;
+  },
+
   renderHourLines(refs, offsetHours = 0) {
     if (!refs.hourLines) return;
     refs.hourLines.innerHTML = "";
     refs.hourLines.style.backgroundImage = "none";
 
-    const time = new Date();
-    time.setTime(time.getTime() + offsetHours * 60 * 60 * 1000);
-
-    const subsolarLng = MapUtils.subsolarLng(time);
-    const centerLng = MapUtils.getXLongitude(50);
-
-    for (let h = 0; h < 24; h += 2) {
-      const baseLng = subsolarLng + (h - 12) * 15;
-      let diff = baseLng - centerLng;
-      diff = ((diff + 180) % 360 + 360) % 360 - 180;
-      const lng = centerLng + diff;
-
-      const x = MathUtils.clamp(MapUtils.getLongitudeX(lng), 0, 100);
-
+    for (const { x: rawX } of this.hourLinePositions(offsetHours)) {
       const line = document.createElement("div");
       line.style.position = "absolute";
-      line.style.left = `${x}%`;
+      line.style.left = `${MathUtils.clamp(rawX, 0, 100)}%`;
       line.style.top = "0";
       line.style.bottom = "0";
       line.style.width = "1px";
@@ -177,14 +187,11 @@ const MapPreview = {
   },
 
   calcNightPoints(offsetHours) {
-    const time = new Date();
-    time.setTime(time.getTime() + offsetHours * 60 * 60 * 1000);
-
     const DECLINATION_DEG = 35.0;
     const tanDec = Math.tan(DECLINATION_DEG * Math.PI / 180);
     const Y_SHIFT = 10;
 
-    const subsolarLng = MapUtils.subsolarLng(time);
+    const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(offsetHours));
 
     const points = [];
     for (let x = 0; x <= 100; x += 2) {
@@ -201,31 +208,18 @@ const MapPreview = {
     if (!refs.mapTimeline) return;
     refs.mapTimeline.innerHTML = "";
 
-    const time = new Date();
-    time.setTime(time.getTime() + offsetHours * 60 * 60 * 1000);
+    for (const { hour, x } of this.hourLinePositions(offsetHours)) {
+      if (x < 0 || x > 100) continue;
+      const tick = document.createElement("div");
+      tick.className = "map-timeline-tick";
+      tick.style.left = `${x}%`;
 
-    const subsolarLng = MapUtils.subsolarLng(time);
-    const centerLng = MapUtils.getXLongitude(50);
+      const label = document.createElement("div");
+      label.className = "map-timeline-label";
+      label.style.left = `${x}%`;
+      label.textContent = `${String(hour).padStart(2, "0")}:00`;
 
-    for (let h = 0; h < 24; h += 2) {
-      const baseLng = subsolarLng + (h - 12) * 15;
-      let diff = baseLng - centerLng;
-      diff = ((diff + 180) % 360 + 360) % 360 - 180;
-      const lng = centerLng + diff;
-
-      const x = MapUtils.getLongitudeX(lng);
-      if (x >= 0 && x <= 100) {
-        const tick = document.createElement("div");
-        tick.className = "map-timeline-tick";
-        tick.style.left = `${x}%`;
-
-        const label = document.createElement("div");
-        label.className = "map-timeline-label";
-        label.style.left = `${x}%`;
-        label.textContent = `${String(h).padStart(2, "0")}:00`;
-
-        refs.mapTimeline.append(tick, label);
-      }
+      refs.mapTimeline.append(tick, label);
     }
   },
 

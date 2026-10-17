@@ -143,7 +143,7 @@ ok("manifest __MSG_*__ placeholders resolve");
 console.log("\n=== 6. dictionary keys still referenced somewhere ===");
 // Keys with no consumer are how stale entries survive; reported, not fatal,
 // because a key can also be read dynamically via I18nUtils.getTranslation(expr).
-const jsSources = ["src/popup/controller.js", "src/popup/renderer.js", "src/options/options.js", "src/shared/utils.js", "src/shared/map-preview.js", "src/shared/timeline-preview.js"];
+const jsSources = ["src/popup/controller.js", "src/popup/renderer.js", "src/options/options.js", "src/shared/utils.js", "src/shared/map-preview.js", "src/shared/timeline-preview.js", "src/shared/city-preview.js"];
 const literalUses = new Set(usedKeys);
 for (const f of jsSources) {
   for (const m of read(f).matchAll(/getTranslation\(\s*"([^"]+)"/g)) literalUses.add(m[1]);

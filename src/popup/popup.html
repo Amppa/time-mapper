@@ -20,52 +20,12 @@
         <h1 id="nowText" data-i18n="nowTextLoading">Loading current time...</h1>
       </div>
       <div class="top-actions">
-        <button id="settingsButton" class="icon-button" type="button" title="Cities" aria-label="Cities"
-          aria-expanded="false" data-i18n-title="customCitySection" data-i18n-aria-label="customCitySection">
-          <span aria-hidden="true">🏙️</span>
-        </button>
         <button id="topbarOptionsButton" class="icon-button" type="button" title="Settings" aria-label="Settings"
           data-i18n-title="mapSettings" data-i18n-aria-label="mapSettings">
           <span aria-hidden="true">⚙</span>
         </button>
       </div>
     </header>
-
-    <section id="settingsPanel" class="settings-panel" aria-label="Cities List" data-i18n-aria-label="customCitySection"
-      hidden>
-      <div class="current-cities-container">
-        <h4 data-i18n="currentCitiesTitle">Current Cities</h4>
-        <div id="currentCitiesList" class="current-cities-list"></div>
-      </div>
-
-      <div class="add-city-section">
-        <h4 data-i18n="addCityTitle">Add City</h4>
-        <div class="search-container">
-          <div class="search-bar-row">
-            <input id="searchCityInput" type="text" placeholder="e.g. London"
-              data-i18n-placeholder="searchPlaceholder" maxlength="40">
-            <button id="searchCityBtn" type="button" data-i18n="searchBtn">Search</button>
-          </div>
-          <div id="searchResultsList" class="search-results-list" hidden></div>
-        </div>
-      </div>
-
-      <div class="settings-actions settings-actions-wide">
-        <label class="city-limit-control">
-          <span data-i18n="cityLimitLabel">城市數量上限：</span>
-          <input id="cityLimitInput" type="number" min="1" max="100" class="city-limit-input">
-        </label>
-        <div class="settings-actions-spacer"></div>
-        <button id="clearAllButton" class="text-button" type="button" data-i18n="clearAllBtn">Clear All</button>
-        <button id="resetButton" class="text-button" type="button" data-i18n="resetCitiesBtn">Reset Cities</button>
-      </div>
-
-      <div class="panel-options-link-row">
-        <button id="openOptionsBtn" class="text-button options-link-btn" type="button" data-i18n="openOptionsBtn">
-          ⚙️ 開啟設定頁面 (Options)
-        </button>
-      </div>
-    </section>
 
     <section class="map-panel">
       <div class="map-content">
@@ -101,7 +61,6 @@
   <script src="../shared/state.js"></script>
   <script src="../shared/map-preview.js"></script>
   <script src="../shared/timeline-preview.js"></script>
-  <script src="../shared/city-preview.js"></script>
   <script src="renderer.js"></script>
   <script src="controller.js"></script>
 </body>

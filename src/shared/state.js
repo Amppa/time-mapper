@@ -33,7 +33,7 @@ const State = {
     this.timePeriods = this.loadTimePeriods();
     this.mapSettings = this.loadMapSettings();
     this.customCities = this.loadCustomCities();
-    this.cityLimit = this.loadCityLimit();
+    this.cityLimit = CONFIG.maxCities;
     this.selectedIds = this.loadSelection();
     this.nowLineMode = this.loadNowLineMode();
     this.scrubs = [];
@@ -271,17 +271,5 @@ const State = {
     }
     this.saveSelection();
     return true;
-  },
-
-  loadCityLimit() {
-    return CONFIG.maxCities;
-  },
-
-  /**
-   * @returns {boolean} true if the selection was truncated to the new limit
-   */
-  saveCityLimit(val) {
-    this.cityLimit = CONFIG.maxCities;
-    return false;
   }
 };

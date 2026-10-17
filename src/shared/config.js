@@ -29,7 +29,6 @@ const CONFIG = {
   /** Maps an internal UI language code to the BCP-47 locale used for date/time formatting. */
   localeMap: { zh: "zh-TW", en: "en-US", es: "es-ES" },
   nowLineModeKey: "worldTimeAlignerNowLineMode",
-  cityLimitKey: "worldTimeAlignerCityLimit",
   defaultMapSettings: {
     lngOffset: 1.0,
     latOffset: 20.7,
@@ -99,21 +98,5 @@ const CONFIG = {
         { color: "#38302E", fontColor: "#FFFFFF" }
       ]
     }
-  },
-  /**
-   * Fixed timeline cell palette per theme. Users customize ranges only;
-   * light matches the pre-hardcode defaults.
-   */
-  periodColors: {
-    light: [
-      { color: "#FFE7A3", fontColor: "#000000" },
-      { color: "#F9BE6C", fontColor: "#000000" },
-      { color: "#856C60", fontColor: "#FFFFFF" }
-    ],
-    dark: [
-      { color: "#EEB422", fontColor: "#000000" },
-      { color: "#B8860B", fontColor: "#000000" },
-      { color: "#38302E", fontColor: "#FFFFFF" }
-    ]
   }
 };
