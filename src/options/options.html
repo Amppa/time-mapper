@@ -46,49 +46,51 @@
         <div id="timelinePreviewMount"></div>
       </section>
 
-      <!-- Card 2: 小地圖設定 / Minimap Settings -->
-      <section class="settings-card" id="cardMinimap">
-        <h2 class="section-title" data-i18n="mapCardTitle">小地圖設定</h2>
-
-        <!-- Toggles -->
-        <div class="control-group">
-          <div class="control-label-wrap">
-            <span class="control-label" data-i18n="showNightArea">顯示夜間範圍</span>
-            <span class="control-desc" data-i18n="showNightAreaDesc">在世界地圖上繪製當前夜間陰影範圍</span>
+      <!-- Card 2: 小地圖設定 / Minimap Settings (collapsible, default collapsed) -->
+      <details class="settings-card collapsible-card" id="cardMinimap">
+        <summary class="collapsible-summary">
+          <span class="section-title" data-i18n="mapCardTitle">小地圖設定</span>
+        </summary>
+        <div class="collapsible-body">
+          <!-- Toggles -->
+          <div class="control-group">
+            <div class="control-label-wrap">
+              <span class="control-label" data-i18n="showNightArea">顯示夜間範圍</span>
+              <span class="control-desc" data-i18n="showNightAreaDesc">在世界地圖上繪製當前夜間陰影範圍</span>
+            </div>
+            <label class="switch" title="Show Night Area">
+              <input type="checkbox" id="showNightArea" data-setting="showNightArea" aria-label="Show Night Area Switch">
+              <span class="slider round"></span>
+            </label>
           </div>
-          <label class="switch" title="Show Night Area">
-            <input type="checkbox" id="showNightArea" data-setting="showNightArea" aria-label="Show Night Area Switch">
-            <span class="slider round"></span>
-          </label>
-        </div>
 
-        <div class="divider"></div>
+          <div class="divider"></div>
 
-        <div class="control-group">
-          <div class="control-label-wrap">
-            <span class="control-label" data-i18n="showHourLines">顯示小時線</span>
-            <span class="control-desc" data-i18n="showHourLinesDesc">在世界地圖上繪製各時區的小時垂直經度線</span>
+          <div class="control-group">
+            <div class="control-label-wrap">
+              <span class="control-label" data-i18n="showHourLines">顯示小時線</span>
+              <span class="control-desc" data-i18n="showHourLinesDesc">在世界地圖上繪製各時區的小時垂直經度線</span>
+            </div>
+            <label class="switch" title="Show Hour Lines">
+              <input type="checkbox" id="showHourLines" data-setting="showHourLines" aria-label="Show Hour Lines Switch">
+              <span class="slider round"></span>
+            </label>
           </div>
-          <label class="switch" title="Show Hour Lines">
-            <input type="checkbox" id="showHourLines" data-setting="showHourLines" aria-label="Show Hour Lines Switch">
-            <span class="slider round"></span>
-          </label>
-        </div>
 
-        <div class="divider"></div>
+          <div class="divider"></div>
 
-        <div class="control-group">
-          <div class="control-label-wrap">
-            <span class="control-label" data-i18n="showCityTimes">顯示已選城市時間</span>
-            <span class="control-desc" data-i18n="showCityTimesDesc">在地圖城市圖釘旁即時顯示對應時間標籤</span>
+          <div class="control-group">
+            <div class="control-label-wrap">
+              <span class="control-label" data-i18n="showCityTimes">顯示已選城市時間</span>
+              <span class="control-desc" data-i18n="showCityTimesDesc">在地圖城市圖釘旁即時顯示對應時間標籤</span>
+            </div>
+            <label class="switch" title="Show City Times">
+              <input type="checkbox" id="showCityTimes" data-setting="showCityTimes" aria-label="Show City Times Switch">
+              <span class="slider round"></span>
+            </label>
           </div>
-          <label class="switch" title="Show City Times">
-            <input type="checkbox" id="showCityTimes" data-setting="showCityTimes" aria-label="Show City Times Switch">
-            <span class="slider round"></span>
-          </label>
         </div>
-
-      </section>
+      </details>
 
       <!-- Card: 小地圖貼圖設定 / Map Texture (collapsible, default collapsed) -->
       <details class="settings-card collapsible-card" id="cardMapTexture">

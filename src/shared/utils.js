@@ -443,6 +443,22 @@ const TimelineUtils = {
     const panelRect = panelEl.getBoundingClientRect();
     const gridLeft = gridRect.left - panelRect.left;
     return MathUtils.clamp((pxLeft - gridLeft) / gridRect.width, 0, 1);
+  },
+
+  formatFractionTime(fraction) {
+    if (typeof fraction !== "number" || isNaN(fraction)) return "--:--";
+    let totalMinutes = Math.round(fraction * 24 * 60);
+    totalMinutes = ((totalMinutes % (24 * 60)) + (24 * 60)) % (24 * 60);
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  },
+
+  snapToFiveMinutes(fraction) {
+    if (typeof fraction !== "number" || isNaN(fraction)) return 0;
+    const totalMinutes = Math.round(fraction * 24 * 60);
+    const snappedMinutes = Math.round(totalMinutes / 5) * 5;
+    return MathUtils.clamp(snappedMinutes / (24 * 60), 0, 1);
   }
 };
 

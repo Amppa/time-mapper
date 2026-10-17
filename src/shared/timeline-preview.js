@@ -134,6 +134,19 @@ const TimelinePreview = {
     }
     refs.nowLine.style.display = "";
     refs.nowLine.style.left = `${left}px`;
+
+    let topKnob = refs.nowLine.querySelector(".now-knob-top");
+    if (!topKnob) {
+      refs.nowLine.innerHTML = `
+        <div class="timeline-knob now-knob-top"><span class="knob-time"></span></div>
+        <div class="timeline-knob-bottom now-knob-bottom"></div>
+      `;
+      topKnob = refs.nowLine.querySelector(".now-knob-top");
+    }
+    const timeEl = topKnob.querySelector(".knob-time");
+    if (timeEl) {
+      timeEl.textContent = TimelineUtils.formatFractionTime(fraction);
+    }
   },
 
   renderScrubLine(refs) {
@@ -151,6 +164,7 @@ const TimelinePreview = {
       // Create line group
       const group = document.createElement("div");
       group.className = "scrub-line-group";
+      if (isActive) group.classList.add("is-dragging");
       group.dataset.id = scrub.id;
       group.style.left = `${left}px`;
 
@@ -169,7 +183,15 @@ const TimelinePreview = {
       }
       handle.setAttribute("aria-label", "Drag to shift night area view");
 
-      // Create remove button
+      // Top knob with time and delete button [ HH:mm × ]
+      const topKnob = document.createElement("div");
+      topKnob.className = "timeline-knob scrub-knob-top";
+      if (isActive) topKnob.classList.add("is-dragging");
+
+      const timeSpan = document.createElement("span");
+      timeSpan.className = "knob-time";
+      timeSpan.textContent = TimelineUtils.formatFractionTime(scrub.fraction);
+
       const removeTitle = (typeof I18nUtils !== "undefined" && typeof I18nUtils.getTranslation === "function")
         ? I18nUtils.getTranslation("removeScrubLine")
         : "Remove";
@@ -181,9 +203,18 @@ const TimelinePreview = {
       resetBtn.setAttribute("aria-label", removeTitle);
       resetBtn.textContent = "×";
 
+      topKnob.appendChild(timeSpan);
+      topKnob.appendChild(resetBtn);
+
+      // Bottom knob
+      const bottomKnob = document.createElement("div");
+      bottomKnob.className = "timeline-knob-bottom scrub-knob-bottom";
+      if (isActive) bottomKnob.classList.add("is-dragging");
+
       group.appendChild(line);
       group.appendChild(handle);
-      group.appendChild(resetBtn);
+      group.appendChild(topKnob);
+      group.appendChild(bottomKnob);
 
       refs.scrubLinesContainer.appendChild(group);
     });
@@ -204,7 +235,7 @@ const TimelinePreview = {
       if (e.button !== 0) return; // Left click only
       if (e.target.closest(".scrub-reset-btn")) return; // Let close button handler work
 
-      const handle = e.target.closest(".scrub-handle");
+      const handle = e.target.closest(".scrub-handle, .scrub-knob-top, .scrub-knob-bottom");
       const hoursGrid = e.target.closest(".hours");
       if (!handle && !hoursGrid) return;
 
@@ -229,7 +260,8 @@ const TimelinePreview = {
 
         const panelRect = refs.timelinePanel.getBoundingClientRect();
         const pxLeft = e.clientX - panelRect.left;
-        fraction = TimelineUtils.leftToFraction(pxLeft, refs.timelinePanel);
+        const rawFraction = TimelineUtils.leftToFraction(pxLeft, refs.timelinePanel);
+        fraction = TimelineUtils.snapToFiveMinutes(rawFraction);
 
         const newScrub = {
           id: `scrub_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
@@ -249,16 +281,21 @@ const TimelinePreview = {
         isDragging = true;
 
         // Apply dragging visual styles
-        refs.scrubLinesContainer.querySelectorAll(".scrub-line, .scrub-handle").forEach((el) => {
+        refs.scrubLinesContainer.querySelectorAll(".scrub-line-group, .scrub-line, .scrub-handle, .scrub-knob-top, .scrub-knob-bottom").forEach((el) => {
           el.classList.remove("is-dragging");
         });
 
         const group = refs.timelinePanel.querySelector(`.scrub-line-group[data-id="${targetScrubId}"]`);
         if (group) {
+          group.classList.add("is-dragging");
           const lineEl = group.querySelector(".scrub-line");
           const handleEl = group.querySelector(".scrub-handle");
+          const knobEl = group.querySelector(".scrub-knob-top");
+          const bottomEl = group.querySelector(".scrub-knob-bottom");
           if (lineEl) lineEl.classList.add("is-dragging");
           if (handleEl) handleEl.classList.add("is-dragging");
+          if (knobEl) knobEl.classList.add("is-dragging");
+          if (bottomEl) bottomEl.classList.add("is-dragging");
         }
 
         e.preventDefault();
@@ -270,29 +307,39 @@ const TimelinePreview = {
 
       const panelRect = refs.timelinePanel.getBoundingClientRect();
       const pxLeft = e.clientX - panelRect.left;
-      const fraction = TimelineUtils.leftToFraction(pxLeft, refs.timelinePanel);
+      const rawFraction = TimelineUtils.leftToFraction(pxLeft, refs.timelinePanel);
+      const fraction = TimelineUtils.snapToFiveMinutes(rawFraction);
 
       // Update fraction in state
       const scrub = State.scrubs.find(s => s.id === activeDragScrubId);
-      if (scrub) {
+      if (scrub && scrub.fraction !== fraction) {
         scrub.fraction = fraction;
-      }
 
-      // Update position of group element directly for performance
-      const group = refs.timelinePanel.querySelector(`.scrub-line-group[data-id="${activeDragScrubId}"]`);
-      if (group) {
-        const left = TimelineUtils.fractionToLeft(fraction, refs.timelinePanel);
-        group.style.left = `${left}px`;
-      }
+        // Update position of group element directly for performance
+        const group = refs.timelinePanel.querySelector(`.scrub-line-group[data-id="${activeDragScrubId}"]`);
+        if (group) {
+          const left = TimelineUtils.fractionToLeft(fraction, refs.timelinePanel);
+          group.style.left = `${left}px`;
+          const timeEl = group.querySelector(".knob-time");
+          if (timeEl) {
+            timeEl.textContent = TimelineUtils.formatFractionTime(fraction);
+          }
+        }
 
-      // Live-update map timeline and ref lines
-      api.renderNightArea(State.selectedOffsetHours);
+        // Live-update map timeline and ref lines
+        api.renderNightArea(State.selectedOffsetHours);
+      }
     });
 
     document.addEventListener("mouseup", () => {
       if (!isDragging) return;
       isDragging = false;
       activeDragScrubId = null;
+      if (refs.scrubLinesContainer) {
+        refs.scrubLinesContainer.querySelectorAll(".scrub-line-group, .scrub-line, .scrub-handle, .scrub-knob-top, .scrub-knob-bottom").forEach((el) => {
+          el.classList.remove("is-dragging");
+        });
+      }
     });
 
     // --- Interaction 3: Click [x] to remove scrub-line (Event Delegation) ---

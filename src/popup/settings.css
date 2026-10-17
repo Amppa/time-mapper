@@ -20,7 +20,7 @@
   --accent-dark: var(--ink);
   --accent-hover: #0ea5e9;
   --now-meta-color: #8e9ca0;
-  --timezone-hover-bg: rgba(15, 139, 141, 0.15);
+  --timezone-hover-bg: rgba(245, 158, 11, 0.16);
   --search-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   --scroll-thumb: #c9ccd3;
   --scroll-thumb-hover: #9ca3af;
@@ -48,7 +48,7 @@
   --accent-dark: #f0f0f4;
   --accent-hover: #7dd3fc;
   --now-meta-color: #8b949e;
-  --timezone-hover-bg: rgba(45, 212, 191, 0.22);
+  --timezone-hover-bg: rgba(251, 146, 60, 0.22);
   --search-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
   --scroll-thumb: #3a3a46;
   --scroll-thumb-hover: #525263;
@@ -76,7 +76,7 @@
     --accent-dark: #f0f0f4;
     --accent-hover: #7dd3fc;
     --now-meta-color: #8b949e;
-    --timezone-hover-bg: rgba(45, 212, 191, 0.22);
+    --timezone-hover-bg: rgba(251, 146, 60, 0.22);
     --search-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
     --scroll-thumb: #3a3a46;
     --scroll-thumb-hover: #525263;
