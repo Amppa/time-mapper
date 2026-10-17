@@ -34,17 +34,10 @@ const AppController = {
   },
 
   /**
-   * Wire the popup's own chrome: the collapsible cities/settings panel and the
-   * hand-off to the options page. Map projection settings are edited on the
-   * options page only, so there is nothing to bind here for them.
+   * Wire the gear button that hands off to the options page. The popup itself
+   * is read-only: cities are added, reordered and reset there.
    */
-  wireSettingsPanel() {
-    DOM.settingsButton.addEventListener("click", () => {
-      const isOpen = DOM.settingsPanel.hidden;
-      DOM.settingsPanel.hidden = !isOpen;
-      DOM.settingsButton.setAttribute("aria-expanded", String(isOpen));
-    });
-
+  wireOptionsButton() {
     const handleOpenOptions = (e) => {
       if (e) {
         e.preventDefault();
@@ -68,29 +61,9 @@ const AppController = {
       }
     };
 
-    if (DOM.openOptionsBtn) {
-      DOM.openOptionsBtn.addEventListener("click", handleOpenOptions);
-    }
     if (DOM.topbarOptionsButton) {
       DOM.topbarOptionsButton.addEventListener("click", handleOpenOptions);
     }
-  },
-
-  wireCitiesDragOver() {
-    if (!DOM.currentCitiesList) return;
-    DOM.currentCitiesList.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-    });
-    DOM.currentCitiesList.addEventListener("dragenter", (e) => {
-      e.preventDefault();
-    });
-  },
-
-  wireSettings() {
-    this.wireSettingsPanel();
-    CityPreview.wireCitySearch(CityPreview.collectRefs(document), () => Renderer.render());
-    this.wireCitiesDragOver();
   },
 
   wireScrubLine() {
@@ -148,15 +121,9 @@ const AppController = {
   init() {
     State.init();
 
-    this.wireSettings();
+    this.wireOptionsButton();
     this.wireScrubLine();
     this.wireMapTimezoneHover();
-
-    CityPreview.wireResetButtons(CityPreview.collectRefs(document), () => {
-      State.scrubs = [];
-      State.activeScrubId = null;
-      Renderer.render();
-    });
 
     I18nUtils.applyAttributes();
     Renderer.render();

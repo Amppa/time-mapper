@@ -35,7 +35,6 @@ const Renderer = {
     this.renderNowText();
     this.renderMap();
     this.renderRows();
-    CityPreview.renderCurrentCitiesList(CityPreview.collectRefs(document), () => Renderer.render());
     // Render lines after layout is established
     this.renderNowLine();
     this.renderScrubLine();

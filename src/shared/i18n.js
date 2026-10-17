@@ -51,7 +51,6 @@ const i18nTranslations = {
     nowLineModeDesc: "設定時間軸中線 (Now-line) 的參考時間依據",
     resetBtn: "恢復預設",
     resetMapParamsDesc: "恢復小地圖經緯度偏移與縮放設定至預設值",
-    openOptionsBtn: "⚙️ 開啟設定頁面 (Options)",
   },
   en: {
     nowTextLoading: "Loading current time...",
@@ -105,7 +104,6 @@ const i18nTranslations = {
     nowLineModeDesc: "Set reference timezone for the current time marker",
     resetBtn: "Defaults",
     resetMapParamsDesc: "Restore map projection offsets and scaling to defaults",
-    openOptionsBtn: "⚙️ Open Options Page",
   },
   es: {
     nowTextLoading: "Cargando la hora actual...",
@@ -159,7 +157,6 @@ const i18nTranslations = {
     nowLineModeDesc: "Define la zona horaria de referencia del marcador de hora actual",
     resetBtn: "Restablecer",
     resetMapParamsDesc: "Restaura los desplazamientos y la escala de la proyección a sus valores predeterminados",
-    openOptionsBtn: "⚙️ Abrir la página de ajustes",
   }
 };
 
