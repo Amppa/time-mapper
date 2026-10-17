@@ -355,71 +355,149 @@ details[open] > .collapsible-summary::after {
   border-radius: var(--radius-sm);
 }
 
-/* Periods Blocks in Period Card */
-.periods-cards-container {
+.control-actions-wrap {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
-.period-card-block {
-  padding: var(--space-md) 0;
+.period-count-select {
+  min-width: 64px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Interactive 24-Hour Grid Timeline (Matches Preview Timeline Style)
+   ========================================================================== */
+.time-periods-timeline-container {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 4px 0 16px 0;
+  user-select: none;
 }
 
-.period-card-header {
+/* Interactive Timeline Panel (Replicates .timeline-panel & .hours) */
+.interactive-timeline-panel {
+  position: relative;
+  overflow: visible;
+  background: var(--panel, #201b19);
+  border: 1px solid var(--divider, rgba(255, 255, 255, 0.15));
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  padding: 0;
+  margin: 12px 0 6px 0;
+}
+
+.interactive-hours {
   display: flex;
+  position: relative;
+  width: 100%;
+  height: 44px;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.interactive-hour-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 calc(100% / 24);
+  min-width: 0;
+  box-sizing: border-box;
+  border-right: 1px solid rgba(255, 255, 255, 0.28);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s ease, filter 0.15s ease;
+}
+
+.interactive-hour-cell:last-child {
+  border-right: none;
+}
+
+.interactive-hour-cell:hover {
+  filter: brightness(1.15);
+}
+
+/* Dividers Layer */
+.timeline-dividers-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Individual Draggable Divider */
+.timeline-divider {
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  width: 28px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: space-between;
-
-  & .period-card-title {
-    font-size: var(--font-md);
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-
-  & .period-preview-badge {
-    padding: 3px 12px;
-    border-radius: var(--radius-pill);
-    font-size: var(--font-xs);
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.3px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    transition: all var(--transition-fast);
-  }
+  cursor: ew-resize;
+  pointer-events: auto;
+  touch-action: none;
+  outline: none;
 }
 
-.period-card-controls {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
+.timeline-divider-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: #ffffff;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
 }
 
-.period-field {
+.timeline-divider-knob {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
-  gap: 8px;
-
-  & .period-field-label {
-    font-size: var(--font-xs);
-    color: var(--text-secondary);
-    font-weight: 500;
-  }
+  justify-content: center;
+  border-radius: var(--radius-sm, 4px);
+  background: var(--bg-surface, #ffffff);
+  color: var(--text-primary, #000000);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.period-range-selects {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.timeline-divider-knob.top-knob {
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  top: -4px;
+}
 
-  & .period-range-sep {
-    font-size: var(--font-xs);
-    color: var(--text-secondary);
-  }
+.timeline-divider-knob.bottom-knob {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  bottom: -4px;
+}
+
+.timeline-divider:hover .timeline-divider-knob,
+.timeline-divider.is-dragging .timeline-divider-knob {
+  transform: scale(1.18);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+  border-color: var(--accent-solid, #F9BE6C);
+}
+
+.timeline-divider.is-dragging .timeline-divider-line {
+  background: var(--accent-solid, #F9BE6C);
+  width: 3px;
 }
 
 .styled-select {

@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // DOM Elements
   const langSelect = document.getElementById("langSelect");
-  const nowLineModeSegment = document.getElementById("nowLineModeSegment");
+  const nowLineModeSelect = document.getElementById("nowLineModeSelect");
   const themeSelect = document.getElementById("themeSelect");
   const resetMapButton = document.getElementById("resetMapButton");
   const resetPeriodsButton = document.getElementById("resetPeriodsButton");
@@ -141,20 +141,203 @@ document.addEventListener("DOMContentLoaded", () => {
     renderMapPreview();
   }
 
+  // --------------------------------------------------------------------------
+  // Interactive 24-Hour Grid Timeline (Matches Preview Timeline Style)
+  // --------------------------------------------------------------------------
+  const periodCountSelect = document.getElementById("periodCountSelect");
+  const interactiveHours = document.getElementById("interactiveHours");
+  const timelineDividersLayer = document.getElementById("timelineDividersLayer");
+
+  const PERIOD_META = {
+    2: [
+      { key: "day", label: "白天", icon: "☀️" },
+      { key: "night", label: "晚上", icon: "🌙" }
+    ],
+    3: [
+      { key: "day", label: "白天", icon: "☀️" },
+      { key: "evening", label: "傍晚", icon: "🌇" },
+      { key: "night", label: "深夜", icon: "🌙" }
+    ],
+    4: [
+      { key: "morning", label: "早晨", icon: "🌅" },
+      { key: "day", label: "白天", icon: "☀️" },
+      { key: "evening", label: "傍晚", icon: "🌇" },
+      { key: "night", label: "晚上", icon: "🌙" }
+    ]
+  };
+
   /**
-   * Populate hour options in select dropdowns
+   * Render the 24 hour cells (00 - 23) styled identically to the preview timeline
    */
-  function populateHourSelects() {
-    document.querySelectorAll(".period-start, .period-end").forEach((select) => {
-      if (select.children.length === 0) {
-        select.innerHTML = "";
-        for (let h = 0; h < 24; h++) {
-          const opt = document.createElement("option");
-          opt.value = h;
-          opt.textContent = `${String(h).padStart(2, "0")}:00`;
-          select.appendChild(opt);
-        }
+  function renderInteractiveHours() {
+    if (!interactiveHours) return;
+    interactiveHours.innerHTML = "";
+
+    for (let h = 0; h < 24; h++) {
+      const cell = document.createElement("div");
+      cell.className = "hour-cell interactive-hour-cell";
+      cell.textContent = String(h).padStart(2, "0");
+      cell.dataset.hour = String(h);
+      cell.title = `Hour ${String(h).padStart(2, "0")}:00`;
+
+      const styleInfo = PeriodUtils.getHourStyle(h);
+      cell.style.backgroundColor = styleInfo.color;
+      cell.style.color = styleInfo.fontColor;
+
+      // Click on cell to snap nearest divider to this boundary
+      cell.addEventListener("click", () => {
+        handleCellClick(h);
+      });
+
+      interactiveHours.appendChild(cell);
+    }
+  }
+
+  /**
+   * Render draggable divider handles at period start points
+   */
+  function renderTimelineDividers() {
+    if (!timelineDividersLayer) return;
+    timelineDividersLayer.innerHTML = "";
+
+    const count = State.timePeriods.length;
+    const metaList = PERIOD_META[count] || PERIOD_META[3];
+
+    State.timePeriods.forEach((period, idx) => {
+      const meta = metaList[idx] || { label: `時段 ${idx + 1}`, icon: "⏰" };
+      const divider = document.createElement("div");
+      divider.className = "timeline-divider";
+      divider.dataset.periodIndex = String(idx);
+      divider.style.left = `${(period.start / 24) * 100}%`;
+      divider.setAttribute("tabindex", "0");
+      divider.setAttribute("role", "slider");
+      divider.setAttribute("aria-label", `${meta.label} 起始時間`);
+      divider.setAttribute("aria-valuenow", String(period.start));
+
+      // Top knob with icon & hour text
+      const topKnob = document.createElement("div");
+      topKnob.className = "timeline-divider-knob top-knob";
+      topKnob.textContent = `${meta.icon} ${String(period.start).padStart(2, "0")}:00`;
+
+      // Vertical line
+      const line = document.createElement("div");
+      line.className = "timeline-divider-line";
+
+      // Bottom knob
+      const bottomKnob = document.createElement("div");
+      bottomKnob.className = "timeline-divider-knob bottom-knob";
+
+      divider.append(topKnob, line, bottomKnob);
+      wireDividerDrag(divider, idx);
+      timelineDividersLayer.appendChild(divider);
+    });
+  }
+
+  /**
+   * Move period divider to target hour with collision prevention
+   */
+  function moveDividerToHour(idx, targetHour) {
+    const N = State.timePeriods.length;
+    const prevIdx = (idx - 1 + N) % N;
+    const nextIdx = (idx + 1) % N;
+
+    const prevStart = State.timePeriods[prevIdx].start;
+    const nextStart = State.timePeriods[nextIdx].start;
+
+    // Minimum gap: targetHour cannot collide with prevStart or nextStart
+    if (targetHour === prevStart || targetHour === nextStart) return false;
+
+    // Check circular ordering
+    // The current period must be between prevStart and nextStart in circular 24h space
+    const isInsidePrev = (prevStart < nextStart)
+      ? (targetHour > prevStart && targetHour < nextStart)
+      : (targetHour > prevStart || targetHour < nextStart);
+
+    if (!isInsidePrev) return false;
+
+    // Apply change
+    State.timePeriods[idx].start = targetHour;
+    State.timePeriods[prevIdx].end = (targetHour - 1 + 24) % 24;
+
+    State.saveTimePeriods();
+    renderInteractiveHours();
+    renderTimelineDividers();
+    renderTimelinePreview();
+    return true;
+  }
+
+  /**
+   * Handle click on an hour cell
+   */
+  function handleCellClick(targetHour) {
+    const N = State.timePeriods.length;
+    let bestIdx = -1;
+    let minDistance = 999;
+
+    for (let i = 0; i < N; i++) {
+      const start = State.timePeriods[i].start;
+      const dist = Math.min(
+        Math.abs(targetHour - start),
+        24 - Math.abs(targetHour - start)
+      );
+      if (dist < minDistance && dist > 0) {
+        minDistance = dist;
+        bestIdx = i;
       }
+    }
+
+    if (bestIdx >= 0) {
+      moveDividerToHour(bestIdx, targetHour);
+    }
+  }
+
+  /**
+   * Wire pointer and keyboard drag events for a divider handle
+   */
+  function wireDividerDrag(dividerEl, idx) {
+    let isDragging = false;
+
+    function onPointerMove(e) {
+      if (!isDragging) return;
+      const rect = interactiveHours.getBoundingClientRect();
+      if (rect.width <= 0) return;
+
+      const px = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+      const rawHour = Math.round((px / rect.width) * 24) % 24;
+
+      moveDividerToHour(idx, rawHour);
+    }
+
+    function onPointerUp() {
+      if (!isDragging) return;
+      isDragging = false;
+      dividerEl.classList.remove("is-dragging");
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
+    }
+
+    dividerEl.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      isDragging = true;
+      dividerEl.classList.add("is-dragging");
+      window.addEventListener("pointermove", onPointerMove);
+      window.addEventListener("pointerup", onPointerUp);
+      window.addEventListener("pointercancel", onPointerUp);
+      e.preventDefault();
+    });
+
+    // Keyboard support (ArrowLeft / ArrowRight)
+    dividerEl.addEventListener("keydown", (e) => {
+      let delta = 0;
+      if (e.key === "ArrowLeft" || e.key === "ArrowDown") delta = -1;
+      if (e.key === "ArrowRight" || e.key === "ArrowUp") delta = 1;
+      if (delta === 0) return;
+
+      const currentStart = State.timePeriods[idx].start;
+      const targetHour = (currentStart + delta + 24) % 24;
+      moveDividerToHour(idx, targetHour);
+      e.preventDefault();
     });
   }
 
@@ -162,34 +345,17 @@ document.addEventListener("DOMContentLoaded", () => {
    * Render Time Period settings controls
    */
   function renderPeriodControls() {
-    // Now-line mode segment
-    if (nowLineModeSegment) {
-      nowLineModeSegment.querySelectorAll(".theme-option").forEach((btn) => {
-        btn.classList.toggle("active", btn.dataset.nowlineValue === State.nowLineMode);
-      });
+    if (nowLineModeSelect) {
+      nowLineModeSelect.value = State.nowLineMode;
     }
 
-    // 3 Periods (ranges editable; colors fixed per theme)
-    State.timePeriods.forEach((period, idx) => {
-      const block = document.querySelector(`.period-card-block[data-period="${idx}"]`);
-      if (!block) return;
+    const count = (State.timePeriods && State.timePeriods.length) || 3;
+    if (periodCountSelect) {
+      periodCountSelect.value = String(count);
+    }
 
-      const startSelect = block.querySelector(".period-start");
-      const endSelect = block.querySelector(".period-end");
-      const previewBadge = document.getElementById(`periodPreview${idx}`);
-      const colors = PeriodUtils.getPeriodColors(idx);
-
-      if (startSelect) startSelect.value = period.start;
-      if (endSelect) endSelect.value = period.end;
-
-      if (previewBadge) {
-        const startStr = `${String(period.start).padStart(2, "0")}:00`;
-        const endStr = `${String(period.end).padStart(2, "0")}:00`;
-        previewBadge.textContent = `${startStr} - ${endStr}`;
-        previewBadge.style.backgroundColor = colors.color;
-        previewBadge.style.color = colors.fontColor;
-      }
-    });
+    renderInteractiveHours();
+    renderTimelineDividers();
   }
 
   /**
@@ -249,56 +415,35 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 3. Now-Line Reference Mode Segment
-  if (nowLineModeSegment) {
-    nowLineModeSegment.addEventListener("click", (e) => {
-      const btn = e.target.closest(".theme-option");
-      if (!btn) return;
-      const mode = btn.dataset.nowlineValue;
-      State.saveNowLineMode(mode);
-      nowLineModeSegment.querySelectorAll(".theme-option").forEach((b) => {
-        b.classList.toggle("active", b === btn);
-      });
+  // 3. Now-Line Reference Mode Select
+  if (nowLineModeSelect) {
+    nowLineModeSelect.addEventListener("change", () => {
+      State.saveNowLineMode(nowLineModeSelect.value);
       renderTimelinePreview();
     });
   }
 
-  // Period Settings Range Selects (colors are fixed per theme)
-  State.timePeriods.forEach((_, idx) => {
-    const block = document.querySelector(`.period-card-block[data-period="${idx}"]`);
-    if (!block) return;
-
-    const startSelect = block.querySelector(".period-start");
-    const endSelect = block.querySelector(".period-end");
-    const previewBadge = document.getElementById(`periodPreview${idx}`);
-
-    function updatePeriodState() {
-      State.timePeriods[idx].start = Number(startSelect.value);
-      State.timePeriods[idx].end = Number(endSelect.value);
-      State.saveTimePeriods();
-      renderTimelinePreview();
-
-      if (previewBadge) {
-        const colors = PeriodUtils.getPeriodColors(idx);
-        const startStr = `${String(State.timePeriods[idx].start).padStart(2, "0")}:00`;
-        const endStr = `${String(State.timePeriods[idx].end).padStart(2, "0")}:00`;
-        previewBadge.textContent = `${startStr} - ${endStr}`;
-        previewBadge.style.backgroundColor = colors.color;
-        previewBadge.style.color = colors.fontColor;
+  // Period Count Selector Dropdown (2 / 3 / 4 periods)
+  if (periodCountSelect) {
+    periodCountSelect.addEventListener("change", () => {
+      const count = Number(periodCountSelect.value);
+      if (CONFIG.periodPresets[count]) {
+        State.timePeriods = JSON.parse(JSON.stringify(CONFIG.periodPresets[count]));
+        State.saveTimePeriods();
+        renderPeriodControls();
+        renderPreviews();
       }
-    }
-
-    startSelect.addEventListener("change", updatePeriodState);
-    endSelect.addEventListener("change", updatePeriodState);
-  });
+    });
+  }
 
   // Reset Periods Button
   if (resetPeriodsButton) {
     resetPeriodsButton.addEventListener("click", () => {
-      State.timePeriods = JSON.parse(JSON.stringify(CONFIG.defaultTimePeriods));
+      const count = (State.timePeriods && State.timePeriods.length) || 3;
+      State.timePeriods = JSON.parse(JSON.stringify(CONFIG.periodPresets[count] || CONFIG.defaultTimePeriods));
       State.saveTimePeriods();
       renderPeriodControls();
-      renderTimelinePreview();
+      renderPreviews();
     });
   }
 
@@ -309,6 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
         globalThis.TimeMapperTheme.apply(themeSelect.value);
       }
       renderThemeSegment();
+      renderPeriodControls();
     });
   }
 
@@ -323,7 +469,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Initial UI Render
-  populateHourSelects();
   applyLanguage();
   renderMapControls();
   renderPeriodControls();

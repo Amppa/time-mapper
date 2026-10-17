@@ -18,7 +18,7 @@ const i18nTranslations = {
     period3: "時段三",
     langSection: "語言",
     langAuto: "自動",
-    nowLineMode: "時間軸基準",
+    nowLineMode: "現在時間",
     nowLineModeLocal: "瀏覽器本地時間",
     nowLineModeFirstCity: "第一個城市時間",
     customCitySection: "城市清單",
@@ -63,7 +63,15 @@ const i18nTranslations = {
     openOptionsBtn: "⚙️ 開啟設定頁面 (Options)",
     cityManagement: "城市清單管理",
     periodTimeRange: "時間範圍",
-    rangeTo: "至"
+    rangeTo: "至",
+    periodDay: "白天",
+    periodEvening: "傍晚",
+    periodNight: "深夜",
+    splitNightDay: "深夜 ⇄ 白天",
+    splitDayEvening: "白天 ⇄ 傍晚",
+    splitEveningNight: "傍晚 ⇄ 深夜",
+    nextDay: "次日",
+    nextDaySuffix: "（次日）"
   },
   en: {
     nowTextLoading: "Loading current time...",
@@ -84,7 +92,7 @@ const i18nTranslations = {
     period3: "Period 3",
     langSection: "Language",
     langAuto: "Auto",
-    nowLineMode: "Now-line reference",
+    nowLineMode: "Current Time",
     nowLineModeLocal: "Browser local time",
     nowLineModeFirstCity: "First city time",
     customCitySection: "Cities List",
@@ -129,7 +137,15 @@ const i18nTranslations = {
     openOptionsBtn: "⚙️ Open Options Page",
     cityManagement: "Cities Management",
     periodTimeRange: "Time Range",
-    rangeTo: "to"
+    rangeTo: "to",
+    periodDay: "Day",
+    periodEvening: "Evening",
+    periodNight: "Night",
+    splitNightDay: "Night ⇄ Day",
+    splitDayEvening: "Day ⇄ Evening",
+    splitEveningNight: "Evening ⇄ Night",
+    nextDay: "Next Day",
+    nextDaySuffix: " (next day)"
   },
   es: {
     nowTextLoading: "Cargando la hora actual...",
@@ -150,7 +166,7 @@ const i18nTranslations = {
     period3: "Periodo 3",
     langSection: "Idioma",
     langAuto: "Auto",
-    nowLineMode: "Referencia de la línea actual",
+    nowLineMode: "Hora actual",
     nowLineModeLocal: "Hora local del navegador",
     nowLineModeFirstCity: "Hora de la primera ciudad",
     customCitySection: "Lista de ciudades",
@@ -195,7 +211,15 @@ const i18nTranslations = {
     openOptionsBtn: "⚙️ Abrir la página de ajustes",
     cityManagement: "Gestión de ciudades",
     periodTimeRange: "Rango horario",
-    rangeTo: "a"
+    rangeTo: "a",
+    periodDay: "Día",
+    periodEvening: "Tarde",
+    periodNight: "Noche",
+    splitNightDay: "Noche ⇄ Día",
+    splitDayEvening: "Día ⇄ Tarde",
+    splitEveningNight: "Tarde ⇄ Noche",
+    nextDay: "Día siguiente",
+    nextDaySuffix: " (día sig.)"
   }
 };
 

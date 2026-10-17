@@ -304,7 +304,12 @@ const PeriodUtils = {
   },
   /** Fixed palette entry for a period index under the active theme. */
   getPeriodColors(idx) {
-    const set = CONFIG.periodColors[this.currentTheme()] || CONFIG.periodColors.light;
+    const count = (typeof State !== "undefined" && State.timePeriods && State.timePeriods.length) || 3;
+    const byCount = CONFIG.periodColorsByCount && CONFIG.periodColorsByCount[count];
+    const theme = this.currentTheme();
+    const set = (byCount && byCount[theme]) || (byCount && byCount.light) ||
+      (CONFIG.periodColors && CONFIG.periodColors[theme]) ||
+      CONFIG.periodColors.light;
     return set[idx] || set[set.length - 1];
   },
   getHourStyle(hour) {

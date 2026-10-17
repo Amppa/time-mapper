@@ -192,90 +192,49 @@
       <section class="settings-card" id="cardPeriods">
         <h2 class="section-title" data-i18n="periodCardTitle">時段設定</h2>
 
-        <!-- 時間軸基準 -->
+        <!-- 現在時間基準 -->
         <div class="control-group">
           <div class="control-label-wrap">
-            <span class="control-label" data-i18n="nowLineMode">時間軸基準</span>
+            <span class="control-label" data-i18n="nowLineMode">現在時間</span>
             <span class="control-desc" data-i18n="nowLineModeDesc">設定時間軸中線 (Now-line) 的參考時間依據</span>
           </div>
-          <div class="theme-segment" id="nowLineModeSegment" role="group" aria-label="Now Line Mode">
-            <button type="button" class="theme-option" data-nowline-value="local" data-i18n="nowLineModeLocal">瀏覽器本地時間</button>
-            <button type="button" class="theme-option" data-nowline-value="firstCity" data-i18n="nowLineModeFirstCity">第一個城市時間</button>
-          </div>
+          <select class="styled-select" id="nowLineModeSelect" aria-label="Now Line Mode">
+            <option value="local" data-i18n="nowLineModeLocal">瀏覽器本地時間</option>
+            <option value="firstCity" data-i18n="nowLineModeFirstCity">第一個城市時間</option>
+          </select>
         </div>
 
         <div class="divider"></div>
 
-        <!-- 3 Periods Blocks -->
-        <div class="periods-cards-container">
-          <!-- Period 1 -->
-          <div class="period-card-block" data-period="0">
-            <div class="period-card-header">
-              <span class="period-card-title" data-i18n="period1">時段一</span>
-              <div class="period-preview-badge" id="periodPreview0">08:00 - 17:00</div>
-            </div>
-            <div class="period-card-controls">
-              <div class="period-field">
-                <span class="period-field-label" data-i18n="periodTimeRange">時間範圍</span>
-                <div class="period-range-selects">
-                  <select class="period-start styled-select" aria-label="Start Hour"></select>
-                  <span class="period-range-sep" data-i18n="rangeTo">至</span>
-                  <select class="period-end styled-select" aria-label="End Hour"></select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <!-- Period 2 -->
-          <div class="period-card-block" data-period="1">
-            <div class="period-card-header">
-              <span class="period-card-title" data-i18n="period2">時段二</span>
-              <div class="period-preview-badge" id="periodPreview1">18:00 - 23:00</div>
-            </div>
-            <div class="period-card-controls">
-              <div class="period-field">
-                <span class="period-field-label" data-i18n="periodTimeRange">時間範圍</span>
-                <div class="period-range-selects">
-                  <select class="period-start styled-select" aria-label="Start Hour"></select>
-                  <span class="period-range-sep" data-i18n="rangeTo">至</span>
-                  <select class="period-end styled-select" aria-label="End Hour"></select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <!-- Period 3 -->
-          <div class="period-card-block" data-period="2">
-            <div class="period-card-header">
-              <span class="period-card-title" data-i18n="period3">時段三</span>
-              <div class="period-preview-badge" id="periodPreview2">00:00 - 07:00</div>
-            </div>
-            <div class="period-card-controls">
-              <div class="period-field">
-                <span class="period-field-label" data-i18n="periodTimeRange">時間範圍</span>
-                <div class="period-range-selects">
-                  <select class="period-start styled-select" aria-label="Start Hour"></select>
-                  <span class="period-range-sep" data-i18n="rangeTo">至</span>
-                  <select class="period-end styled-select" aria-label="End Hour"></select>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- 重設時段 -->
+        <!-- Period Count Selector & Reset Button -->
         <div class="control-group">
           <div class="control-label-wrap">
-            <span class="control-label" data-i18n="resetTimePeriods">重設時段時間</span>
-            <span class="control-desc" data-i18n="resetTimePeriodsDesc">恢復三段時段的時間範圍至預設值</span>
+            <span class="control-label" id="periodCountLabel">時段數量</span>
+            <span class="control-desc" id="periodCountDesc">設定一天劃分的時段數量</span>
           </div>
-          <button type="button" class="reset-btn" id="resetPeriodsButton" data-i18n="resetBtn">恢復預設</button>
+          <div class="control-actions-wrap">
+            <select class="styled-select period-count-select" id="periodCountSelect" aria-label="Period Count">
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+            </select>
+            <button type="button" class="reset-btn" id="resetPeriodsButton" data-i18n="resetBtn">恢復預設</button>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Single Axis 24-Hour Grid Timeline (Matches Preview Timeline Style) -->
+        <div class="time-periods-timeline-container">
+          <!-- Interactive 24-Hour Grid Panel -->
+          <div class="interactive-timeline-panel" id="interactiveTimelinePanel">
+            <div class="hours interactive-hours" id="interactiveHours">
+              <!-- 24 hour cells (00 - 23) rendered dynamically -->
+            </div>
+            <div class="timeline-dividers-layer" id="timelineDividersLayer">
+              <!-- Draggable divider handles rendered at period boundaries -->
+            </div>
+          </div>
         </div>
       </section>
 

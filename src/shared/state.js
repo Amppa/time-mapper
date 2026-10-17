@@ -84,10 +84,10 @@ const State = {
     try {
       const saved = JSON.parse(localStorage.getItem(CONFIG.timePeriodsKey));
       // Colors were user-customizable before hardcode; keep ranges only.
-      if (Array.isArray(saved) && saved.length === 3 &&
+      if (Array.isArray(saved) && saved.length >= 2 && saved.length <= 4 &&
         saved.every((p) => p && Number.isFinite(Number(p.start)) && Number.isFinite(Number(p.end)))) {
         return saved.map((p, i) => ({
-          name: CONFIG.defaultTimePeriods[i].name,
+          name: p.name || `period${i + 1}`,
           start: Number(p.start),
           end: Number(p.end)
         }));
