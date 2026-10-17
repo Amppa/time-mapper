@@ -128,108 +128,6 @@ const AppController = {
     }
   },
 
-  fetchCityResults(query) {
-    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`;
-    return fetch(url).then((res) => res.json());
-  },
-
-  wireCitySearch() {
-    if (!DOM.searchCityBtn) return;
-
-    document.addEventListener("click", (e) => {
-      if (DOM.searchResultsList && !DOM.searchResultsList.contains(e.target) && e.target !== DOM.searchCityInput && e.target !== DOM.searchCityBtn) {
-        DOM.searchResultsList.hidden = true;
-      }
-    });
-
-    const triggerSearch = () => {
-      const query = DOM.searchCityInput.value.trim();
-      if (!query) return;
-
-      DOM.searchCityBtn.textContent = "⏳";
-      DOM.searchCityBtn.style.pointerEvents = "none";
-      DOM.searchResultsList.hidden = true;
-      DOM.searchResultsList.innerHTML = "";
-
-      this.fetchCityResults(query)
-        .then((data) => {
-          if (data && data.results && data.results.length > 0) {
-            DOM.searchResultsList.innerHTML = "";
-            data.results.forEach((result) => {
-              const card = document.createElement("div");
-              card.className = "search-result-card";
-
-              const locationParts = [];
-              if (result.country) locationParts.push(result.country);
-              if (result.admin1) locationParts.push(result.admin1);
-              const subtitleText = locationParts.length > 0 ? ` (${locationParts.join(", ")})` : "";
-
-              const lng = result.longitude || 0;
-              const lat = result.latitude || 0;
-
-              card.innerHTML = `
-                <div class="search-result-info">
-                  <div class="search-result-name-row">
-                    <span class="search-result-name">${EscapeUtils.html(result.name)}</span>
-                    <span class="search-result-country">${EscapeUtils.html(subtitleText)}</span>
-                  </div>
-                  <div class="search-result-details">${EscapeUtils.html(result.timezone || "UTC")} (Lng: ${lng.toFixed(1)}, Lat: ${lat.toFixed(1)})</div>
-                </div>
-              `;
-
-              card.addEventListener("click", (evt) => {
-                evt.stopPropagation();
-                
-                const newCity = {
-                  id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-                  name: result.name,
-                  zone: result.timezone || "UTC",
-                  x: MathUtils.clamp(MapUtils.lngToX(lng), 0, 100),
-                  y: MathUtils.clamp(MapUtils.latToY(lat), 0, 100),
-                  lng: lng,
-                  lat: lat
-                };
-
-                State.customCities = [...State.customCities, newCity];
-                State.saveCustomCities();
-                State.toggleCity(newCity.id);
-                Renderer.render();
-
-                DOM.searchCityInput.value = "";
-                DOM.searchResultsList.hidden = true;
-                DOM.searchResultsList.innerHTML = "";
-              });
-              
-              DOM.searchResultsList.append(card);
-            });
-            DOM.searchResultsList.hidden = false;
-          } else {
-            alert(I18nUtils.getTranslation("cityNotFound") || "City not found");
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-          alert("Network error. Please try again.");
-        })
-        .finally(() => {
-          DOM.searchCityBtn.textContent = I18nUtils.getTranslation("searchBtn") || "Search";
-          DOM.searchCityBtn.style.pointerEvents = "auto";
-        });
-    };
-
-    DOM.searchCityBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      triggerSearch();
-    });
-
-    DOM.searchCityInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        triggerSearch();
-      }
-    });
-  },
-
   wireCitiesDragOver() {
     if (!DOM.currentCitiesList) return;
     DOM.currentCitiesList.addEventListener("dragover", (e) => {
@@ -241,31 +139,11 @@ const AppController = {
     });
   },
 
-  wireCityLimit() {
-    if (!DOM.cityLimitInput) return;
-    DOM.cityLimitInput.addEventListener("input", (e) => {
-      const val = parseInt(e.target.value, 10);
-      if (!isNaN(val) && val > 0 && State.saveCityLimit(val)) {
-        Renderer.render();
-      }
-    });
-    DOM.cityLimitInput.addEventListener("change", (e) => {
-      const val = parseInt(e.target.value, 10);
-      if (!isNaN(val) && val > 0) {
-        if (State.saveCityLimit(val)) {
-          Renderer.render();
-        }
-      } else {
-        e.target.value = String(State.cityLimit);
-      }
-    });
-  },
-
   wireSettings() {
     this.wireMapSettings();
-    this.wireCitySearch();
+    CityPreview.wireCitySearch(CityPreview.collectRefs(document), () => Renderer.render());
     this.wireCitiesDragOver();
-    this.wireCityLimit();
+    CityPreview.wireCityLimit(CityPreview.collectRefs(document), () => Renderer.render());
   },
 
   wireScrubLine() {
@@ -331,21 +209,9 @@ const AppController = {
     this.wireMapTimezoneHover();
     Renderer.renderSettingsControls();
 
-    DOM.resetButton.addEventListener("click", () => {
-      State.selectedIds = [...CONFIG.defaultSelection].slice(0, State.cityLimit);
+    CityPreview.wireResetButtons(CityPreview.collectRefs(document), () => {
       State.scrubs = [];
       State.activeScrubId = null;
-      State.saveSelection();
-      Renderer.render();
-    });
-
-    DOM.clearAllButton.addEventListener("click", () => {
-      State.selectedIds = [];
-      State.customCities = [];
-      State.scrubs = [];
-      State.activeScrubId = null;
-      State.saveSelection();
-      State.saveCustomCities();
       Renderer.render();
     });
 

@@ -13,7 +13,7 @@ const State = {
   scrubs: [],             // array of { id, fraction } objects
   activeScrubId: null,    // id of the active scrub line
   draggingId: null,
-  cityLimit: 6,
+  cityLimit: 10,
   lastActiveCard: null,
   _localCity: null,
 
@@ -265,22 +265,15 @@ const State = {
       }
     } else {
       if (this.selectedIds.length >= this.cityLimit) {
-        this.selectedIds = [...this.selectedIds.slice(-(this.cityLimit - 1)), id];
-      } else {
-        this.selectedIds = [...this.selectedIds, id];
+        return false;
       }
+      this.selectedIds = [...this.selectedIds, id];
     }
     this.saveSelection();
+    return true;
   },
 
   loadCityLimit() {
-    try {
-      const saved = localStorage.getItem(CONFIG.cityLimitKey);
-      if (saved !== null) {
-        const val = parseInt(saved, 10);
-        if (val > 0) return val;
-      }
-    } catch { }
     return CONFIG.maxCities;
   },
 
@@ -288,18 +281,7 @@ const State = {
    * @returns {boolean} true if the selection was truncated to the new limit
    */
   saveCityLimit(val) {
-    const limit = parseInt(val, 10);
-    if (isNaN(limit) || limit <= 0) return false;
-    this.cityLimit = limit;
-    try {
-      localStorage.setItem(CONFIG.cityLimitKey, String(limit));
-    } catch { }
-
-    if (this.selectedIds.length > this.cityLimit) {
-      this.selectedIds = this.selectedIds.slice(0, this.cityLimit);
-      this.saveSelection();
-      return true;
-    }
+    this.cityLimit = CONFIG.maxCities;
     return false;
   }
 };

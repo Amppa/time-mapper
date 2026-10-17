@@ -44,10 +44,23 @@ document.addEventListener("DOMContentLoaded", () => {
     TimelinePreview.renderAll(timelinePreviewRefs);
   }
 
-  /** Repaint both previews (selection / language / periods / storage). */
+  // Live cities list (shares CityPreview with the popup)
+  const citiesMount = document.getElementById("cardCities");
+  const cityRefs = citiesMount ? CityPreview.collectRefs(citiesMount) : null;
+
+  /**
+   * Repaint the cities list from current State.
+   */
+  function renderCities() {
+    if (!cityRefs) return;
+    CityPreview.renderCurrentCitiesList(cityRefs, renderPreviews);
+  }
+
+  /** Repaint both previews + cities (selection / language / periods / storage). */
   function renderPreviews() {
     renderMapPreview();
     renderTimelinePreview();
+    renderCities();
   }
 
   // Scrub interaction inside the timeline preview; night ref curve follows
@@ -456,6 +469,13 @@ document.addEventListener("DOMContentLoaded", () => {
       renderThemeSegment();
       renderPeriodControls();
     });
+  }
+
+  // Cities: search, limit, reset (shares CityPreview with the popup)
+  if (cityRefs) {
+    CityPreview.wireCitySearch(cityRefs, renderPreviews);
+    CityPreview.wireCityLimit(cityRefs, renderPreviews);
+    CityPreview.wireResetButtons(cityRefs, renderPreviews);
   }
 
   // Listen to changes from other contexts (e.g. Popup)

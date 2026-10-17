@@ -529,3 +529,412 @@ details[open]>.collapsible-summary::after {
 .switch input:checked+.slider {
   background: #F9BE6C;
 }
+
+/* ==========================================================================
+   Cities list & add-city search (shared with popup settings.css)
+   Copied verbatim so the options page looks identical to the popup.
+   ========================================================================== */
+
+.current-cities-container h4,
+.add-city-section h4 {
+  margin: 0 0 8px 0;
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.current-cities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.current-city-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 20px 1.2fr 1.6fr 58px 58px auto auto;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 8px;
+  border: 1px solid var(--divider);
+  border-radius: 8px;
+  background: var(--bg-card);
+  font-size: 11px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.current-city-card:hover {
+  border-color: var(--text-secondary);
+  background: var(--bg-elevated);
+}
+
+.current-city-card.is-dragging {
+  opacity: 0.4;
+  border-style: dashed;
+  background: var(--bg-elevated);
+}
+
+.current-cities-list.is-dragging-active .current-city-card * {
+  pointer-events: none;
+}
+
+.current-cities-list.is-dragging-active .current-city-card {
+  transition: none !important;
+}
+
+.current-cities-list.is-dragging-active .current-city-card::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  background: transparent;
+  z-index: 1;
+  pointer-events: auto !important;
+}
+
+.current-city-card.drag-over-top::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -5px;
+  height: 3px;
+  background-color: #1a73e8;
+  border-radius: 1.5px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.current-city-card.drag-over-bottom::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 3px;
+  background-color: #1a73e8;
+  border-radius: 1.5px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: bold;
+  user-select: none;
+  width: 20px;
+  height: 28px;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.current-city-card input,
+.current-city-card select {
+  width: 100%;
+  min-height: 28px;
+  padding: 0 6px;
+  border: 1px solid var(--divider);
+  border-radius: 7px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 11px;
+  outline: none;
+  transition: border-color 0.2s, background-color 0.2s;
+  user-select: text;
+}
+
+.current-city-card input:focus,
+.current-city-card select:focus {
+  border-color: var(--accent-solid);
+}
+
+.current-city-card input.invalid,
+.current-city-card select.invalid {
+  border-color: #ff3b30;
+  box-shadow: 0 0 0 1px #ff3b30;
+}
+
+.current-city-card input[type="number"]::-webkit-outer-spin-button,
+.current-city-card input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.current-city-card input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.remove-city-card-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--divider);
+  border-radius: 7px;
+  background: var(--input-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.remove-city-card-btn:hover {
+  color: #ef4444;
+  border-color: #ef4444;
+  background: var(--danger-hover-bg);
+}
+
+.search-bar-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.search-bar-row input {
+  flex: 1;
+  min-width: 0;
+  min-height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--divider);
+  border-radius: 7px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.search-bar-row input:focus {
+  border-color: var(--accent-solid);
+}
+
+.city-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.search-bar-row button,
+.city-list-actions button,
+.city-list-actions .text-button {
+  min-height: 30px;
+  padding: 0 14px;
+  border: 1px solid var(--divider);
+  border-radius: 7px;
+  background: var(--btn-bg);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search-bar-row button:hover,
+.city-list-actions button:hover,
+.city-list-actions .text-button:hover {
+  background: var(--btn-bg-hover);
+  border-color: var(--text-secondary);
+}
+
+.current-cities-container {
+  margin-bottom: var(--space-md);
+}
+
+.add-city-header {
+  padding-bottom: 8px;
+}
+
+.add-city-search {
+  width: 100%;
+}
+
+.add-city-search .search-container {
+  width: 100%;
+  position: relative;
+}
+
+.add-city-search .search-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 0;
+  width: 100%;
+}
+
+.add-city-search .search-bar-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-container {
+  position: relative;
+}
+
+.search-results-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--divider);
+  border-radius: 8px;
+  padding: 6px;
+  background: var(--bg-card);
+  box-shadow: var(--search-shadow);
+  z-index: 1000;
+}
+
+.search-results-list[hidden] {
+  display: none !important;
+}
+
+.search-result-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.search-result-card:hover {
+  background: var(--bg-elevated);
+  border-color: var(--divider);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.search-result-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.search-result-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-result-name {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.search-result-country {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.search-result-details {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.settings-actions-wide {
+  margin-top: 16px;
+}
+
+.settings-actions-spacer {
+  flex: 1;
+}
+
+.city-limit-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.city-limit-input {
+  width: 50px;
+  min-height: 28px;
+  padding: 0 6px;
+  border: 1px solid var(--divider);
+  border-radius: 7px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 11px;
+  outline: none;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.city-limit-input:focus {
+  border-color: var(--accent-solid);
+}
+
+.panel-options-link-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--divider);
+}
+
+.options-link-btn {
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--accent-solid);
+  transition: color 0.2s ease;
+}
+
+.options-link-btn:hover {
+  color: var(--accent-hover);
+}
+
+/* Scrollbar polish */
+.current-cities-list::-webkit-scrollbar,
+.search-results-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.current-cities-list::-webkit-scrollbar-track,
+.search-results-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.current-cities-list::-webkit-scrollbar-thumb,
+.search-results-list::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border-radius: 3px;
+}
+
+.current-cities-list::-webkit-scrollbar-thumb:hover,
+.search-results-list::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-thumb-hover);
+}

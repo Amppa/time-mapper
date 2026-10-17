@@ -46,6 +46,42 @@
         <div id="timelinePreviewMount"></div>
       </section>
 
+      <!-- Card: 城市與設定 / Cities & Settings -->
+      <section class="settings-card" id="cardCities">
+        <h2 class="section-title" data-i18n="customCitySection">城市清單管理</h2>
+        <div class="current-cities-container">
+          <div class="control-group city-list-header-group">
+            <div class="control-label-wrap">
+              <span class="control-label" data-i18n="currentCitiesTitle">編輯城市清單</span>
+            </div>
+            <div class="city-list-actions">
+              <button id="clearAllButton" class="text-button" type="button" data-i18n="clearAllBtn">清除全部</button>
+              <button id="resetButton" class="text-button" type="button" data-i18n="resetCitiesBtn">預設範例</button>
+            </div>
+          </div>
+          <div id="currentCitiesList" class="current-cities-list"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="control-group add-city-header">
+          <div class="control-label-wrap">
+            <span class="control-label" data-i18n="addCityTitle">新增城市</span>
+            <span class="control-desc" data-i18n="addCityDesc">最多顯示10個城市。</span>
+          </div>
+        </div>
+        <div class="add-city-search">
+          <div class="search-container">
+            <div class="search-bar-row">
+              <input id="searchCityInput" type="text" placeholder="e.g. London"
+                data-i18n-placeholder="searchPlaceholder" maxlength="40">
+              <button id="searchCityBtn" type="button" data-i18n="searchBtn">搜尋</button>
+            </div>
+            <div id="searchResultsList" class="search-results-list" hidden></div>
+          </div>
+        </div>
+      </section>
+
       <!-- Card 2: 小地圖設定 / Minimap Settings (collapsible, default collapsed) -->
       <details class="settings-card collapsible-card" id="cardMinimap">
         <summary class="collapsible-summary">
@@ -259,6 +295,7 @@
   <script src="../shared/version.js"></script>
   <script src="../shared/map-preview.js"></script>
   <script src="../shared/timeline-preview.js"></script>
+  <script src="../shared/city-preview.js"></script>
   <script src="options.js"></script>
 </body>
 
