@@ -195,41 +195,6 @@ details[open]>.collapsible-summary::after {
   padding-top: var(--space-md);
 }
 
-/* Segmented Picker (Theme / Lang / Mode) */
-.theme-segment {
-  display: flex;
-  background: var(--btn-bg);
-  border: 1px solid var(--divider);
-  border-radius: var(--radius-md);
-  padding: 3px;
-  gap: 2px;
-  flex-shrink: 0;
-
-  & .theme-option {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    font-size: var(--font-xs);
-    font-weight: 500;
-    padding: 6px 14px;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    white-space: nowrap;
-
-    &:hover {
-      color: var(--text-primary);
-    }
-
-    &.active {
-      background: var(--bg-card);
-      color: var(--text-primary);
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-      font-weight: 600;
-    }
-  }
-}
-
 /* Reset & Secondary Action Buttons */
 .reset-btn {
   background: var(--btn-bg);
@@ -345,12 +310,6 @@ details[open]>.collapsible-summary::after {
   border: 1px solid var(--divider);
   padding: 3px 8px;
   border-radius: var(--radius-sm);
-}
-
-.control-actions-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
 .period-count-select {
@@ -867,32 +826,6 @@ details[open]>.collapsible-summary::after {
 
 .settings-actions-spacer {
   flex: 1;
-}
-
-.city-limit-control {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  user-select: none;
-}
-
-.city-limit-input {
-  width: 50px;
-  min-height: 28px;
-  padding: 0 6px;
-  border: 1px solid var(--divider);
-  border-radius: 7px;
-  background: var(--input-bg);
-  color: var(--text-primary);
-  font-size: 11px;
-  outline: none;
-  transition: border-color 0.2s, background-color 0.2s;
-}
-
-.city-limit-input:focus {
-  border-color: var(--accent-solid);
 }
 
 .panel-options-link-row {
