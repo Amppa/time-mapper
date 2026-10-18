@@ -1,16 +1,12 @@
 /**
  * TimeMapper - Shared City List Preview Module
- *
- * Pure rendering of the current-cities list, add-city search, city limit,
- * clear/reset controls. Shared by the popup and the options page. All DOM
- * access goes through the `refs` object so both pages share one
- * implementation; each page writes its own HTML markup to match its layout
- * and supplies `handlers` for page-specific repaints after mutations.
- *
- * Expects State / MapUtils / TimeUtils / I18nUtils / EscapeUtils loaded.
  */
 
-const CityPreview = {
+import { State } from "./state.js";
+import { CONFIG } from "./config.js";
+import { MapUtils, TimeUtils, I18nUtils, EscapeUtils } from "./utils.js";
+
+export const CityPreview = {
   /**
    * Collect the nodes this module renders into. `root` is `document` in the
    * popup or the mount element built by each page.
@@ -444,3 +440,7 @@ const CityPreview = {
     }
   },
 };
+
+if (typeof globalThis !== "undefined") {
+  globalThis.CityPreview = CityPreview;
+}

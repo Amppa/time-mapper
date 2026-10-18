@@ -1,16 +1,11 @@
 /**
  * TimeMapper - Shared Minimap Rendering Module
- *
- * Pure rendering of the world-map preview (pins, night area, hour lines,
- * map timeline strip). Consumed by the popup (Renderer delegates to it)
- * and by the options-page live preview. All DOM access goes through the
- * `refs` object so both pages share one implementation; the only
- * page-specific part is the `onCityToggle` callback after a pin click.
- *
- * Expects State / MapUtils / TimeUtils / I18nUtils / MathUtils loaded.
  */
 
-const MapPreview = {
+import { State } from "./state.js";
+import { MapUtils, TimeUtils, I18nUtils, MathUtils, TimelineUtils } from "./utils.js";
+
+export const MapPreview = {
   ASSET_PATH: "../../assets/world-map.jpg",
 
   /** "Now" shifted by `offsetHours`; every sun-driven layer shares this. */
@@ -353,3 +348,7 @@ const MapPreview = {
     this.applyVisibility(refs);
   },
 };
+
+if (typeof globalThis !== "undefined") {
+  globalThis.MapPreview = MapPreview;
+}

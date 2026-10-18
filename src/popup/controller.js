@@ -1,8 +1,11 @@
-/**
- * TimeMapper - Event Controller Module
- */
+import { DOM } from "./dom.js";
+import { State } from "../shared/state.js";
+import { Renderer } from "./renderer.js";
+import { MathUtils, MapUtils, I18nUtils } from "../shared/utils.js";
+import { MapPreview } from "../shared/map-preview.js";
+import { TimelinePreview } from "../shared/timeline-preview.js";
 
-const AppController = {
+export const AppController = {
   addGeneratedTimezone(offset, clickX, clickY) {
     const offsetText = offset >= 0 ? `+${offset}` : `${offset}`;
     const name = `UTC${offsetText}`;
@@ -146,5 +149,9 @@ const AppController = {
     setInterval(() => Renderer.render(), 60 * 1000);
   }
 };
+
+if (typeof globalThis !== "undefined") {
+  globalThis.AppController = AppController;
+}
 
 AppController.init();

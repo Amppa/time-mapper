@@ -19,15 +19,9 @@ import url from "node:url";
 const ROOT = path.dirname(path.dirname(url.fileURLToPath(import.meta.url)));
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
 
-// The extension sources are plain browser scripts with top-level `const`, not
-// modules, so load them into one shared VM context and pull the bindings out.
-const vm = await import("node:vm");
-const ctx = vm.createContext({ Intl, console });
-for (const f of ["src/shared/cities.js", "src/shared/config.js", "src/shared/i18n.js"]) {
-  vm.runInContext(read(f), ctx, { filename: f });
-}
-const { cityCatalog, CONFIG, i18nTranslations, i18nCityNames } =
-  vm.runInContext("({ cityCatalog, CONFIG, i18nTranslations, i18nCityNames })", ctx);
+import { cityCatalog } from "../src/shared/cities.js";
+import { CONFIG } from "../src/shared/config.js";
+import { i18nTranslations, i18nCityNames } from "../src/shared/i18n.js";
 
 let failures = 0;
 let warnings = 0;

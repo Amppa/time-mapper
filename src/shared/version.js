@@ -1,6 +1,6 @@
 // src/shared/version.js
-(() => {
-  function render(el) {
+export const TimeMapperVersion = {
+  render(el) {
     if (!el) return;
     try {
       const version = chrome.runtime.getManifest().version;
@@ -9,6 +9,8 @@
       el.textContent = `TimeMapper`;
     }
   }
+};
 
-  globalThis.TimeMapperVersion = { render };
-})();
+if (typeof globalThis !== "undefined") {
+  globalThis.TimeMapperVersion = TimeMapperVersion;
+}

@@ -5,7 +5,7 @@
  *   x = lngX * longitude + lngXOffset
  *   y = latY * latitude  + latYOffset
  */
-const PROJECTION = {
+export const PROJECTION = {
   lngX: 0.2816,
   lngXOffset: 46.2357,
   latY: -0.5257,
@@ -15,7 +15,7 @@ const PROJECTION = {
 /**
  * TimeMapper - Configuration Module
  */
-const CONFIG = {
+export const CONFIG = {
   defaultSelection: ["local", "tokyo", "new-york", "los-angeles"],
   maxCities: 10,
   maxScrubs: 4,
@@ -100,3 +100,8 @@ const CONFIG = {
     }
   }
 };
+
+if (typeof globalThis !== "undefined") {
+  globalThis.PROJECTION = PROJECTION;
+  globalThis.CONFIG = CONFIG;
+}

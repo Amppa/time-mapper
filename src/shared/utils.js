@@ -2,13 +2,16 @@
  * TimeMapper - Utilities Module
  */
 
-const MathUtils = {
+import { PROJECTION, CONFIG } from "./config.js";
+import { i18nTranslations, i18nCityNames } from "./i18n.js";
+
+export const MathUtils = {
   clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
   }
 };
 
-const EscapeUtils = {
+export const EscapeUtils = {
   HTML_ENTITIES: {
     "&": "&amp;",
     "<": "&lt;",
@@ -26,7 +29,7 @@ const EscapeUtils = {
   }
 };
 
-const TimeUtils = {
+export const TimeUtils = {
   _formatterCache: {},
   _resolvedCache: {},
   _cachedSupportedZones: null,
@@ -223,7 +226,7 @@ const TimeUtils = {
   }
 };
 
-const I18nUtils = {
+export const I18nUtils = {
   /**
    * The one place that maps translation keys onto the DOM. Both the popup and
    * the options page call applyAttributes(); neither should re-implement it.
@@ -246,7 +249,7 @@ const I18nUtils = {
    * random language inside an otherwise translated page.
    */
   applyAttributes(root = document) {
-    const lang = State.currentLang;
+    const lang = (typeof State !== "undefined" && State.currentLang) || "zh";
     const dict = i18nTranslations[lang];
 
     if (!dict) {
@@ -269,7 +272,8 @@ const I18nUtils = {
   },
 
   getTranslation(key, params = {}) {
-    let text = i18nTranslations[State.currentLang]?.[key] || "";
+    const lang = (typeof State !== "undefined" && State.currentLang) || "zh";
+    let text = i18nTranslations[lang]?.[key] || "";
     for (const [pKey, pVal] of Object.entries(params)) {
       text = text.replace(`{${pKey}}`, pVal);
     }
@@ -281,18 +285,19 @@ const I18nUtils = {
     if (city.id.startsWith("custom-")) {
       return city.name;
     }
+    const lang = (typeof State !== "undefined" && State.currentLang) || "zh";
     if (city.id === "local") {
       if (city.matchingId) {
-        return i18nCityNames[State.currentLang]?.[city.matchingId] || city.matchingId;
+        return i18nCityNames[lang]?.[city.matchingId] || city.matchingId;
       }
       const parts = city.zone.split("/");
       return parts[parts.length - 1].replace(/_/g, " ");
     }
-    return i18nCityNames[State.currentLang]?.[city.id] || city.id;
+    return i18nCityNames[lang]?.[city.id] || city.id;
   }
 };
 
-const PeriodUtils = {
+export const PeriodUtils = {
   /** Active theme, following theme.js; falls back to light. */
   currentTheme() {
     try {
@@ -310,20 +315,21 @@ const PeriodUtils = {
     return set[idx] || set[set.length - 1];
   },
   getHourStyle(hour) {
-    let idx = State.timePeriods.findIndex((p) => {
+    const timePeriods = (typeof State !== "undefined" && State.timePeriods) || CONFIG.defaultTimePeriods;
+    let idx = timePeriods.findIndex((p) => {
       if (p.start <= p.end) {
         return hour >= p.start && hour <= p.end;
       } else {
         return hour >= p.start || hour <= p.end;
       }
     });
-    if (idx < 0) idx = State.timePeriods.length - 1;
-    const period = State.timePeriods[idx];
+    if (idx < 0) idx = timePeriods.length - 1;
+    const period = timePeriods[idx];
     return { ...period, ...this.getPeriodColors(idx) };
   }
 };
 
-const MapUtils = {
+export const MapUtils = {
   /**
    * Longitude of the subsolar point (where the sun is directly overhead)
    * for the given instant, in degrees.
@@ -361,19 +367,23 @@ const MapUtils = {
    * mapped back to the uncalibrated base map.
    */
   calibrateX(x) {
-    return 50 + (x - 50) * State.mapSettings.widthScale + State.mapSettings.lngOffset;
+    const settings = (typeof State !== "undefined" && State.mapSettings) || CONFIG.defaultMapSettings;
+    return 50 + (x - 50) * settings.widthScale + settings.lngOffset;
   },
 
   calibrateY(y) {
-    return 50 + (y - 50) * State.mapSettings.heightScale - State.mapSettings.latOffset;
+    const settings = (typeof State !== "undefined" && State.mapSettings) || CONFIG.defaultMapSettings;
+    return 50 + (y - 50) * settings.heightScale - settings.latOffset;
   },
 
   uncalibrateX(screenX) {
-    return 50 + (screenX - 50 - State.mapSettings.lngOffset) / State.mapSettings.widthScale;
+    const settings = (typeof State !== "undefined" && State.mapSettings) || CONFIG.defaultMapSettings;
+    return 50 + (screenX - 50 - settings.lngOffset) / settings.widthScale;
   },
 
   uncalibrateY(screenY) {
-    return 50 + (screenY - 50 + State.mapSettings.latOffset) / State.mapSettings.heightScale;
+    const settings = (typeof State !== "undefined" && State.mapSettings) || CONFIG.defaultMapSettings;
+    return 50 + (screenY - 50 + settings.latOffset) / settings.heightScale;
   },
 
   mapPosition(city) {
@@ -398,12 +408,12 @@ const MapUtils = {
   }
 };
 
-const TimelineUtils = {
+export const TimelineUtils = {
   getNowFraction() {
     const now = new Date();
     let hours, minutes;
 
-    if (State.nowLineMode === "firstCity" && State.selectedIds.length > 0) {
+    if (typeof State !== "undefined" && State.nowLineMode === "firstCity" && State.selectedIds.length > 0) {
       const firstCity = State.findCity(State.selectedIds[0]);
       if (firstCity) {
         const zone = TimeUtils.resolveZone(firstCity.zone);
@@ -481,3 +491,13 @@ const TimelineUtils = {
     return MathUtils.clamp(snappedMinutes / (24 * 60), 0, 1);
   }
 };
+
+if (typeof globalThis !== "undefined") {
+  globalThis.MathUtils = MathUtils;
+  globalThis.EscapeUtils = EscapeUtils;
+  globalThis.TimeUtils = TimeUtils;
+  globalThis.I18nUtils = I18nUtils;
+  globalThis.PeriodUtils = PeriodUtils;
+  globalThis.MapUtils = MapUtils;
+  globalThis.TimelineUtils = TimelineUtils;
+}

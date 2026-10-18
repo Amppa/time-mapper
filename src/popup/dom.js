@@ -5,10 +5,14 @@
  * wires directly; everything the shared preview modules touch is resolved by
  * their own collectRefs().
  */
-const DOM = {
+export const DOM = {
   nowText: document.querySelector("#nowText"),
   topbarOptionsButton: document.querySelector("#topbarOptionsButton"),
   mapShell: document.querySelector(".map-shell"),
   timezoneHoverBar: document.querySelector("#timezoneHoverBar"),
   cityLayer: document.querySelector("#cityLayer")
 };
+
+if (typeof globalThis !== "undefined") {
+  globalThis.DOM = DOM;
+}

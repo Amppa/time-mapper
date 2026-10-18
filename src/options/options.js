@@ -1,7 +1,18 @@
-/**
- * TimeMapper - Options Page Controller
- * Follows design and behavioral architecture of ../_chrome-ext-template
- */
+import { CONFIG } from "../shared/config.js";
+import { State } from "../shared/state.js";
+import {
+  MathUtils,
+  TimeUtils,
+  MapUtils,
+  TimelineUtils,
+  I18nUtils,
+  PeriodUtils,
+  EscapeUtils
+} from "../shared/utils.js";
+import { TimeMapperVersion } from "../shared/version.js";
+import { MapPreview } from "../shared/map-preview.js";
+import { TimelinePreview } from "../shared/timeline-preview.js";
+import { CityPreview } from "../shared/city-preview.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   State.init();

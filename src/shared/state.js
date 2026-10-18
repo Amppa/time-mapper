@@ -2,7 +2,11 @@
  * TimeMapper - Application State Management Module
  */
 
-const State = {
+import { CONFIG } from "./config.js";
+import { cityCatalog } from "./cities.js";
+import { TimeUtils, TimelineUtils } from "./utils.js";
+
+export const State = {
   selectedIds: [],
   customCities: [],
   mapSettings: {},
@@ -273,3 +277,7 @@ const State = {
     return true;
   }
 };
+
+if (typeof globalThis !== "undefined") {
+  globalThis.State = State;
+}
