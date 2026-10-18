@@ -494,10 +494,24 @@ details[open]>.collapsible-summary::after {
 /* Page Footer */
 .footer {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: 16px;
+  gap: 4px;
+  margin-top: 24px;
   padding: 8px 0;
+}
+
+.footer-repo-link {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--transition-fast);
+
+  &:hover {
+    color: var(--text-primary);
+  }
 }
 
 /* Options switch ON state: solid swatch color instead of the shared accent
