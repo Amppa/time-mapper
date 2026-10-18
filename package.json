@@ -1,0 +1,13 @@
+{
+  "name": "time-mapper",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check:i18n": "node tools/check-i18n.mjs",
+    "profile:popup": "node tools/profile-popup.mjs"
+  },
+  "devDependencies": {
+    "puppeteer": "^24.4.0"
+  }
+}
