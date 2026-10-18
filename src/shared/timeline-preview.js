@@ -149,7 +149,7 @@ const TimelinePreview = {
       return;
     }
     refs.nowLine.style.display = "";
-    refs.nowLine.style.left = `${left}px`;
+    refs.nowLine.style.transform = `translateX(${left}px)`;
 
     let topKnob = refs.nowLine.querySelector(".now-knob-top");
     if (!topKnob) {
@@ -186,7 +186,7 @@ const TimelinePreview = {
       group.className = "scrub-line-group";
       if (isActive) group.classList.add("is-dragging");
       group.dataset.id = scrub.id;
-      group.style.left = `${left}px`;
+      group.style.transform = `translateX(${left}px)`;
 
       // Create dashed vertical line
       const line = document.createElement("div");
@@ -408,7 +408,7 @@ const TimelinePreview = {
         const group = refs.timelinePanel.querySelector(`.scrub-line-group[data-id="${activeDragScrubId}"]`);
         if (group) {
           const left = TimelineUtils.fractionToLeft(fraction, refs.timelinePanel);
-          group.style.left = `${left}px`;
+          group.style.transform = `translateX(${left}px)`;
           const timeEl = group.querySelector(".knob-time");
           if (timeEl) {
             timeEl.textContent = TimelineUtils.formatFractionTime(fraction);
