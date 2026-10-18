@@ -2,7 +2,13 @@
  * TimeMapper - UI Renderer Module
  */
 
-const Renderer = {
+import { DOM } from "./dom.js";
+import { State } from "../shared/state.js";
+import { TimeUtils, TimelineUtils } from "../shared/utils.js";
+import { MapPreview } from "../shared/map-preview.js";
+import { TimelinePreview } from "../shared/timeline-preview.js";
+
+export const Renderer = {
   renderNowText() {
     const localZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const now = new Date();
@@ -56,3 +62,7 @@ const Renderer = {
     TimelinePreview.renderIntervals(TimelinePreview.collectRefs(document), geo);
   }
 };
+
+if (typeof globalThis !== "undefined") {
+  globalThis.Renderer = Renderer;
+}
