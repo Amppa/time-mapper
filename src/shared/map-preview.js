@@ -97,11 +97,9 @@ const MapPreview = {
     }
     if (refs.cityLayer) {
       refs.cityLayer.style.transform = `translateY(${State.mapSettings.mapYOffset || 0}px)`;
-      refs.cityLayer.innerHTML = "";
     }
     if (refs.mapTimeLabelLayer) {
       refs.mapTimeLabelLayer.style.transform = `translateY(${State.mapSettings.mapYOffset || 0}px)`;
-      refs.mapTimeLabelLayer.innerHTML = "";
     }
 
     const activeFraction = State.getActiveScrubFraction();
@@ -126,6 +124,48 @@ const MapPreview = {
       });
     }
     refs._onCityToggle = onCityToggle;
+
+    const allCities = State.allCities();
+    const existingPins = refs.cityLayer ? Array.from(refs.cityLayer.children) : [];
+
+    // In-place patch if structure matches (same cities in same order)
+    if (existingPins.length === allCities.length &&
+        existingPins.every((btn, idx) => btn.dataset.id === allCities[idx].id)) {
+      existingPins.forEach((btn, idx) => {
+        const city = allCities[idx];
+        const isSelected = State.selectedIds.includes(city.id);
+        btn.classList.toggle("is-selected", isSelected);
+      });
+
+      // Synchronize label layer for selected cities
+      if (refs.mapTimeLabelLayer) {
+        const existingLabels = Array.from(refs.mapTimeLabelLayer.children);
+        const labelsMatch = existingLabels.length === State.selectedIds.length &&
+          existingLabels.every((lbl, idx) => lbl.dataset.id === State.selectedIds[idx]);
+        if (!labelsMatch) {
+          refs.mapTimeLabelLayer.innerHTML = "";
+          const lblFrag = document.createDocumentFragment();
+          State.selectedIds.forEach((id) => {
+            const city = State.findCity(id);
+            if (!city) return;
+            const position = MapUtils.mapPosition(city);
+            const label = document.createElement("div");
+            label.className = "map-time-label";
+            label.style.left = `${position.x}%`;
+            label.style.top = `${position.y}%`;
+            label.dataset.id = city.id;
+            label.dataset.zone = city.zone;
+            lblFrag.append(label);
+          });
+          refs.mapTimeLabelLayer.append(lblFrag);
+        }
+        this.updateMapCityTimes(refs, activeFraction);
+      }
+      return;
+    }
+
+    if (refs.cityLayer) refs.cityLayer.innerHTML = "";
+    if (refs.mapTimeLabelLayer) refs.mapTimeLabelLayer.innerHTML = "";
 
     const pinFrag = document.createDocumentFragment();
     const labelFrag = refs.mapTimeLabelLayer ? document.createDocumentFragment() : null;
