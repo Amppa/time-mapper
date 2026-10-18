@@ -1,4 +1,4 @@
-const cityCatalog = [
+export const cityCatalog = [
   { id: "amsterdam", zone: "Europe/Amsterdam", lng: 4.9, lat: 52.37 },
   { id: "athens-airport", zone: "Europe/Athens", lng: 23.94, lat: 37.94 },
   { id: "auckland", zone: "Pacific/Auckland", lng: 174.76, lat: -36.85 },
@@ -69,3 +69,7 @@ const cityCatalog = [
   { id: "warsaw", zone: "Europe/Warsaw", lng: 21.01, lat: 52.23 },
   { id: "washington-dc", zone: "America/New_York", lng: -77.0, lat: 38.9 }
 ];
+
+if (typeof globalThis !== "undefined") {
+  globalThis.cityCatalog = cityCatalog;
+}
