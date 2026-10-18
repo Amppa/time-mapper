@@ -377,12 +377,14 @@ const MapUtils = {
   },
 
   mapPosition(city) {
-    const hasLngLat = typeof city.lng === "number" && typeof city.lat === "number";
-    const cx = hasLngLat ? this.lngToX(city.lng) : city.x;
-    const cy = hasLngLat ? this.latToY(city.lat) : city.y;
+    if (city._cx === undefined) {
+      const hasLngLat = typeof city.lng === "number" && typeof city.lat === "number";
+      city._cx = hasLngLat ? this.lngToX(city.lng) : city.x;
+      city._cy = hasLngLat ? this.latToY(city.lat) : city.y;
+    }
     return {
-      x: MathUtils.clamp(this.calibrateX(cx), 0, 100),
-      y: MathUtils.clamp(this.calibrateY(cy), 0, 100)
+      x: MathUtils.clamp(this.calibrateX(city._cx), 0, 100),
+      y: MathUtils.clamp(this.calibrateY(city._cy), 0, 100)
     };
   },
 
