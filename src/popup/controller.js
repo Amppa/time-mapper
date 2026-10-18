@@ -2,7 +2,6 @@ import { DOM } from "./dom.js";
 import { State } from "../shared/state.js";
 import { Renderer } from "./renderer.js";
 import { MathUtils, MapUtils, I18nUtils } from "../shared/utils.js";
-import { MapPreview } from "../shared/map-preview.js";
 import { TimelinePreview } from "../shared/timeline-preview.js";
 
 export const AppController = {
@@ -76,47 +75,31 @@ export const AppController = {
     });
   },
 
-  wireMapTimezoneHover() {
-    if (DOM.mapShell && DOM.timezoneHoverBar) {
-      DOM.mapShell.addEventListener("mousemove", (e) => {
-        const rect = DOM.mapShell.getBoundingClientRect();
-        const relativeX = (e.clientX - rect.left) / rect.width;
-        if (relativeX >= 0 && relativeX <= 1) {
-          const x = relativeX * 100;
-          const lng = MapUtils.getXLongitude(x);
+  wireMapClick() {
+    const handleMapClick = (targetContainer, e) => {
+      if (e.target.closest(".city-pin")) return;
+      const rect = targetContainer.getBoundingClientRect();
+      const clickX = ((e.clientX - rect.left) / rect.width) * 100;
+      const clickY = ((e.clientY - rect.top) / rect.height) * 100;
 
-          const subsolarLng = MapUtils.subsolarLng(MapPreview.shiftedNow(State.selectedOffsetHours));
+      const lng = MapUtils.getXLongitude(clickX);
+      const offset = MathUtils.clamp(Math.round(lng / 15), -12, 12);
 
-          const k = Math.round((lng - subsolarLng) / 15);
-
-          const x_left = MathUtils.clamp(MapUtils.getLongitudeX(subsolarLng + (k - 0.5) * 15), 0, 100);
-          const x_right = MathUtils.clamp(MapUtils.getLongitudeX(subsolarLng + (k + 0.5) * 15), 0, 100);
-
-          const scale = (x_right - x_left) / 100;
-          DOM.timezoneHoverBar.style.transform = `translateX(${x_left}%) scaleX(${scale})`;
-          DOM.timezoneHoverBar.hidden = false;
-        } else {
-          DOM.timezoneHoverBar.hidden = true;
-        }
-      });
-
-      DOM.mapShell.addEventListener("mouseleave", () => {
-        DOM.timezoneHoverBar.hidden = true;
-      });
-    }
+      this.addGeneratedTimezone(offset, clickX, clickY);
+    };
 
     if (DOM.cityLayer) {
       DOM.cityLayer.addEventListener("click", (e) => {
         if (e.target === DOM.cityLayer) {
-          const rect = DOM.cityLayer.getBoundingClientRect();
-          const clickX = ((e.clientX - rect.left) / rect.width) * 100;
-          const clickY = ((e.clientY - rect.top) / rect.height) * 100;
-
-          const lng = MapUtils.getXLongitude(clickX);
-          const offset = MathUtils.clamp(Math.round(lng / 15), -12, 12);
-
-          this.addGeneratedTimezone(offset, clickX, clickY);
+          handleMapClick(DOM.cityLayer, e);
         }
+      });
+    }
+
+    const hoverBands = DOM.mapShell?.querySelector(".timezone-hover-bands");
+    if (hoverBands) {
+      hoverBands.addEventListener("click", (e) => {
+        handleMapClick(hoverBands, e);
       });
     }
   },
@@ -126,7 +109,7 @@ export const AppController = {
 
     this.wireOptionsButton();
     this.wireScrubLine();
-    this.wireMapTimezoneHover();
+    this.wireMapClick();
 
     I18nUtils.applyAttributes();
     requestAnimationFrame(() => {

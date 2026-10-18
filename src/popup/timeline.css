@@ -101,6 +101,17 @@
    Timeline Vertical Lines & Knobs
    ====================================== */
 
+/* Grid overlay tracking the 1fr hours width (left: 120px for label width) */
+.timeline-track-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 120px;
+  right: 0;
+  pointer-events: none;
+  z-index: 8;
+}
+
 /* Shared base for both lines */
 .timeline-vline {
   position: absolute;
@@ -110,7 +121,7 @@
   width: 0;
   pointer-events: none;
   z-index: 8;
-  will-change: transform;
+  will-change: left;
 }
 
 /* Container for multiple scrub lines */
@@ -177,7 +188,7 @@
   pointer-events: none;
   z-index: 10;
   transition: z-index 0.15s;
-  will-change: transform;
+  will-change: left;
 }
 
 .scrub-line-group:hover,

@@ -9,7 +9,6 @@ export const DOM = {
   nowText: document.querySelector("#nowText"),
   topbarOptionsButton: document.querySelector("#topbarOptionsButton"),
   mapShell: document.querySelector(".map-shell"),
-  timezoneHoverBar: document.querySelector("#timezoneHoverBar"),
   cityLayer: document.querySelector("#cityLayer")
 };
 

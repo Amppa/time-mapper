@@ -41,25 +41,23 @@ export const Renderer = {
     this.renderNowText();
     this.renderMap();
     this.renderRows();
-    // Render lines after layout is established, share single grid geometry measure
     const timelineRefs = TimelinePreview.collectRefs(document);
-    const geo = TimelineUtils.gridGeometry(timelineRefs.timelinePanel);
-    this.renderNowLine(geo);
-    this.renderScrubLine(geo);
+    TimelinePreview.renderNowLine(timelineRefs);
+    TimelinePreview.renderScrubLine(timelineRefs);
     this.renderNightArea(State.selectedOffsetHours);
     this.applyVisibilitySettings();
   },
 
-  renderNowLine(geo = null) {
-    TimelinePreview.renderNowLine(TimelinePreview.collectRefs(document), geo);
+  renderNowLine() {
+    TimelinePreview.renderNowLine(TimelinePreview.collectRefs(document));
   },
 
-  renderScrubLine(geo = null) {
-    TimelinePreview.renderScrubLine(TimelinePreview.collectRefs(document), geo);
+  renderScrubLine() {
+    TimelinePreview.renderScrubLine(TimelinePreview.collectRefs(document));
   },
 
-  renderIntervals(geo = null) {
-    TimelinePreview.renderIntervals(TimelinePreview.collectRefs(document), geo);
+  renderIntervals() {
+    TimelinePreview.renderIntervals(TimelinePreview.collectRefs(document));
   }
 };
 

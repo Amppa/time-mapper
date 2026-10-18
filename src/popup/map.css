@@ -93,26 +93,38 @@
   vector-effect: non-scaling-stroke;
 }
 
-.timezone-hover-bar {
+.timezone-hover-bands {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.timezone-band {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 0;
-  width: 100%;
-  background: var(--timezone-hover-bg);
-  pointer-events: none;
-  z-index: 1;
-  transform-origin: left;
-  will-change: transform;
+  pointer-events: auto;
+  background: transparent;
+  transition: background-color 0.15s ease;
+  cursor: crosshair;
+}
+
+.timezone-band:hover {
+  background: var(--timezone-hover-bg, rgba(245, 158, 11, 0.18));
 }
 
 .city-layer {
   position: absolute;
   inset: 0;
+  pointer-events: none;
+  z-index: 2;
 }
 
 .city-pin {
   position: absolute;
+  pointer-events: auto;
   width: 10px;
   height: 10px;
   margin: -5px 0 0 -5px;

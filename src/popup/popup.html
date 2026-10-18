@@ -37,7 +37,7 @@
             <path id="nightPath" d=""></path>
             <path id="nightPathRef" d=""></path>
           </svg>
-          <div id="timezoneHoverBar" class="timezone-hover-bar" hidden></div>
+          <div id="timezoneHoverBands" class="timezone-hover-bands"></div>
           <div id="cityLayer" class="city-layer" aria-label="City Pins"></div>
           <div id="mapTimeLabelLayer" class="map-time-label-layer" aria-hidden="true"></div>
         </div>
@@ -47,11 +47,13 @@
 
     <section class="timeline-panel" aria-label="Timeline">
       <div id="timelineRows" class="timeline-rows"></div>
-      <div id="timelineIntervalsContainer" class="timeline-intervals-container" aria-hidden="true"></div>
-      <!-- Now Line: always visible, shows current time of reference timezone -->
-      <div id="nowLine" class="timeline-vline now-line" aria-hidden="true"></div>
-      <!-- Container for dynamic scrub lines -->
-      <div id="scrubLinesContainer"></div>
+      <div id="timelineTrackOverlay" class="timeline-track-overlay">
+        <div id="timelineIntervalsContainer" class="timeline-intervals-container" aria-hidden="true"></div>
+        <!-- Now Line: always visible, shows current time of reference timezone -->
+        <div id="nowLine" class="timeline-vline now-line" aria-hidden="true"></div>
+        <!-- Container for dynamic scrub lines -->
+        <div id="scrubLinesContainer"></div>
+      </div>
     </section>
   </main>
   <script type="module" src="controller.js"></script>

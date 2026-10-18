@@ -15,6 +15,7 @@ export const TimelinePreview = {
     const q = (sel) => root.querySelector(sel);
     return {
       timelinePanel: q(".timeline-panel"),
+      timelineTrackOverlay: q("#timelineTrackOverlay"),
       timelineRows: q("#timelineRows"),
       timelineIntervalsContainer: q("#timelineIntervalsContainer"),
       nowLine: q("#nowLine"),
@@ -36,21 +37,27 @@ export const TimelinePreview = {
     rows.className = "timeline-rows";
     panel.append(rows);
 
+    const overlay = document.createElement("div");
+    overlay.id = "timelineTrackOverlay";
+    overlay.className = "timeline-track-overlay";
+
     const intervals = document.createElement("div");
     intervals.id = "timelineIntervalsContainer";
     intervals.className = "timeline-intervals-container";
     intervals.setAttribute("aria-hidden", "true");
-    panel.append(intervals);
+    overlay.append(intervals);
 
     const nowLine = document.createElement("div");
     nowLine.id = "nowLine";
     nowLine.className = "timeline-vline now-line";
     nowLine.setAttribute("aria-hidden", "true");
-    panel.append(nowLine);
+    overlay.append(nowLine);
 
     const scrubs = document.createElement("div");
     scrubs.id = "scrubLinesContainer";
-    panel.append(scrubs);
+    overlay.append(scrubs);
+
+    panel.append(overlay);
 
     mount.append(panel);
     return this.collectRefs(mount);
@@ -134,17 +141,11 @@ export const TimelinePreview = {
     refs.timelineRows.append(rowsFrag);
   },
 
-  renderNowLine(refs, geo = null) {
+  renderNowLine(refs) {
     if (!refs.nowLine) return;
-    const g = geo || TimelineUtils.gridGeometry(refs.timelinePanel);
     const fraction = TimelineUtils.getNowFraction();
-    const left = TimelineUtils.fractionToLeft(fraction, refs.timelinePanel, g);
-    if (left === 0) {
-      refs.nowLine.style.display = "none";
-      return;
-    }
     refs.nowLine.style.display = "";
-    refs.nowLine.style.transform = `translateX(${left}px)`;
+    refs.nowLine.style.left = `${(fraction * 100).toFixed(4)}%`;
 
     let topKnob = refs.nowLine.querySelector(".now-knob-top");
     if (!topKnob) {
@@ -158,22 +159,17 @@ export const TimelinePreview = {
     if (timeEl) {
       timeEl.textContent = TimelineUtils.formatFractionTime(fraction);
     }
-    this.renderIntervals(refs, g);
+    this.renderIntervals(refs);
   },
 
-  renderScrubLine(refs, geo = null) {
+  renderScrubLine(refs) {
     if (!refs.scrubLinesContainer) return;
 
     // Clear dynamic scrub lines
     refs.scrubLinesContainer.innerHTML = "";
-    const g = geo || TimelineUtils.gridGeometry(refs.timelinePanel);
-
     const scrubFrag = document.createDocumentFragment();
 
     State.scrubs.forEach((scrub) => {
-      const left = TimelineUtils.fractionToLeft(scrub.fraction, refs.timelinePanel, g);
-      if (left === 0) return;
-
       const isActive = (scrub.id === State.activeScrubId);
 
       // Create line group
@@ -181,7 +177,7 @@ export const TimelinePreview = {
       group.className = "scrub-line-group";
       if (isActive) group.classList.add("is-dragging");
       group.dataset.id = scrub.id;
-      group.style.transform = `translateX(${left}px)`;
+      group.style.left = `${(scrub.fraction * 100).toFixed(4)}%`;
 
       // Create dashed vertical line
       const line = document.createElement("div");
@@ -235,35 +231,28 @@ export const TimelinePreview = {
     });
 
     refs.scrubLinesContainer.appendChild(scrubFrag);
-    this.renderIntervals(refs, g);
+    this.renderIntervals(refs);
   },
 
   /**
    * Render interval indicators between adjacent markers (Scrub lines + Now line).
    * Values rounded to nearest 0.5h (e.g. 0.5h, 1h, 1.5h, 2h).
    */
-  renderIntervals(refs, geo = null) {
+  renderIntervals(refs) {
     if (!refs || !refs.timelineIntervalsContainer || !refs.timelinePanel) return;
     const container = refs.timelineIntervalsContainer;
     container.innerHTML = "";
 
-    const g = geo || TimelineUtils.gridGeometry(refs.timelinePanel);
     const markers = [];
 
     // 1. Now Line (if visible/laid out)
     const nowFraction = TimelineUtils.getNowFraction();
-    const nowLeft = TimelineUtils.fractionToLeft(nowFraction, refs.timelinePanel, g);
-    if (nowLeft > 0) {
-      markers.push({ type: "now", fraction: nowFraction, left: nowLeft });
-    }
+    markers.push({ type: "now", fraction: nowFraction });
 
     // 2. User scrub lines
     if (Array.isArray(State.scrubs)) {
       State.scrubs.forEach((scrub) => {
-        const left = TimelineUtils.fractionToLeft(scrub.fraction, refs.timelinePanel, g);
-        if (left > 0) {
-          markers.push({ type: "scrub", id: scrub.id, fraction: scrub.fraction, left });
-        }
+        markers.push({ type: "scrub", id: scrub.id, fraction: scrub.fraction });
       });
     }
 
@@ -284,16 +273,14 @@ export const TimelinePreview = {
         text = "0h";
       } else if (diffHours < 0.25) {
         text = "<0.5h";
-      } else if (roundedHours % 1 === 0) {
-        text = `${roundedHours}h`;
       } else {
         text = `${roundedHours}h`;
       }
 
       const span = document.createElement("div");
       span.className = "timeline-interval-span";
-      span.style.left = `${m1.left}px`;
-      span.style.width = `${Math.max(0, m2.left - m1.left)}px`;
+      span.style.left = `${(m1.fraction * 100).toFixed(4)}%`;
+      span.style.width = `${Math.max(0, (m2.fraction - m1.fraction) * 100).toFixed(4)}%`;
 
       const pill = document.createElement("div");
       pill.className = "timeline-interval-pill";
@@ -313,6 +300,18 @@ export const TimelinePreview = {
     if (!refs.scrubLinesContainer || !refs.timelinePanel) return;
     let isDragging = false;
     let activeDragScrubId = null;
+    let cachedOverlayRect = null;
+
+    const getOverlay = () =>
+      refs.timelineTrackOverlay ||
+      refs.timelinePanel.querySelector(".timeline-track-overlay") ||
+      refs.timelinePanel;
+
+    const calcFraction = (clientX) => {
+      if (!cachedOverlayRect || cachedOverlayRect.width <= 0) return 0;
+      const raw = MathUtils.clamp((clientX - cachedOverlayRect.left) / cachedOverlayRect.width, 0, 1);
+      return TimelineUtils.snapToFiveMinutes(raw);
+    };
 
     // --- Interaction 1 & 2: Click/Drag timeline to add or drag scrub-line ---
     refs.timelinePanel.addEventListener("mousedown", (e) => {
@@ -321,7 +320,11 @@ export const TimelinePreview = {
 
       const handle = e.target.closest(".scrub-handle, .scrub-knob-top, .scrub-knob-bottom");
       const hoursGrid = e.target.closest(".hours");
-      if (!handle && !hoursGrid) return;
+      const overlayEl = e.target.closest(".timeline-track-overlay");
+      if (!handle && !hoursGrid && !overlayEl) return;
+
+      const overlay = getOverlay();
+      cachedOverlayRect = overlay.getBoundingClientRect();
 
       let targetScrubId = null;
       let fraction = null;
@@ -342,10 +345,7 @@ export const TimelinePreview = {
           return;
         }
 
-        const panelRect = refs.timelinePanel.getBoundingClientRect();
-        const pxLeft = e.clientX - panelRect.left;
-        const rawFraction = TimelineUtils.leftToFraction(pxLeft, refs.timelinePanel);
-        fraction = TimelineUtils.snapToFiveMinutes(rawFraction);
+        fraction = calcFraction(e.clientX);
 
         const newScrub = {
           id: `scrub_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
@@ -389,10 +389,7 @@ export const TimelinePreview = {
     document.addEventListener("mousemove", (e) => {
       if (!isDragging || !activeDragScrubId) return;
 
-      const panelRect = refs.timelinePanel.getBoundingClientRect();
-      const pxLeft = e.clientX - panelRect.left;
-      const rawFraction = TimelineUtils.leftToFraction(pxLeft, refs.timelinePanel);
-      const fraction = TimelineUtils.snapToFiveMinutes(rawFraction);
+      const fraction = calcFraction(e.clientX);
 
       // Update fraction in state
       const scrub = State.scrubs.find(s => s.id === activeDragScrubId);
@@ -402,8 +399,7 @@ export const TimelinePreview = {
         // Update position of group element directly for performance
         const group = refs.timelinePanel.querySelector(`.scrub-line-group[data-id="${activeDragScrubId}"]`);
         if (group) {
-          const left = TimelineUtils.fractionToLeft(fraction, refs.timelinePanel);
-          group.style.transform = `translateX(${left}px)`;
+          group.style.left = `${(fraction * 100).toFixed(4)}%`;
           const timeEl = group.querySelector(".knob-time");
           if (timeEl) {
             timeEl.textContent = TimelineUtils.formatFractionTime(fraction);
@@ -420,6 +416,7 @@ export const TimelinePreview = {
       if (!isDragging) return;
       isDragging = false;
       activeDragScrubId = null;
+      cachedOverlayRect = null;
       if (refs.scrubLinesContainer) {
         refs.scrubLinesContainer.querySelectorAll(".scrub-line-group, .scrub-line, .scrub-handle, .scrub-knob-top, .scrub-knob-bottom").forEach((el) => {
           el.classList.remove("is-dragging");

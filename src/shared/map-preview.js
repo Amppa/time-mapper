@@ -22,6 +22,7 @@ export const MapPreview = {
     return {
       mapImg: q(".world-map"),
       cityLayer: q(".city-layer"),
+      timezoneHoverBands: q("#timezoneHoverBands") || q(".timezone-hover-bands"),
       mapTimeLabelLayer: q(".map-time-label-layer"),
       hourLines: q(".hour-lines"),
       nightAreaOverlay: q(".night-area-overlay"),
@@ -66,6 +67,11 @@ export const MapPreview = {
     nightPathRef.setAttribute("d", "");
     overlay.append(nightPath, nightPathRef);
     shell.append(overlay);
+
+    const hoverBands = document.createElement("div");
+    hoverBands.id = "timezoneHoverBands";
+    hoverBands.className = "timezone-hover-bands";
+    shell.append(hoverBands);
 
     const cityLayer = document.createElement("div");
     cityLayer.className = "city-layer";
@@ -280,11 +286,44 @@ export const MapPreview = {
     refs.mapTimeline.append(frag);
   },
 
+  renderHourBands(refs, offsetHours = 0) {
+    if (!refs.timezoneHoverBands) return;
+    refs.timezoneHoverBands.innerHTML = "";
+
+    const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(offsetHours));
+    const centerLng = MapUtils.getXLongitude(50);
+    const frag = document.createDocumentFragment();
+
+    for (let h = 0; h < 24; h++) {
+      let diff = subsolarLng + (h - 12) * 15 - centerLng;
+      diff = ((diff + 180) % 360 + 360) % 360 - 180;
+
+      const x_left = MapUtils.getLongitudeX(centerLng + diff - 7.5);
+      const x_right = MapUtils.getLongitudeX(centerLng + diff + 7.5);
+
+      const left = MathUtils.clamp(Math.min(x_left, x_right), 0, 100);
+      const right = MathUtils.clamp(Math.max(x_left, x_right), 0, 100);
+      const width = right - left;
+      if (width < 0.2) continue;
+
+      const band = document.createElement("div");
+      band.className = "timezone-band";
+      band.dataset.hour = String(h);
+      band.title = `${String(h).padStart(2, "0")}:00`;
+      band.style.left = `${left.toFixed(2)}%`;
+      band.style.width = `${width.toFixed(2)}%`;
+      frag.append(band);
+    }
+
+    refs.timezoneHoverBands.append(frag);
+  },
+
   renderNightArea(refs, offsetHours = 0) {
     if (!refs.nightPath) return;
 
     this.renderMapTimeline(refs, offsetHours);
     this.renderHourLines(refs, offsetHours);
+    this.renderHourBands(refs, offsetHours);
 
     if (refs.nightAreaOverlay) {
       refs.nightAreaOverlay.style.transform = `translateY(${State.mapSettings.mapYOffset || 0}px)`;
