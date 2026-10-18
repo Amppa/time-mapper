@@ -48,5 +48,9 @@ const Renderer = {
 
   renderScrubLine() {
     TimelinePreview.renderScrubLine(TimelinePreview.collectRefs(document));
+  },
+
+  renderIntervals() {
+    TimelinePreview.renderIntervals(TimelinePreview.collectRefs(document));
   }
 };

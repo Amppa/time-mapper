@@ -2,7 +2,7 @@
   position: relative;
   overflow: visible;
   margin-top: 14px;
-  margin-bottom: 8px;
+  margin-bottom: 14px;
   background: var(--bg);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -122,6 +122,49 @@
   z-index: 10;
 }
 
+/* Container for interval span badges between adjacent lines */
+#timelineIntervalsContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 12;
+}
+
+.timeline-interval-span {
+  position: absolute;
+  bottom: 0;
+  height: 0;
+  border-bottom: 1px dashed var(--line);
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.timeline-interval-pill {
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 5px;
+  border-radius: 9px;
+  background: var(--panel);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  font-size: 9px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
 /* Group wrapper for a single dynamic scrub line */
 .scrub-line-group {
   position: absolute;
@@ -165,12 +208,6 @@
   z-index: 11;
   border-radius: 4px;
   transition: background-color 0.15s;
-}
-
-.scrub-handle:hover,
-.scrub-handle.is-dragging,
-.scrub-line-group:hover .scrub-handle {
-  background: var(--scrub-hover-bg);
 }
 
 /* Floating Knobs / Badges */

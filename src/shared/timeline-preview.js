@@ -21,6 +21,7 @@ const TimelinePreview = {
     return {
       timelinePanel: q(".timeline-panel"),
       timelineRows: q("#timelineRows"),
+      timelineIntervalsContainer: q("#timelineIntervalsContainer"),
       nowLine: q("#nowLine"),
       scrubLinesContainer: q("#scrubLinesContainer"),
     };
@@ -39,6 +40,12 @@ const TimelinePreview = {
     rows.id = "timelineRows";
     rows.className = "timeline-rows";
     panel.append(rows);
+
+    const intervals = document.createElement("div");
+    intervals.id = "timelineIntervalsContainer";
+    intervals.className = "timeline-intervals-container";
+    intervals.setAttribute("aria-hidden", "true");
+    panel.append(intervals);
 
     const nowLine = document.createElement("div");
     nowLine.id = "nowLine";
@@ -147,6 +154,7 @@ const TimelinePreview = {
     if (timeEl) {
       timeEl.textContent = TimelineUtils.formatFractionTime(fraction);
     }
+    this.renderIntervals(refs);
   },
 
   renderScrubLine(refs) {
@@ -218,6 +226,72 @@ const TimelinePreview = {
 
       refs.scrubLinesContainer.appendChild(group);
     });
+    this.renderIntervals(refs);
+  },
+
+  /**
+   * Render interval indicators between adjacent markers (Scrub lines + Now line).
+   * Values rounded to nearest 0.5h (e.g. 0.5h, 1h, 1.5h, 2h).
+   */
+  renderIntervals(refs) {
+    if (!refs || !refs.timelineIntervalsContainer || !refs.timelinePanel) return;
+    const container = refs.timelineIntervalsContainer;
+    container.innerHTML = "";
+
+    const markers = [];
+
+    // 1. Now Line (if visible/laid out)
+    const nowFraction = TimelineUtils.getNowFraction();
+    const nowLeft = TimelineUtils.fractionToLeft(nowFraction, refs.timelinePanel);
+    if (nowLeft > 0) {
+      markers.push({ type: "now", fraction: nowFraction, left: nowLeft });
+    }
+
+    // 2. User scrub lines
+    if (Array.isArray(State.scrubs)) {
+      State.scrubs.forEach((scrub) => {
+        const left = TimelineUtils.fractionToLeft(scrub.fraction, refs.timelinePanel);
+        if (left > 0) {
+          markers.push({ type: "scrub", id: scrub.id, fraction: scrub.fraction, left });
+        }
+      });
+    }
+
+    if (markers.length < 2) return;
+
+    // Sort left to right by fraction
+    markers.sort((a, b) => a.fraction - b.fraction);
+
+    for (let i = 0; i < markers.length - 1; i++) {
+      const m1 = markers[i];
+      const m2 = markers[i + 1];
+
+      const diffHours = (m2.fraction - m1.fraction) * 24;
+      const roundedHours = Math.round(diffHours * 2) / 2;
+
+      let text;
+      if (diffHours === 0) {
+        text = "0h";
+      } else if (diffHours < 0.25) {
+        text = "<0.5h";
+      } else if (roundedHours % 1 === 0) {
+        text = `${roundedHours}h`;
+      } else {
+        text = `${roundedHours}h`;
+      }
+
+      const span = document.createElement("div");
+      span.className = "timeline-interval-span";
+      span.style.left = `${m1.left}px`;
+      span.style.width = `${Math.max(0, m2.left - m1.left)}px`;
+
+      const pill = document.createElement("div");
+      pill.className = "timeline-interval-pill";
+      pill.textContent = text;
+
+      span.appendChild(pill);
+      container.appendChild(span);
+    }
   },
 
   /**
@@ -326,8 +400,9 @@ const TimelinePreview = {
           }
         }
 
-        // Live-update map timeline and ref lines
+        // Live-update map timeline, ref lines, and intervals
         api.renderNightArea(State.selectedOffsetHours);
+        this.renderIntervals(refs);
       }
     });
 
@@ -372,10 +447,11 @@ const TimelinePreview = {
     });
   },
 
-  /** Full repaint: rows + now-line + scrub markers. */
+  /** Full repaint: rows + now-line + scrub markers + intervals. */
   renderAll(refs) {
     this.renderRows(refs);
     this.renderNowLine(refs);
     this.renderScrubLine(refs);
+    this.renderIntervals(refs);
   },
 };

@@ -16,7 +16,6 @@
   --scrub-shadow: rgba(var(--scrub-rgb), 0.25);
   --scrub-active-color: #ea580c;
   --scrub-active-shadow: rgba(234, 88, 12, 0.45);
-  --scrub-hover-bg: rgba(var(--scrub-rgb), 0.12);
   --scrub-reset-btn-bg: #d97706;
   --unselected-pin: #ffc56f;
   --selected-pin: #de6b23;
@@ -44,7 +43,6 @@
   --scrub-shadow: rgba(var(--scrub-rgb), 0.35);
   --scrub-active-color: #f97316;
   --scrub-active-shadow: rgba(249, 115, 22, 0.60);
-  --scrub-hover-bg: rgba(var(--scrub-rgb), 0.16);
   --scrub-reset-btn-bg: #d97706;
   --unselected-pin: #fbbf24;
   --selected-pin: #fb923c;
@@ -73,7 +71,6 @@
     --scrub-shadow: rgba(var(--scrub-rgb), 0.35);
     --scrub-active-color: #f97316;
     --scrub-active-shadow: rgba(249, 115, 22, 0.60);
-    --scrub-hover-bg: rgba(var(--scrub-rgb), 0.16);
     --scrub-reset-btn-bg: #d97706;
     --unselected-pin: #fbbf24;
     --selected-pin: #fb923c;
