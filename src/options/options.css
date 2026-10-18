@@ -18,8 +18,8 @@ body {
 
 .container {
   width: 100%;
-  max-width: 760px;
-  /* match popup body width so the preview map renders 1:1 */
+  max-width: 1144px;
+  /* 760px preview (1:1 with popup) + 24px gap + 360px settings panel */
 }
 
 /* Header & Brand */
@@ -44,10 +44,11 @@ body {
     }
 
     & .title {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: var(--font-lg);
-      font-weight: 700;
+      font-weight: 300;
       color: var(--text-primary);
-      letter-spacing: -0.3px;
+      letter-spacing: normal;
     }
   }
 
@@ -77,11 +78,28 @@ body {
   background-color: var(--bg-elevated);
 }
 
-/* Settings Cards Layout */
+/* Settings Cards Layout: 2-column split (Preview on left, Settings on right) */
 .main-layout {
+  display: grid;
+  grid-template-columns: 760px 360px;
+  gap: 24px;
+  align-items: start;
+}
+
+.preview-column {
+  position: sticky;
+  top: 24px;
+  align-self: start;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.settings-column {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
 }
 
 .settings-card {
@@ -870,4 +888,149 @@ details[open]>.collapsible-summary::after {
 .current-cities-list::-webkit-scrollbar-thumb:hover,
 .search-results-list::-webkit-scrollbar-thumb:hover {
   background: var(--scroll-thumb-hover);
+}
+
+/* ==========================================================================
+   Dual-Column Adaptations for Settings Column (360px)
+   ========================================================================== */
+
+.settings-column .settings-card {
+  padding: var(--space-lg) var(--space-md);
+}
+
+.settings-column .settings-card .section-title {
+  font-size: var(--font-lg);
+  margin-bottom: var(--space-md);
+}
+
+/* Single-line City Card: [drag] [name] [zone] [lng] [lat] [remove] */
+.settings-column .current-city-card {
+  grid-template-columns: 16px 56px 1fr 46px 46px 20px;
+  grid-template-rows: auto;
+  gap: 4px;
+  padding: 5px 6px;
+  align-items: center;
+}
+
+.settings-column .current-city-card .drag-handle {
+  grid-column: auto;
+  grid-row: auto;
+  width: 16px;
+  height: 26px;
+  font-size: 13px;
+  align-self: center;
+}
+
+.settings-column .current-city-card .city-name-input {
+  grid-column: auto;
+  grid-row: auto;
+  width: 100%;
+  padding: 0 4px;
+}
+
+.settings-column .current-city-card .city-zone-select {
+  grid-column: auto;
+  grid-row: auto;
+  width: 100%;
+  min-width: 0;
+  padding: 0 4px;
+}
+
+.settings-column .current-city-card .city-lng-input,
+.settings-column .current-city-card .city-lat-input {
+  grid-column: auto;
+  grid-row: auto;
+  width: 100%;
+  padding: 0 2px;
+  text-align: center;
+  font-size: 10px;
+}
+
+.settings-column .current-city-card .remove-city-card-btn {
+  grid-column: auto;
+  grid-row: auto;
+  width: 20px;
+  height: 20px;
+  font-size: 14px;
+}
+
+.settings-column .city-list-header-group {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.settings-column .city-list-actions button {
+  padding: 0 10px;
+  font-size: 11px;
+}
+
+/* Map Texture Calibration Sliders in 360px Column */
+.settings-column .slider-control-group {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.settings-column .slider-control-group .slider-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.settings-column .slider-control-group .settings-slider {
+  flex: 1;
+  width: auto;
+  min-width: 80px;
+}
+
+/* Timeline Interactive Divider Handles & Hour Cells in 360px Column */
+.settings-column .interactive-hour-cell {
+  font-size: 9px;
+  letter-spacing: -0.5px;
+}
+
+.settings-column .timeline-divider-knob.top-knob {
+  padding: 1px 4px;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Responsive Breakpoint: Single-Column Fallback for Small Screens (< 1180px)
+   ========================================================================== */
+@media (max-width: 1180px) {
+  .container {
+    max-width: 760px;
+  }
+
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-column {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .settings-column {
+    width: 100%;
+  }
+
+  .settings-column .current-city-card {
+    grid-template-columns: 20px 1.2fr 1.6fr 58px 58px auto auto;
+    grid-template-rows: auto;
+  }
+
+  .settings-column .current-city-card .drag-handle,
+  .settings-column .current-city-card .city-name-input,
+  .settings-column .current-city-card .city-zone-select,
+  .settings-column .current-city-card .remove-city-card-btn,
+  .settings-column .current-city-card .city-lng-input,
+  .settings-column .current-city-card .city-lat-input {
+    grid-column: auto;
+    grid-row: auto;
+  }
 }
