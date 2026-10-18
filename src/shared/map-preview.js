@@ -111,6 +111,22 @@ const MapPreview = {
       targetDate = new Date(State.baseHours[0].getTime() + useFraction * 24 * 3600000);
     }
 
+    // Single delegated click listener on cityLayer instead of 70+ closures
+    if (refs.cityLayer && !refs.cityLayer._hasCityDelegation) {
+      refs.cityLayer._hasCityDelegation = true;
+      refs.cityLayer.addEventListener("click", (e) => {
+        const pin = e.target.closest(".city-pin");
+        if (!pin || !refs.cityLayer.contains(pin)) return;
+        e.stopPropagation();
+        const cityId = pin.dataset.id;
+        if (cityId) {
+          State.toggleCity(cityId);
+          if (refs._onCityToggle) refs._onCityToggle();
+        }
+      });
+    }
+    refs._onCityToggle = onCityToggle;
+
     const pinFrag = document.createDocumentFragment();
     const labelFrag = refs.mapTimeLabelLayer ? document.createDocumentFragment() : null;
 
@@ -128,10 +144,6 @@ const MapPreview = {
       const cityName = I18nUtils.getCityName(city);
       button.title = cityName;
       button.setAttribute("aria-label", I18nUtils.getTranslation("selectCity", { name: cityName }));
-      button.addEventListener("click", () => {
-        State.toggleCity(city.id);
-        if (onCityToggle) onCityToggle();
-      });
       pinFrag.append(button);
 
       if (isSelected && labelFrag) {
