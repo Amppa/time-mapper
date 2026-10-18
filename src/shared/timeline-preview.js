@@ -1,17 +1,12 @@
 /**
  * TimeMapper - Shared Timeline Rendering Module
- *
- * City hour rows, now-line marker and scrub-line interaction, shared by
- * the popup (Renderer / AppController delegate to it) and by the
- * options-page live preview. All DOM access goes through the `refs`
- * object; rerendering is done through the `api` callbacks so each page
- * keeps its own render loop.
- *
- * Expects State / PeriodUtils / TimeUtils / I18nUtils / EscapeUtils /
- * TimelineUtils / CONFIG loaded.
  */
 
-const TimelinePreview = {
+import { State } from "./state.js";
+import { CONFIG } from "./config.js";
+import { PeriodUtils, TimeUtils, I18nUtils, EscapeUtils, TimelineUtils } from "./utils.js";
+
+export const TimelinePreview = {
   /**
    * Collect the nodes this module renders into. `root` is `document`
    * in the popup or the mount element built by buildPreview().
@@ -470,3 +465,7 @@ const TimelinePreview = {
     this.renderIntervals(refs);
   },
 };
+
+if (typeof globalThis !== "undefined") {
+  globalThis.TimelinePreview = TimelinePreview;
+}
