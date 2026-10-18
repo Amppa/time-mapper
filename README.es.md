@@ -18,13 +18,11 @@ Una extensión de Chrome para comparar la hora en varios husos horarios. Haz cli
 
 ## Cómo se usa
 
-**Elige ciudades** — haz clic en cualquier marcador del mapa mundial para añadir esa ciudad a la línea de tiempo; vuelve a hacer clic para quitarla. La primera vez que abras la ventana ya estarán seleccionadas Tokio, Nueva York, Los Ángeles y tu hora local.
-
-**Abre la lista de ciudades** — el botón 🏙️ de la barra superior te permite buscar cualquier ciudad por nombre, revisar y reordenar tu lista actual, cambiar el máximo de ciudades, cargar un conjunto de ejemplo o borrarlo todo.
+**Elige ciudades** — haz clic en cualquier marcador del mapa mundial para añadir esa ciudad a la línea de tiempo; vuelve a hacer clic para quitarla. Si haces clic en una zona vacía del mapa, se añade una fila con ese desfase UTC (por ejemplo, `UTC+8`). La primera vez que abras la ventana ya estarán seleccionadas Tokio, Nueva York, Los Ángeles y tu hora local. Se muestran hasta 10 ciudades a la vez.
 
 **Lee la línea de tiempo** — cada fila es el día de 24 horas de una ciudad y la **línea actual** vertical marca este preciso momento. La celda de las `00` también muestra la fecha, para que veas dónde cambia el día.
 
-**Compara un momento concreto** — haz clic en cualquier parte de la línea de tiempo para colocar una línea de alineación (hasta cuatro). Arrástrala para moverla o pulsa su `[x]` para quitarla. Cada fila muestra a qué hora es ese momento en esa ciudad.
+**Compara un momento concreto** — haz clic en cualquier parte de la línea de tiempo para colocar una línea de alineación (hasta cuatro). Arrástrala para moverla o pulsa su `[x]` para quitarla. Cada fila muestra a qué hora es ese momento en esa ciudad. El espacio entre dos marcadores contiguos —incluida la línea actual— aparece rotulado con su duración (`1.5h`).
 
 **Usa el mapa** — el mapa puede sombrear la zona nocturna actual, dibujar las líneas de cada hora y mostrar una burbuja con la hora sobre cada ciudad seleccionada. El panel del mapa se puede plegar si solo quieres la línea de tiempo.
 
@@ -32,22 +30,22 @@ Una extensión de Chrome para comparar la hora en varios husos horarios. Haz cli
 
 ## Ajustes
 
-Haz clic en el botón ⚙ de la barra superior para abrir la página de ajustes:
+Haz clic en el botón ⚙ de la barra superior para abrir la página de ajustes. Los selectores de idioma y tema están en la cabecera, y junto a los ajustes queda fijada una vista previa del mapa y de la línea de tiempo.
 
 | Sección | Qué puedes hacer |
 | --- | --- |
-| **Ajustes de idioma** | Cambia la interfaz entre 繁體中文, English y Español. |
-| **Ajustes del minimapa** | Activa o desactiva la zona nocturna, las líneas de hora y las burbujas de hora; ajusta los desplazamientos de longitud/latitud, la escala de ancho/alto y el desplazamiento vertical; restablece los valores predeterminados. |
-| **Ajustes de periodos** | Elige la referencia de la línea actual (la hora local del navegador o la de la primera ciudad) y define el rango horario y los colores de fondo y de texto de tres periodos resaltados. Por defecto son 08–17, 18–23 y 00–07. |
-| **Apariencia** | Tema automático, oscuro o claro. Automático sigue la preferencia del sistema. |
+| **Ciudades** | Revisa cada ciudad que tienes ahora en la línea de tiempo: renómbrala, cambia su huso horario, ajusta sus coordenadas en el mapa, arrastra el asa para reordenarla o quítala con `×`. Busca por nombre para añadir una ciudad que no está en el mapa, carga el conjunto de ejemplo o bórralo todo. Hasta 10 ciudades. |
+| **Minimapa** | Activa o desactiva la zona nocturna, las líneas de hora y las burbujas de hora. |
+| **Textura del mapa** | Ajusta los desplazamientos de longitud/latitud, la escala de ancho/alto y el desplazamiento vertical, y después restablece los valores predeterminados. |
+| **Periodos** | Elige entre 2, 3 o 4 periodos resaltados y arrastra los tiradores sobre la cuadrícula de 24 horas para fijar sus tramos horarios, o restablece los valores predeterminados. También eliges la referencia de la línea actual (la hora local del navegador o la de la primera ciudad). |
 
-Tus ciudades, periodos y la calibración del mapa se guardan en el `localStorage` del navegador y se restauran la próxima vez que abras la ventana.
+Cada número de periodos trae su propia paleta para el tema claro y el oscuro, así que las bandas se siguen leyendo al cambiar de tema. Tus ciudades, periodos y la calibración del mapa se guardan en el `localStorage` del navegador y se restauran la próxima vez que abras la ventana.
 
 ---
 
 ## Una ciudad que no está en el mapa
 
-Búscala en la lista de ciudades. Los resultados vienen de la [API de geocodificación de Open-Meteo](https://geocoding-api.open-meteo.com/), así que buscar requiere conexión a internet. La ciudad que elijas se coloca en el mapa con sus propias coordenadas y se recuerda para la próxima vez.
+Búscala en la sección **Ciudades** de la página de ajustes. Los resultados vienen de la [API de geocodificación de Open-Meteo](https://geocoding-api.open-meteo.com/), así que buscar requiere conexión a internet. La ciudad que elijas se coloca en el mapa con sus propias coordenadas y se recuerda para la próxima vez.
 
 Para añadir una ciudad permanentemente a la lista integrada, edita `cityCatalog` en `src/shared/cities.js`. Las constantes que convierten longitud/latitud en una posición del mapa están documentadas en el bloque `PROJECTION`, al principio de `src/shared/config.js`.
 

@@ -18,13 +18,11 @@ A Chrome extension popup for comparing time across timezones. Click cities on a 
 
 ## How to use
 
-**Choose cities** — click any pin on the world map to add that city to the timeline; click it again to remove it. The first time you open the popup, Tokyo, New York, Los Angeles and your browser's local time are already selected.
-
-**Open the cities panel** — the 🏙️ button in the top bar lets you search for any city by name, review and reorder your current list, change the maximum number of cities, load an example set, or clear everything.
+**Choose cities** — click any pin on the world map to add that city to the timeline; click it again to remove it. Clicking an empty spot on the map adds that UTC offset (e.g. `UTC+8`) as a new row. The first time you open the popup, Tokyo, New York, Los Angeles and your browser's local time are already selected. Up to 10 cities are shown at once.
 
 **Read the timeline** — each row is one city's 24-hour day, and the vertical **now line** marks this exact moment. The `00` cell also shows the date, so you can see where a city's day rolls over.
 
-**Compare a specific moment** — click anywhere on the timeline to drop an alignment line (up to four). Drag a line to move it, or click its `[x]` to remove it. Every row updates to show what time that moment is in that city.
+**Compare a specific moment** — click anywhere on the timeline to drop an alignment line (up to four). Drag a line to move it, or click its `[x]` to remove it. Every row updates to show what time that moment is in that city. The gap between two neighbouring markers — including the now line — is labelled with its length (`1.5h`).
 
 **Use the map** — the map can shade the current night area, draw the hour lines for each timezone, and show a live time bubble above every selected city. The map panel collapses if you only want the timeline.
 
@@ -32,22 +30,22 @@ A Chrome extension popup for comparing time across timezones. Click cities on a 
 
 ## Settings
 
-Click the ⚙ button in the top bar to open the settings page:
+Click the ⚙ button in the top bar to open the settings page. The language and theme pickers sit in the page header, and a live preview of the map and timeline stays pinned beside the settings as you edit.
 
 | Section | What you can do |
 | --- | --- |
-| **Language Settings** | Switch the interface between 繁體中文, English and Español. |
-| **Minimap Settings** | Toggle the night area, hour lines and city time bubbles; fine-tune the map's longitude/latitude offsets, width/height scale and vertical offset; reset everything to defaults. |
-| **Time Period Settings** | Choose what the now line is measured against (your browser's local time, or the first city), then set the hour range and the background/text colours of three highlighted periods. Defaults are 08–17, 18–23 and 00–07. |
-| **Appearance** | Auto, dark or light theme. Auto follows your system setting. |
+| **Cities** | Review every city currently on your timeline: rename it, switch its timezone, fine-tune its map coordinates, drag the handle to reorder, or remove it with `×`. Search by name to add a city that is not on the map, load the example set, or clear everything. Up to 10 cities. |
+| **Minimap** | Toggle the night area, hour lines and city time bubbles. |
+| **Map Texture** | Fine-tune the map's longitude/latitude offsets, width/height scale and vertical offset, then restore the defaults. |
+| **Time Periods** | Pick 2, 3 or 4 highlighted periods, then drag the handles on the 24-hour grid to set their hour ranges, or restore the defaults. Also choose what the now line is measured against (your browser's local time, or the first city). |
 
-Your cities, periods and map calibration are saved in the browser's `localStorage` and restored the next time you open the popup.
+Each period count ships with its own colour scheme for light and dark, so the bands stay readable when you switch theme. Your cities, periods and map calibration are saved in the browser's `localStorage` and restored the next time you open the popup.
 
 ---
 
 ## A city that is not on the map
 
-Search for it in the cities panel. Results come from the [Open-Meteo geocoding API](https://geocoding-api.open-meteo.com/), so searching needs a network connection. The city you pick is placed on the map from its own coordinates and remembered for next time.
+Search for it in the **Cities** section of the settings page. Results come from the [Open-Meteo geocoding API](https://geocoding-api.open-meteo.com/), so searching needs a network connection. The city you pick is placed on the map from its own coordinates and remembered for next time.
 
 To add a city permanently to the built-in list, edit `cityCatalog` in `src/shared/cities.js`. The constants that turn longitude/latitude into a map position are documented in the `PROJECTION` block at the top of `src/shared/config.js`.
 
