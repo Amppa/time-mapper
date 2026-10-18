@@ -451,16 +451,16 @@ const TimelineUtils = {
   },
 
   /** Convert a 0-1 day fraction to a pixel offset inside the timeline panel. */
-  fractionToLeft(fraction, scope) {
-    const geo = this.gridGeometry(scope);
-    if (!geo) return 0;
-    return geo.gridLeft + fraction * geo.gridWidth;
+  fractionToLeft(fraction, scope, geo = null) {
+    const g = geo || this.gridGeometry(scope);
+    if (!g) return 0;
+    return g.gridLeft + fraction * g.gridWidth;
   },
 
-  leftToFraction(pxLeft, scope) {
-    const geo = this.gridGeometry(scope);
-    if (!geo) return 0;
-    return MathUtils.clamp((pxLeft - geo.gridLeft) / geo.gridWidth, 0, 1);
+  leftToFraction(pxLeft, scope, geo = null) {
+    const g = geo || this.gridGeometry(scope);
+    if (!g) return 0;
+    return MathUtils.clamp((pxLeft - g.gridLeft) / g.gridWidth, 0, 1);
   },
 
   formatFractionTime(fraction) {

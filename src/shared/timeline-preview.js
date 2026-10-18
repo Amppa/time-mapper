@@ -64,6 +64,9 @@ const TimelinePreview = {
   renderRows(refs) {
     if (!refs.timelineRows) return;
     refs.timelineRows.innerHTML = "";
+
+    const rowsFrag = document.createDocumentFragment();
+
     State.selectedIds.forEach((id) => {
       const city = State.findCity(id);
       if (!city) return;
@@ -97,6 +100,8 @@ const TimelinePreview = {
 
       // Render 25 cells if there's a fractional hour offset, otherwise 24
       const numCells = F > 0 ? 25 : 24;
+      const hoursFrag = document.createDocumentFragment();
+
       for (let index = 0; index < numCells; index++) {
         const cellDate = new Date(State.baseHours[0].getTime() + (index - F) * 3600000);
         const cityHour = TimeUtils.hourInZone(cellDate, city.zone);
@@ -123,18 +128,22 @@ const TimelinePreview = {
           cell.style.marginLeft = `calc(-${F} * 100% / 24)`;
         }
 
-        hours.append(cell);
+        hoursFrag.append(cell);
       }
 
+      hours.append(hoursFrag);
       row.append(label, hours);
-      refs.timelineRows.append(row);
+      rowsFrag.append(row);
     });
+
+    refs.timelineRows.append(rowsFrag);
   },
 
-  renderNowLine(refs) {
+  renderNowLine(refs, geo = null) {
     if (!refs.nowLine) return;
+    const g = geo || TimelineUtils.gridGeometry(refs.timelinePanel);
     const fraction = TimelineUtils.getNowFraction();
-    const left = TimelineUtils.fractionToLeft(fraction, refs.timelinePanel);
+    const left = TimelineUtils.fractionToLeft(fraction, refs.timelinePanel, g);
     if (left === 0) {
       refs.nowLine.style.display = "none";
       return;
@@ -154,17 +163,20 @@ const TimelinePreview = {
     if (timeEl) {
       timeEl.textContent = TimelineUtils.formatFractionTime(fraction);
     }
-    this.renderIntervals(refs);
+    this.renderIntervals(refs, g);
   },
 
-  renderScrubLine(refs) {
+  renderScrubLine(refs, geo = null) {
     if (!refs.scrubLinesContainer) return;
 
     // Clear dynamic scrub lines
     refs.scrubLinesContainer.innerHTML = "";
+    const g = geo || TimelineUtils.gridGeometry(refs.timelinePanel);
+
+    const scrubFrag = document.createDocumentFragment();
 
     State.scrubs.forEach((scrub) => {
-      const left = TimelineUtils.fractionToLeft(scrub.fraction, refs.timelinePanel);
+      const left = TimelineUtils.fractionToLeft(scrub.fraction, refs.timelinePanel, g);
       if (left === 0) return;
 
       const isActive = (scrub.id === State.activeScrubId);
@@ -224,25 +236,28 @@ const TimelinePreview = {
       group.appendChild(topKnob);
       group.appendChild(bottomKnob);
 
-      refs.scrubLinesContainer.appendChild(group);
+      scrubFrag.appendChild(group);
     });
-    this.renderIntervals(refs);
+
+    refs.scrubLinesContainer.appendChild(scrubFrag);
+    this.renderIntervals(refs, g);
   },
 
   /**
    * Render interval indicators between adjacent markers (Scrub lines + Now line).
    * Values rounded to nearest 0.5h (e.g. 0.5h, 1h, 1.5h, 2h).
    */
-  renderIntervals(refs) {
+  renderIntervals(refs, geo = null) {
     if (!refs || !refs.timelineIntervalsContainer || !refs.timelinePanel) return;
     const container = refs.timelineIntervalsContainer;
     container.innerHTML = "";
 
+    const g = geo || TimelineUtils.gridGeometry(refs.timelinePanel);
     const markers = [];
 
     // 1. Now Line (if visible/laid out)
     const nowFraction = TimelineUtils.getNowFraction();
-    const nowLeft = TimelineUtils.fractionToLeft(nowFraction, refs.timelinePanel);
+    const nowLeft = TimelineUtils.fractionToLeft(nowFraction, refs.timelinePanel, g);
     if (nowLeft > 0) {
       markers.push({ type: "now", fraction: nowFraction, left: nowLeft });
     }
@@ -250,7 +265,7 @@ const TimelinePreview = {
     // 2. User scrub lines
     if (Array.isArray(State.scrubs)) {
       State.scrubs.forEach((scrub) => {
-        const left = TimelineUtils.fractionToLeft(scrub.fraction, refs.timelinePanel);
+        const left = TimelineUtils.fractionToLeft(scrub.fraction, refs.timelinePanel, g);
         if (left > 0) {
           markers.push({ type: "scrub", id: scrub.id, fraction: scrub.fraction, left });
         }

@@ -126,7 +126,9 @@ const AppController = {
     this.wireMapTimezoneHover();
 
     I18nUtils.applyAttributes();
-    Renderer.render();
+    requestAnimationFrame(() => {
+      Renderer.render();
+    });
 
     // Listen to settings changes from Options page
     window.addEventListener("storage", () => {

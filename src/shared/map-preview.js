@@ -111,6 +111,9 @@ const MapPreview = {
       targetDate = new Date(State.baseHours[0].getTime() + useFraction * 24 * 3600000);
     }
 
+    const pinFrag = document.createDocumentFragment();
+    const labelFrag = refs.mapTimeLabelLayer ? document.createDocumentFragment() : null;
+
     State.allCities().forEach((city) => {
       const position = MapUtils.mapPosition(city);
       const button = document.createElement("button");
@@ -129,9 +132,9 @@ const MapPreview = {
         State.toggleCity(city.id);
         if (onCityToggle) onCityToggle();
       });
-      if (refs.cityLayer) refs.cityLayer.append(button);
+      pinFrag.append(button);
 
-      if (isSelected && refs.mapTimeLabelLayer) {
+      if (isSelected && labelFrag) {
         const label = document.createElement("div");
         label.className = "map-time-label";
         label.style.left = `${position.x}%`;
@@ -146,9 +149,12 @@ const MapPreview = {
           label.style.display = "none";
         }
 
-        refs.mapTimeLabelLayer.append(label);
+        labelFrag.append(label);
       }
     });
+
+    if (refs.cityLayer) refs.cityLayer.append(pinFrag);
+    if (refs.mapTimeLabelLayer && labelFrag) refs.mapTimeLabelLayer.append(labelFrag);
   },
 
   /**
@@ -174,6 +180,7 @@ const MapPreview = {
     refs.hourLines.innerHTML = "";
     refs.hourLines.style.backgroundImage = "none";
 
+    const frag = document.createDocumentFragment();
     for (const { x: rawX } of this.hourLinePositions(offsetHours)) {
       const line = document.createElement("div");
       line.style.position = "absolute";
@@ -182,8 +189,9 @@ const MapPreview = {
       line.style.bottom = "0";
       line.style.width = "1px";
       line.style.backgroundColor = "rgba(8, 74, 96, 0.18)";
-      refs.hourLines.append(line);
+      frag.append(line);
     }
+    refs.hourLines.append(frag);
   },
 
   calcNightPoints(offsetHours) {
@@ -208,6 +216,7 @@ const MapPreview = {
     if (!refs.mapTimeline) return;
     refs.mapTimeline.innerHTML = "";
 
+    const frag = document.createDocumentFragment();
     for (const { hour, x } of this.hourLinePositions(offsetHours)) {
       if (x < 0 || x > 100) continue;
       const tick = document.createElement("div");
@@ -219,8 +228,9 @@ const MapPreview = {
       label.style.left = `${x}%`;
       label.textContent = `${String(hour).padStart(2, "0")}:00`;
 
-      refs.mapTimeline.append(tick, label);
+      frag.append(tick, label);
     }
+    refs.mapTimeline.append(frag);
   },
 
   renderNightArea(refs, offsetHours = 0) {
