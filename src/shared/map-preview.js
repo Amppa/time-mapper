@@ -97,11 +97,11 @@ export const MapPreview = {
     return this.collectRefs(mount);
   },
 
-  _createPinElement(city, isSelected, currentOffset, subsolarLng) {
+  _createPinElement(city, isSelected, currentOffset, subsolarLng, nightCurve = null) {
     const position = MapUtils.mapPosition(city);
     const button = document.createElement("button");
     button.type = "button";
-    const isNight = this.isCityInNight(city, currentOffset, subsolarLng);
+    const isNight = this.isCityInNight(city, currentOffset, subsolarLng, nightCurve);
     button.className = `city-pin${isSelected ? " is-selected" : ""}${isNight ? " is-night" : ""}`;
     button.style.left = `${position.x}%`;
     button.style.top = `${position.y}%`;
@@ -152,6 +152,8 @@ export const MapPreview = {
     const existingPins = refs.cityLayer ? Array.from(refs.cityLayer.children) : [];
     const currentOffset = State.selectedOffsetHours || 0;
     const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(currentOffset));
+    // One shared terminator curve for all pins: replaces 70x trig with lookups.
+    const nightCurve = this.calcNightPoints(currentOffset).curve;
     const selectedSet = new Set(State.selectedIds);
 
     // In-place patch only when the mounted pins are exactly the live cities, as a
@@ -165,7 +167,7 @@ export const MapPreview = {
         const city = State.findCity(btn.dataset.id);
         if (!city) return;
         const isSelected = selectedSet.has(city.id);
-        const isNight = this.isCityInNight(city, currentOffset, subsolarLng);
+        const isNight = this.isCityInNight(city, currentOffset, subsolarLng, nightCurve);
         btn.classList.toggle("is-selected", isSelected);
         btn.classList.toggle("is-night", isNight);
       });
@@ -214,7 +216,7 @@ export const MapPreview = {
     const labelFrag = refs.mapTimeLabelLayer ? document.createDocumentFragment() : null;
 
     immediateCities.forEach((city) => {
-      pinFrag.append(this._createPinElement(city, selectedSet.has(city.id), currentOffset, subsolarLng));
+      pinFrag.append(this._createPinElement(city, selectedSet.has(city.id), currentOffset, subsolarLng, nightCurve));
 
       if (selectedSet.has(city.id) && labelFrag) {
         const position = MapUtils.mapPosition(city);
@@ -247,9 +249,10 @@ export const MapPreview = {
         const deferredFrag = document.createDocumentFragment();
         const curOffset = State.selectedOffsetHours || 0;
         const curSubsolar = MapUtils.subsolarLng(this.shiftedNow(curOffset));
+        const curCurve = this.calcNightPoints(curOffset).curve;
         deferredCities.forEach((city) => {
           if (refs.cityLayer.querySelector(`[data-id="${city.id}"]`)) return;
-          deferredFrag.append(this._createPinElement(city, false, curOffset, curSubsolar));
+          deferredFrag.append(this._createPinElement(city, false, curOffset, curSubsolar, curCurve));
         });
         refs.cityLayer.append(deferredFrag);
       });
@@ -296,13 +299,20 @@ export const MapPreview = {
     const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(offsetHours));
 
     const points = [];
+    // Numeric curve for isCityInNight lookups: same calibrated viewport
+    // coordinates as the SVG path, so pins and shading always agree.
+    const curve = [];
     for (let x = 0; x <= 100; x += 2) {
       const lng = MapUtils.getXLongitude(x);
       const lat = Math.atan(-Math.cos((lng - subsolarLng) * Math.PI / 180) / NIGHT_TAN_DEC)
         * 180 / Math.PI + NIGHT_Y_SHIFT;
       const { x: px, y: py } = MapUtils.mapPosition({ lng, lat });
       points.push(`${px.toFixed(1)},${py.toFixed(1)}`);
+      curve.push({ x: px, y: py });
     }
+    // Keep the string array as the return value (SVG path building reads it);
+    // stash the numeric curve alongside for night lookups.
+    points.curve = curve;
     return points;
   },
 
@@ -396,17 +406,51 @@ export const MapPreview = {
   /**
    * Determine if a city is inside the night curve (terminator) at the given offset.
    * `cachedSubsolarLng` allows batch callers to avoid recomputing subsolar longitude.
+   * `cachedCurve` (from calcNightPoints().curve) allows skipping the per-city
+   * trigonometry entirely: the pin shares the exact curve the shading draws,
+   * so color and shadow can never disagree by 1px.
    */
-  isCityInNight(city, offsetHours = 0, cachedSubsolarLng = null) {
+  isCityInNight(city, offsetHours = 0, cachedSubsolarLng = null, cachedCurve = null) {
+    const cityPos = MapUtils.mapPosition(city);
+    if (cachedCurve && cachedCurve.length > 0) {
+      return this._isNightFromCurve(cityPos, cachedCurve);
+    }
     const { lng } = MapUtils.lngLatOf(city);
     const subsolarLng = cachedSubsolarLng !== null
       ? cachedSubsolarLng
       : MapUtils.subsolarLng(this.shiftedNow(offsetHours));
     const termLat = Math.atan(-Math.cos((lng - subsolarLng) * Math.PI / 180) / NIGHT_TAN_DEC)
       * 180 / Math.PI + NIGHT_Y_SHIFT;
-    const cityPos = MapUtils.mapPosition(city);
     const termPos = MapUtils.mapPosition({ lng, lat: termLat });
     return cityPos.y >= termPos.y;
+  },
+
+  /** Table lookup against the terminator polyline (51 pts, x step 2). */
+  _isNightFromCurve(cityPos, curve) {
+    const x = cityPos.x;
+    // Clamp to endpoints when calibration pushes pins off the curve span.
+    if (x <= curve[0].x) return cityPos.y >= curve[0].y;
+    const last = curve[curve.length - 1];
+    if (x >= last.x) return cityPos.y >= last.y;
+    // Linear scan over 51 pts is cheaper than trig; find bracketing segment.
+    for (let i = 0; i < curve.length - 1; i++) {
+      const a = curve[i];
+      const b = curve[i + 1];
+      if (x >= a.x && x <= b.x) {
+        const span = b.x - a.x;
+        const t = span > 0 ? (x - a.x) / span : 0;
+        const curveY = a.y + (b.y - a.y) * t;
+        return cityPos.y >= curveY;
+      }
+    }
+    // Non-monotonic calibration fallback: nearest point.
+    let best = curve[0];
+    let bestDist = Math.abs(x - best.x);
+    for (let i = 1; i < curve.length; i++) {
+      const d = Math.abs(x - curve[i].x);
+      if (d < bestDist) { bestDist = d; best = curve[i]; }
+    }
+    return cityPos.y >= best.y;
   },
 
   /** Synchronize .is-night class on all rendered pins */

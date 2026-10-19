@@ -20,6 +20,9 @@ export const State = {
   cityLimit: 10,
   lastActiveCard: null,
   _localCity: null,
+  _cachedCityList: null,
+  _cachedCityIndex: null,
+  _cachedCustomCities: null,
 
   /**
    * Derived from the active scrub line; never assigned directly.
@@ -33,6 +36,9 @@ export const State = {
 
   init() {
     this._localCity = null;
+    this._cachedCityList = null;
+    this._cachedCityIndex = null;
+    this._cachedCustomCities = null;
     this.currentLang = this.loadLanguage();
     this.timePeriods = this.loadTimePeriods();
     this.mapSettings = this.loadMapSettings();
@@ -211,11 +217,22 @@ export const State = {
         matchingId: matchingCity ? matchingCity.id : null
       };
     }
-    return [this._localCity, ...cityCatalog, ...this.customCities];
+    // Catalog is static; only rebuild when local/custom content changes.
+    // customCities is reassigned (never mutated) on every edit, so a
+    // reference check is a reliable invalidation signal.
+    if (!this._cachedCityList || this._cachedCustomCities !== this.customCities) {
+      this._cachedCityList = [this._localCity, ...cityCatalog, ...this.customCities];
+      this._cachedCityIndex = new Map(this._cachedCityList.map((c) => [c.id, c]));
+      this._cachedCustomCities = this.customCities;
+    }
+    return this._cachedCityList;
   },
 
   findCity(id) {
-    return this.allCities().find((city) => city.id === id);
+    if (!this._cachedCityIndex || this._cachedCustomCities !== this.customCities) {
+      this.allCities();
+    }
+    return this._cachedCityIndex.get(id);
   },
 
   loadNowLineMode() {
