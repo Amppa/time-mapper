@@ -386,33 +386,48 @@ export const TimelinePreview = {
       }
     });
 
+    let dragRafId = null;
+    let pendingClientX = null;
+
     document.addEventListener("mousemove", (e) => {
       if (!isDragging || !activeDragScrubId) return;
+      pendingClientX = e.clientX;
+      if (dragRafId !== null) return;
 
-      const fraction = calcFraction(e.clientX);
+      dragRafId = requestAnimationFrame(() => {
+        dragRafId = null;
+        if (!isDragging || !activeDragScrubId || pendingClientX === null) return;
 
-      // Update fraction in state
-      const scrub = State.scrubs.find(s => s.id === activeDragScrubId);
-      if (scrub && scrub.fraction !== fraction) {
-        scrub.fraction = fraction;
+        const fraction = calcFraction(pendingClientX);
 
-        // Update position of group element directly for performance
-        const group = refs.timelinePanel.querySelector(`.scrub-line-group[data-id="${activeDragScrubId}"]`);
-        if (group) {
-          group.style.left = `${(fraction * 100).toFixed(4)}%`;
-          const timeEl = group.querySelector(".knob-time");
-          if (timeEl) {
-            timeEl.textContent = TimelineUtils.formatFractionTime(fraction);
+        // Update fraction in state
+        const scrub = State.scrubs.find(s => s.id === activeDragScrubId);
+        if (scrub && scrub.fraction !== fraction) {
+          scrub.fraction = fraction;
+
+          // Update position of group element directly for performance
+          const group = refs.timelinePanel.querySelector(`.scrub-line-group[data-id="${activeDragScrubId}"]`);
+          if (group) {
+            group.style.left = `${(fraction * 100).toFixed(4)}%`;
+            const timeEl = group.querySelector(".knob-time");
+            if (timeEl) {
+              timeEl.textContent = TimelineUtils.formatFractionTime(fraction);
+            }
           }
-        }
 
-        // Live-update map timeline, ref lines, and intervals
-        api.renderNightArea(State.selectedOffsetHours);
-        this.renderIntervals(refs);
-      }
+          // Live-update map timeline, ref lines, and intervals
+          api.renderNightArea(State.selectedOffsetHours);
+          this.renderIntervals(refs);
+        }
+      });
     });
 
     document.addEventListener("mouseup", () => {
+      if (dragRafId !== null) {
+        cancelAnimationFrame(dragRafId);
+        dragRafId = null;
+      }
+      pendingClientX = null;
       if (!isDragging) return;
       isDragging = false;
       activeDragScrubId = null;
