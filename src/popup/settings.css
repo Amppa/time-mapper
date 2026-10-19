@@ -9,7 +9,6 @@
   --line: #d9ded8;
   --accent: var(--ink);
   --now-meta-color: #8e9ca0;
-  --timezone-hover-bg: rgba(245, 158, 11, 0.18);
 }
 
 :root[data-theme="dark"] {
@@ -22,7 +21,6 @@
   --line: #2e3038;
   --accent: #38bdf8;
   --now-meta-color: #8b949e;
-  --timezone-hover-bg: rgba(56, 189, 248, 0.18);
 }
 
 body {

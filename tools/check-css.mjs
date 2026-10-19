@@ -241,9 +241,22 @@ const pages = htmlFiles.map((page) => {
   return { page, links };
 });
 
+// Which stylesheets declare each custom property, repo-wide.
+const definedAnywhere = new Map();
+for (const f of cssFiles) {
+  for (const rule of parsed.get(f).rules) {
+    for (const d of rule.decls) {
+      if (!d.prop.startsWith("--")) continue;
+      if (!definedAnywhere.has(d.prop)) definedAnywhere.set(d.prop, new Set());
+      definedAnywhere.get(d.prop).add(f);
+    }
+  }
+}
+
 for (const { page, links } of pages) {
   const defined = new Set();
   const referenced = new Map(); // var name -> [locations]
+  const masked = new Map();     // fallback-backed refs to a name owned by another page
 
   for (const href of links) {
     const { text, rules } = parsed.get(href);
@@ -252,8 +265,14 @@ for (const { page, links } of pages) {
         const line = text.slice(0, rule.offset).split("\n").length;
         if (d.prop.startsWith("--")) defined.add(d.prop);
         for (const m of d.value.matchAll(/var\(\s*(--[\w-]+)(\s*,)?/g)) {
-          // A fallback makes an unresolved reference degrade instead of break.
-          if (m[2]) continue;
+          if (m[2]) {
+            // A fallback keeps the declaration valid, but it can still mask a
+            // token that another page owns: the two pages then quietly render
+            // different colours. Remember the site for a post-pass.
+            if (!masked.has(m[1])) masked.set(m[1], []);
+            masked.get(m[1]).push(`${href}:${line}`);
+            continue;
+          }
           if (!referenced.has(m[1])) referenced.set(m[1], []);
           referenced.get(m[1]).push(`${href}:${line}`);
         }
@@ -268,6 +287,15 @@ for (const { page, links } of pages) {
     }
   } else {
     ok(`${page}: ${referenced.size} var() reference(s) resolve across ${links.length} stylesheet(s)`);
+  }
+
+  // A fallback is fine when nothing in the repo defines the name. It is not
+  // fine when the name exists but only on a page this one does not load.
+  for (const [name, where] of masked) {
+    if (defined.has(name)) continue;
+    const owners = [...definedAnywhere.get(name) || []].filter((f) => !links.includes(f));
+    if (!owners.length) continue;
+    warn(`${page}: var(${name}, fallback) hides a token only defined in ${owners.join(", ")} [${where.join(", ")}]`);
   }
 }
 
