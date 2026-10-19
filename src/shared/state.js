@@ -162,7 +162,8 @@ export const State = {
     try {
       const saved = JSON.parse(localStorage.getItem(CONFIG.storageKey));
       if (Array.isArray(saved)) {
-        return saved.filter((id) => this.allCities().some((city) => city.id === id)).slice(0, this.cityLimit);
+        // Storage is user-writable; keep the first occurrence of each id only.
+        return [...new Set(saved)].filter((id) => this.allCities().some((city) => city.id === id)).slice(0, this.cityLimit);
       }
     } catch {
       localStorage.removeItem(CONFIG.storageKey);

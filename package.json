@@ -6,7 +6,9 @@
   "scripts": {
     "check:i18n": "node tools/check-i18n.mjs",
     "check:css": "node tools/check-css.mjs",
-    "test": "npm run check:i18n && npm run check:css",
+    "test:unit": "node --test tests/*.test.js",
+    "test:coverage": "node --test --experimental-test-coverage tests/*.test.js",
+    "test": "npm run check:i18n && npm run check:css && npm run test:unit",
     "profile:popup": "node tools/profile-popup.mjs"
   },
   "devDependencies": {

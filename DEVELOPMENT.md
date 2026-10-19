@@ -5,17 +5,27 @@
 ```bash
 # Run every pre-commit check (must pass before commit)
 npm test
-#   check:i18n — dictionaries, data-i18n keys, language plumbing
-#   check:css  — var() resolution per page, dead selectors, duplicate blocks
+#   check:i18n  — dictionaries, data-i18n keys, language plumbing
+#   check:css   — var() resolution per page, dead selectors, duplicate blocks
+#   test:unit   — node:test suite in tests/ (shared utils, catalog, state)
 
 # Or individually
 node tools/check-i18n.mjs
 node tools/check-css.mjs
+npm run test:unit      # unit tests only
+npm run test:coverage  # unit tests with the line/branch/function coverage report
 
 # Profile the popup: web vitals, long tasks and a DevTools-compatible trace
 npm install          # first run only, pulls puppeteer
 npm run profile:popup # writes traces/*.trace.json
 ```
+
+### Unit Tests
+- Built on the Node.js built-in runner (`node:test` + `node:assert/strict`). No test framework is installed and none may be added — the extension stays zero-dependency at runtime.
+- Layout: `tests/helpers/mock-storage.js` (in-memory `localStorage`), `tests/utils.test.js`, `tests/cities.test.js`, `tests/state.test.js`.
+- `tests/state.test.js` shares the `State` singleton and the global `localStorage`, so its `beforeEach` re-seeds storage and re-initialises state rather than mutating leftovers.
+- Tests must stay deterministic: never depend on the machine time zone or on the current date. Assert zone-relative behaviour (`TimeUtils.hourInZone(...)`) or freeze `Date` with `t.mock.timers`.
+- `src/shared/cities.js` carries no `name` field — display names live in `i18nCityNames`, keyed by city id. `tests/cities.test.js` asserts that linkage instead.
 
 ### Local Extension Loading
 - Chrome: `chrome://extensions/` → Enable **Developer mode** → **Load unpacked** (select root).
@@ -50,7 +60,7 @@ When adding a new setting or feature:
 2. [ ] **i18n**: Add strings for `zh`, `en`, and `es` in `src/shared/i18n.js`.
 3. [ ] **UI**: Add `.control-group` row in `options.html` (and `popup.html` if exposed).
 4. [ ] **Styles**: Declare any new `var(--x)` in a stylesheet the page actually loads. `check-css.mjs` resolves references per page, so a token defined only in `popup/settings.css` is invisible to `options.html`.
-5. [ ] **Verification**: Run `npm test` (0 failures).
+5. [ ] **Verification**: Run `npm test` (0 failures). New logic in `src/shared/` needs a case in `tests/`.
 
 ---
 
