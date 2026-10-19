@@ -1,0 +1,141 @@
+/* ==========================================================================
+   Options Time Periods Stylesheet - TimeMapper
+   Interactive 24-Hour Grid Timeline & Period Boundaries
+   ========================================================================== */
+
+.period-count-select {
+  min-width: 64px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.period-timeline-header {
+  padding-bottom: 0;
+}
+
+/* ==========================================================================
+   Interactive 24-Hour Grid Timeline (Matches Preview Timeline Style)
+   ========================================================================== */
+.time-periods-timeline-container {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 var(--space-md) 0;
+  user-select: none;
+}
+
+/* Interactive Timeline Panel (Replicates .timeline-panel & .hours) */
+.interactive-timeline-panel {
+  position: relative;
+  overflow: visible;
+  background: var(--bg-primary);
+  border: 1px solid var(--divider);
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  padding: 0;
+  margin: 12px 0 0 0;
+}
+
+.interactive-hours {
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: 44px;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+/* Interactive Hour Cell inherits layout, sizing and typography from .hour-cell */
+.interactive-hour-cell {
+  cursor: pointer;
+  font-size: 9px;
+  letter-spacing: -0.5px;
+  transition: background-color 0.15s ease, filter 0.15s ease;
+}
+
+.interactive-hour-cell:last-child {
+  border-right: none;
+}
+
+.interactive-hour-cell:hover {
+  filter: brightness(1.15);
+}
+
+/* Dividers Layer */
+.timeline-dividers-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Individual Draggable Divider */
+.timeline-divider {
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  width: 28px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  cursor: ew-resize;
+  pointer-events: auto;
+  touch-action: none;
+  outline: none;
+}
+
+.timeline-divider-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: #ffffff;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+.timeline-divider-knob {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  color: #111111;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.timeline-divider-knob.top-knob {
+  padding: 1px 4px;
+  font-size: 9px;
+  white-space: nowrap;
+  top: -4px;
+}
+
+.timeline-divider-knob.bottom-knob {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  bottom: -4px;
+}
+
+.timeline-divider:hover .timeline-divider-knob,
+.timeline-divider.is-dragging .timeline-divider-knob {
+  transform: scale(1.18);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+  border-color: var(--accent-solid);
+}
+
+.timeline-divider.is-dragging .timeline-divider-line {
+  background: var(--accent-solid);
+  width: 3px;
+}
