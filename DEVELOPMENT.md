@@ -14,6 +14,7 @@ node tools/check-i18n.mjs
 node tools/check-css.mjs
 npm run test:unit      # unit tests only
 npm run test:coverage  # unit tests with the line/branch/function coverage report
+npm run bench          # hot path benchmarks with per-call budgets (~2 s)
 
 # Profile the popup: web vitals, long tasks and a DevTools-compatible trace
 npm install          # first run only, pulls puppeteer
@@ -26,6 +27,12 @@ npm run profile:popup # writes traces/*.trace.json
 - `tests/state.test.js` shares the `State` singleton and the global `localStorage`, so its `beforeEach` re-seeds storage and re-initialises state rather than mutating leftovers.
 - Tests must stay deterministic: never depend on the machine time zone or on the current date. Assert zone-relative behaviour (`TimeUtils.hourInZone(...)`) or freeze `Date` with `t.mock.timers`.
 - `src/shared/cities.js` carries no `name` field — display names live in `i18nCityNames`, keyed by city id. `tests/cities.test.js` asserts that linkage instead.
+
+### Benchmarks
+- `npm run bench` (`tools/bench.mjs`) times the pure hot paths — night-area geometry, map projection, state lookup, escaping — and fails if a median exceeds its per-call budget. Zero dependencies, no browser.
+- It guards **algorithmic** regressions only. Each budget sits ~100× above the measured cost, so CPU variance never trips it; a breach means the complexity changed, not that the machine is slow.
+- It does **not** cover DOM insertion, style recalculation or paint. Those need `npm run profile:popup`.
+- Kept out of `npm test` deliberately: benchmarks are a review signal, not a correctness gate. Run them before touching `src/shared/map-preview.js`, `src/shared/state.js` or the projection math in `src/shared/utils.js`.
 
 ### Local Extension Loading
 - Chrome: `chrome://extensions/` → Enable **Developer mode** → **Load unpacked** (select root).
