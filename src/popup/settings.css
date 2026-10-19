@@ -92,10 +92,9 @@ button {
 }
 
 .topbar-brand {
-  font-size: 19px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  color: var(--ink);
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--now-meta-color);
   white-space: nowrap;
 }
 
@@ -128,7 +127,7 @@ h1 {
 
 .now-date {
   color: var(--now-meta-color);
-  font-size: 16px;
+  font-size: 20px;
   margin-left: 8px;
   font-weight: 300;
   font-variant-numeric: tabular-nums;
@@ -145,9 +144,6 @@ h1 {
   background: var(--panel);
   color: var(--ink);
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.2s ease;
   user-select: none;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
@@ -156,10 +152,12 @@ h1 {
   font-size: 15px;
   line-height: 1;
   color: var(--muted);
-  transition: transform 0.25s ease, color 0.2s ease;
 }
 
+/* 設定按鈕文字的大小與粗細在此調整 */
 .settings-button .settings-text {
+  font-size: 15px;
+  font-weight: 500;
   line-height: 1;
 }
 
@@ -171,12 +169,8 @@ h1 {
 
 .settings-button:hover .settings-icon {
   color: var(--accent);
-  transform: rotate(45deg);
 }
 
-.settings-button:active {
-  transform: scale(0.97);
-}
 /* Scrollbar polish */
 .timeline-rows::-webkit-scrollbar {
   width: 6px;
