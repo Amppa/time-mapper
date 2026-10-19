@@ -17,7 +17,8 @@
   --scrub-active-color: #ea580c;
   --scrub-active-shadow: rgba(234, 88, 12, 0.45);
   --scrub-reset-btn-bg: #d97706;
-  --unselected-pin: #ffc56f;
+  --unselected-pin: #cc9d58;
+  --night-pin: #ffc56f;
   --selected-pin: #de6b23;
   --map-shell-bg: #ffffff;
   --map-filter: none;
@@ -45,6 +46,7 @@
   --scrub-active-shadow: rgba(249, 115, 22, 0.60);
   --scrub-reset-btn-bg: #d97706;
   --unselected-pin: #fbbf24;
+  --night-pin: #fbbf24;
   --selected-pin: #fb923c;
   --map-shell-bg: #15151a;
   --map-filter: invert(0.88) brightness(0.92) contrast(1.1);
@@ -73,6 +75,7 @@
     --scrub-active-shadow: rgba(249, 115, 22, 0.60);
     --scrub-reset-btn-bg: #d97706;
     --unselected-pin: #fbbf24;
+    --night-pin: #fbbf24;
     --selected-pin: #fb923c;
     --map-shell-bg: #15151a;
     --map-filter: invert(0.88) brightness(0.92) contrast(1.1);

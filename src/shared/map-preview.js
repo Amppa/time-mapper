@@ -5,6 +5,10 @@
 import { State } from "./state.js";
 import { MapUtils, TimeUtils, I18nUtils, MathUtils, TimelineUtils } from "./utils.js";
 
+const NIGHT_DECLINATION_DEG = 35.0;
+const NIGHT_TAN_DEC = Math.tan(NIGHT_DECLINATION_DEG * Math.PI / 180);
+const NIGHT_Y_SHIFT = 10;
+
 export const MapPreview = {
   ASSET_PATH: "../../assets/world-map.jpg",
 
@@ -128,6 +132,7 @@ export const MapPreview = {
 
     const allCities = State.allCities();
     const existingPins = refs.cityLayer ? Array.from(refs.cityLayer.children) : [];
+    const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(0));
 
     // In-place patch if structure matches (same cities in same order)
     if (existingPins.length === allCities.length &&
@@ -135,7 +140,9 @@ export const MapPreview = {
       existingPins.forEach((btn, idx) => {
         const city = allCities[idx];
         const isSelected = State.selectedIds.includes(city.id);
+        const isNight = this.isCityInNight(city, 0, subsolarLng);
         btn.classList.toggle("is-selected", isSelected);
+        btn.classList.toggle("is-night", isNight);
       });
 
       // Synchronize label layer for selected cities
@@ -176,7 +183,8 @@ export const MapPreview = {
       const button = document.createElement("button");
       button.type = "button";
       const isSelected = State.selectedIds.includes(city.id);
-      button.className = `city-pin${isSelected ? " is-selected" : ""}`;
+      const isNight = this.isCityInNight(city, 0, subsolarLng);
+      button.className = `city-pin${isSelected ? " is-selected" : ""}${isNight ? " is-night" : ""}`;
       button.style.left = `${position.x}%`;
       button.style.top = `${position.y}%`;
       button.dataset.id = city.id;
@@ -248,17 +256,13 @@ export const MapPreview = {
   },
 
   calcNightPoints(offsetHours) {
-    const DECLINATION_DEG = 35.0;
-    const tanDec = Math.tan(DECLINATION_DEG * Math.PI / 180);
-    const Y_SHIFT = 10;
-
     const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(offsetHours));
 
     const points = [];
     for (let x = 0; x <= 100; x += 2) {
       const lng = MapUtils.getXLongitude(x);
-      const lat = Math.atan(-Math.cos((lng - subsolarLng) * Math.PI / 180) / tanDec)
-        * 180 / Math.PI + Y_SHIFT;
+      const lat = Math.atan(-Math.cos((lng - subsolarLng) * Math.PI / 180) / NIGHT_TAN_DEC)
+        * 180 / Math.PI + NIGHT_Y_SHIFT;
       const { x: px, y: py } = MapUtils.mapPosition({ lng, lat });
       points.push(`${px.toFixed(1)},${py.toFixed(1)}`);
     }
@@ -342,6 +346,39 @@ export const MapPreview = {
     // Live update local times for selected cities on the map
     const activeFraction = State.getActiveScrubFraction();
     this.updateMapCityTimes(refs, activeFraction);
+
+    this.updatePinsNightState(refs);
+  },
+
+  /**
+   * Determine if a city is inside the night curve (terminator) at the given offset.
+   * `cachedSubsolarLng` allows batch callers to avoid recomputing subsolar longitude.
+   */
+  isCityInNight(city, offsetHours = 0, cachedSubsolarLng = null) {
+    const { lng } = MapUtils.lngLatOf(city);
+    const subsolarLng = cachedSubsolarLng !== null
+      ? cachedSubsolarLng
+      : MapUtils.subsolarLng(this.shiftedNow(offsetHours));
+    const termLat = Math.atan(-Math.cos((lng - subsolarLng) * Math.PI / 180) / NIGHT_TAN_DEC)
+      * 180 / Math.PI + NIGHT_Y_SHIFT;
+    const cityPos = MapUtils.mapPosition(city);
+    const termPos = MapUtils.mapPosition({ lng, lat: termLat });
+    return cityPos.y >= termPos.y;
+  },
+
+  /** Synchronize .is-night class on all rendered pins */
+  updatePinsNightState(refs) {
+    if (!refs.cityLayer) return;
+    const allCities = State.allCities();
+    const pinElements = refs.cityLayer.querySelectorAll(".city-pin");
+    if (!pinElements.length) return;
+    const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(0));
+    pinElements.forEach((btn, idx) => {
+      const city = allCities[idx] || (btn.dataset.id ? State.findCity(btn.dataset.id) : null);
+      if (city) {
+        btn.classList.toggle("is-night", this.isCityInNight(city, 0, subsolarLng));
+      }
+    });
   },
 
   updateMapCityTimes(refs, activeFraction) {

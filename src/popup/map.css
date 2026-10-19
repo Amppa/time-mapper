@@ -141,6 +141,10 @@
   display: none;
 }
 
+.city-pin.is-night:not(.is-selected) {
+  background: var(--night-pin, #ffc56f);
+}
+
 .city-pin.is-selected {
   background: var(--selected-pin);
   z-index: 2;
