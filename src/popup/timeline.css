@@ -76,7 +76,6 @@
   justify-content: center;
   flex: 0 0 calc(100% / 24);
   min-width: 0;
-  box-sizing: border-box;
   border-right: var(--timeline-cell-border);
   color: #ffffff;
   font-size: var(--timeline-cell-font-size);
@@ -152,7 +151,6 @@
   height: 0;
   border-bottom: 1px dashed var(--line);
   pointer-events: none;
-  box-sizing: border-box;
 }
 
 .timeline-interval-pill {

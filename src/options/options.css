@@ -12,10 +12,27 @@
   --search-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
+/* Legacy palette aliases. popup/map.css and popup/timeline.css are written
+   against the popup's token names, and this page has to load both. Defining
+   the aliases here keeps that bridge in one place; the popup is unaffected
+   because options.html never links popup/settings.css, where those names
+   are still defined natively.
+
+   Only the five names map.css and timeline.css actually read are aliased —
+   --accent and friends stay popup-only. The mapping deliberately reproduces
+   what #cardPreview used to declare, so the preview renders identically. */
+:root {
+  --bg: var(--bg-card);
+  --panel: var(--bg-primary);
+  --line: var(--divider);
+  --ink: var(--text-primary);
+  --muted: var(--text-secondary);
+}
+
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans);
   font-size: var(--font-sm);
   line-height: 1.5;
   padding: 40px 20px;
@@ -52,7 +69,7 @@ body {
     }
 
     & .title {
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: var(--font-sans);
       font-size: var(--font-lg);
       font-weight: 300;
       color: var(--text-primary);
@@ -161,17 +178,6 @@ body {
     }
   }
 }
-
-/* Live preview card: map.css/timeline.css provide layout, map-tokens.css
-   the popup palette; only page-chrome vars need mapping to options tokens. */
-#cardPreview {
-  --bg: var(--bg-card);
-  --panel: var(--bg-primary);
-  --line: var(--divider);
-  --ink: var(--text-primary);
-  --muted: var(--text-secondary);
-}
-
 
 /* Explicit divider object */
 .divider {
