@@ -132,7 +132,8 @@ export const MapPreview = {
 
     const allCities = State.allCities();
     const existingPins = refs.cityLayer ? Array.from(refs.cityLayer.children) : [];
-    const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(0));
+    const currentOffset = State.selectedOffsetHours || 0;
+    const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(currentOffset));
 
     // In-place patch if structure matches (same cities in same order)
     if (existingPins.length === allCities.length &&
@@ -140,7 +141,7 @@ export const MapPreview = {
       existingPins.forEach((btn, idx) => {
         const city = allCities[idx];
         const isSelected = State.selectedIds.includes(city.id);
-        const isNight = this.isCityInNight(city, 0, subsolarLng);
+        const isNight = this.isCityInNight(city, currentOffset, subsolarLng);
         btn.classList.toggle("is-selected", isSelected);
         btn.classList.toggle("is-night", isNight);
       });
@@ -183,7 +184,7 @@ export const MapPreview = {
       const button = document.createElement("button");
       button.type = "button";
       const isSelected = State.selectedIds.includes(city.id);
-      const isNight = this.isCityInNight(city, 0, subsolarLng);
+      const isNight = this.isCityInNight(city, currentOffset, subsolarLng);
       button.className = `city-pin${isSelected ? " is-selected" : ""}${isNight ? " is-night" : ""}`;
       button.style.left = `${position.x}%`;
       button.style.top = `${position.y}%`;
@@ -332,21 +333,21 @@ export const MapPreview = {
       refs.nightAreaOverlay.style.transform = `translateY(${State.mapSettings.mapYOffset || 0}px)`;
     }
 
-    // Filled night area — always at the true "now" position (offset = 0)
-    const realNowPts = this.calcNightPoints(0);
-    refs.nightPath.setAttribute("d", `M 0,100 L ${realNowPts.join(" L ")} L 100,100 Z`);
+    // Dynamic filled night area — follows the active scrub line offset
+    const activePts = this.calcNightPoints(offsetHours);
+    refs.nightPath.setAttribute("d", `M 0,100 L ${activePts.join(" L ")} L 100,100 Z`);
 
-    // Dynamic reference curve — follows the active scrub line offset
+    // Static reference curve — shows the night area boundary at the true "now" time (offset = 0)
     if (refs.nightPathRef) {
-      const activePts = this.calcNightPoints(offsetHours);
-      refs.nightPathRef.setAttribute("d", `M ${activePts.join(" L ")}`);
+      const realNowPts = this.calcNightPoints(0);
+      refs.nightPathRef.setAttribute("d", `M ${realNowPts.join(" L ")}`);
     }
 
     // Live update local times for selected cities on the map
     const activeFraction = State.getActiveScrubFraction();
     this.updateMapCityTimes(refs, activeFraction);
 
-    this.updatePinsNightState(refs);
+    this.updatePinsNightState(refs, offsetHours);
   },
 
   /**
@@ -366,16 +367,16 @@ export const MapPreview = {
   },
 
   /** Synchronize .is-night class on all rendered pins */
-  updatePinsNightState(refs) {
+  updatePinsNightState(refs, offsetHours = 0) {
     if (!refs.cityLayer) return;
     const allCities = State.allCities();
     const pinElements = refs.cityLayer.querySelectorAll(".city-pin");
     if (!pinElements.length) return;
-    const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(0));
+    const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(offsetHours));
     pinElements.forEach((btn, idx) => {
       const city = allCities[idx] || (btn.dataset.id ? State.findCity(btn.dataset.id) : null);
       if (city) {
-        btn.classList.toggle("is-night", this.isCityInNight(city, 0, subsolarLng));
+        btn.classList.toggle("is-night", this.isCityInNight(city, offsetHours, subsolarLng));
       }
     });
   },
