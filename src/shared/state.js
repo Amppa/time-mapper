@@ -6,6 +6,13 @@ import { CONFIG } from "./config.js";
 import { cityCatalog } from "./cities.js";
 import { TimeUtils, TimelineUtils } from "./utils.js";
 
+/** localStorage can throw (quota exceeded, blocked storage); a failed write must not break the UI. */
+function safeSetItem(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch { }
+}
+
 export const State = {
   selectedIds: [],
   customCities: [],
@@ -76,17 +83,13 @@ export const State = {
 
   saveLanguage(lang) {
     if (lang === "auto") {
-      try {
-        localStorage.setItem(CONFIG.languageKey, "auto");
-      } catch { }
+      safeSetItem(CONFIG.languageKey, "auto");
       this.currentLang = this.loadLanguage();
       return;
     }
     if (!CONFIG.supportedLanguages.includes(lang)) return;
     this.currentLang = lang;
-    try {
-      localStorage.setItem(CONFIG.languageKey, lang);
-    } catch { }
+    safeSetItem(CONFIG.languageKey, lang);
   },
 
   loadTimePeriods() {
@@ -107,9 +110,7 @@ export const State = {
   },
 
   saveTimePeriods() {
-    try {
-      localStorage.setItem(CONFIG.timePeriodsKey, JSON.stringify(this.timePeriods));
-    } catch { }
+    safeSetItem(CONFIG.timePeriodsKey, JSON.stringify(this.timePeriods));
   },
 
   loadMapSettings() {
@@ -135,7 +136,7 @@ export const State = {
   },
 
   saveMapSettings() {
-    localStorage.setItem(CONFIG.mapSettingsKey, JSON.stringify(this.mapSettings));
+    safeSetItem(CONFIG.mapSettingsKey, JSON.stringify(this.mapSettings));
   },
 
   loadCustomCities() {
@@ -161,7 +162,7 @@ export const State = {
   },
 
   saveCustomCities() {
-    localStorage.setItem(CONFIG.customCitiesKey, JSON.stringify(this.customCities));
+    safeSetItem(CONFIG.customCitiesKey, JSON.stringify(this.customCities));
   },
 
   loadSelection() {
@@ -169,7 +170,7 @@ export const State = {
       const saved = JSON.parse(localStorage.getItem(CONFIG.storageKey));
       if (Array.isArray(saved)) {
         // Storage is user-writable; keep the first occurrence of each id only.
-        return [...new Set(saved)].filter((id) => this.allCities().some((city) => city.id === id)).slice(0, this.cityLimit);
+        return [...new Set(saved)].filter((id) => this.findCity(id)).slice(0, this.cityLimit);
       }
     } catch {
       localStorage.removeItem(CONFIG.storageKey);
@@ -178,7 +179,7 @@ export const State = {
   },
 
   saveSelection() {
-    localStorage.setItem(CONFIG.storageKey, JSON.stringify(this.selectedIds));
+    safeSetItem(CONFIG.storageKey, JSON.stringify(this.selectedIds));
   },
 
   getActiveScrubFraction() {
@@ -245,9 +246,7 @@ export const State = {
 
   saveNowLineMode(mode) {
     this.nowLineMode = mode;
-    try {
-      localStorage.setItem(CONFIG.nowLineModeKey, mode);
-    } catch { }
+    safeSetItem(CONFIG.nowLineModeKey, mode);
   },
 
   makeBaseHours() {

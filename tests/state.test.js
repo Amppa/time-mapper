@@ -609,7 +609,14 @@ describe("corrupted storage recovery", () => {
       assert.doesNotThrow(() => State.loadTimePeriods());
       assert.deepEqual(State.loadTimePeriods(), CONFIG.defaultTimePeriods);
       assert.doesNotThrow(() => State.loadNowLineMode());
-      assert.doesNotThrow(() => State.saveTimePeriods());
+      // Every save path goes through the same guard, so a quota error can never
+      // abort an interaction (drag-reorder, map click, slider) mid-write.
+      for (const save of [
+        "saveTimePeriods", "saveMapSettings", "saveCustomCities",
+        "saveSelection", "saveNowLineMode"
+      ]) {
+        assert.doesNotThrow(() => State[save](), `${save} threw`);
+      }
     } finally {
       uninstallMockStorage();
     }
