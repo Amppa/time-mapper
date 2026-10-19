@@ -12,23 +12,6 @@
   --search-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
-/* Legacy palette aliases. popup/map.css and popup/timeline.css are written
-   against the popup's token names, and this page has to load both. Defining
-   the aliases here keeps that bridge in one place; the popup is unaffected
-   because options.html never links popup/settings.css, where those names
-   are still defined natively.
-
-   Only the five names map.css and timeline.css actually read are aliased —
-   --accent and friends stay popup-only. The mapping deliberately reproduces
-   what #cardPreview used to declare, so the preview renders identically. */
-:root {
-  --bg: var(--bg-card);
-  --panel: var(--bg-primary);
-  --line: var(--divider);
-  --ink: var(--text-primary);
-  --muted: var(--text-secondary);
-}
-
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -368,7 +351,7 @@ details[open]>.collapsible-summary::after {
 .interactive-timeline-panel {
   position: relative;
   overflow: visible;
-  background: var(--panel, #201b19);
+  background: var(--bg-primary);
   border: 1px solid var(--divider, rgba(255, 255, 255, 0.15));
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
