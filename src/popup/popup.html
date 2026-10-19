@@ -16,13 +16,17 @@
 <body>
   <main class="app">
     <header class="topbar">
-      <div>
+      <div class="topbar-left">
         <h1 id="nowText" data-i18n="nowTextLoading">Loading current time...</h1>
       </div>
-      <div class="top-actions">
-        <button id="topbarOptionsButton" class="icon-button" type="button" title="Settings" aria-label="Settings"
+      <div class="topbar-center">
+        <span class="topbar-brand">TimeMapper</span>
+      </div>
+      <div class="topbar-right">
+        <button id="topbarOptionsButton" class="settings-button" type="button" title="Settings" aria-label="Settings"
           data-i18n-title="mapSettings" data-i18n-aria-label="mapSettings">
-          <span aria-hidden="true">⚙</span>
+          <span class="settings-icon" aria-hidden="true">⚙</span>
+          <span class="settings-text" data-i18n="mapSettings">設定</span>
         </button>
       </div>
     </header>

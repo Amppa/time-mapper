@@ -70,21 +70,39 @@ button {
 }
 
 .topbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
   margin-bottom: 8px;
+  min-height: 34px;
 }
 
-.topbar>div:first-child {
-  flex: 1;
-}
-
-.top-actions {
+.topbar-left {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.topbar-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.topbar-brand {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 h1 {
@@ -102,51 +120,62 @@ h1 {
   line-height: 1;
 }
 
+.now-time {
+  font-size: 26px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
 .now-date {
   color: var(--now-meta-color);
-  font-size: 20px;
-  margin-left: 4px;
+  font-size: 16px;
+  margin-left: 8px;
   font-weight: 300;
+  font-variant-numeric: tabular-nums;
 }
 
-.now-time {
-  font-size: 28px;
-  margin-left: 6px;
-}
-
-.now-brand {
-  color: var(--now-meta-color);
-  font-size: 18px;
-  font-weight: 300;
-  margin-left: auto;
-  margin-right: 8px;
-}
-
-.topbar p {
-  margin: 5px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.icon-button {
-  width: 34px;
-  height: 34px;
+.settings-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
-  color: var(--accent-dark);
+  color: var(--ink);
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
+  font-size: 13px;
+  font-weight: 500;
   transition: all 0.2s ease;
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.icon-button:hover {
+.settings-button .settings-icon {
+  font-size: 15px;
+  line-height: 1;
+  color: var(--muted);
+  transition: transform 0.25s ease, color 0.2s ease;
+}
+
+.settings-button .settings-text {
+  line-height: 1;
+}
+
+.settings-button:hover {
   border-color: var(--accent);
-  color: var(--accent);
   background: var(--btn-hover);
+  color: var(--accent);
+}
+
+.settings-button:hover .settings-icon {
+  color: var(--accent);
+  transform: rotate(45deg);
+}
+
+.settings-button:active {
+  transform: scale(0.97);
 }
 /* Scrollbar polish */
 .timeline-rows::-webkit-scrollbar {
