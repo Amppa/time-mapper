@@ -154,8 +154,13 @@ export const MapPreview = {
     const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(currentOffset));
     const selectedSet = new Set(State.selectedIds);
 
-    // In-place patch if all pins are already mounted
-    if (existingPins.length === allCities.length) {
+    // In-place patch only when the mounted pins are exactly the live cities, as a
+    // set: phased mounting reorders the DOM, so index order is not comparable.
+    // A length-only check lets a same-sized edit (one city added while another
+    // was removed) skip the rebuild and leave a stale pin behind forever.
+    const mountedIds = new Set(existingPins.map((btn) => btn.dataset.id));
+    if (existingPins.length === allCities.length &&
+        allCities.every((city) => mountedIds.has(city.id))) {
       existingPins.forEach((btn) => {
         const city = State.findCity(btn.dataset.id);
         if (!city) return;
@@ -412,7 +417,10 @@ export const MapPreview = {
     if (!pinElements.length) return;
     const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(offsetHours));
     pinElements.forEach((btn, idx) => {
-      const city = allCities[idx] || (btn.dataset.id ? State.findCity(btn.dataset.id) : null);
+      // Phased mounting appends deferred pins after the selected ones, so DOM
+      // order no longer matches allCities order. The pin's own data-id is
+      // authoritative; the index is only a fallback for unmarked pins.
+      const city = (btn.dataset.id ? State.findCity(btn.dataset.id) : null) || allCities[idx];
       if (city) {
         btn.classList.toggle("is-night", this.isCityInNight(city, offsetHours, subsolarLng));
       }
