@@ -54,7 +54,6 @@ describe("State.init", () => {
     assert.equal(State.nowLineMode, "local");
     assert.equal(State.activeScrubId, null);
     assert.equal(State.draggingId, null);
-    assert.equal(State.lastActiveCard, null);
     assert.equal(State.baseHours.length, 24);
   });
 

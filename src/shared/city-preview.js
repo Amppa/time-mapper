@@ -6,6 +6,14 @@ import { State } from "./state.js";
 import { CONFIG } from "./config.js";
 import { MapUtils, TimeUtils, I18nUtils, EscapeUtils } from "./utils.js";
 
+/**
+ * Transient drag bookkeeping. These hold DOM nodes, so they stay in module
+ * scope instead of the persisted State singleton; the rect is only ever needed
+ * for the card currently being hovered.
+ */
+let lastActiveCard = null;
+let lastActiveCardRect = null;
+
 export const CityPreview = {
   /**
    * Collect the nodes this module renders into. `root` is `document` in the
@@ -30,10 +38,10 @@ export const CityPreview = {
     }
     document.querySelectorAll(".current-city-card").forEach((c) => {
       c.classList.remove("drag-over-top", "drag-over-bottom");
-      c._cachedRect = null;
     });
+    lastActiveCard = null;
+    lastActiveCardRect = null;
     State.draggingId = null;
-    State.lastActiveCard = null;
   },
 
   /**
@@ -44,6 +52,8 @@ export const CityPreview = {
   renderCurrentCitiesList(refs, onReorder) {
     if (!refs.currentCitiesList) return;
     refs.currentCitiesList.innerHTML = "";
+    lastActiveCard = null;
+    lastActiveCardRect = null;
 
     State.selectedIds.forEach((id) => {
       const city = State.findCity(id);
@@ -133,18 +143,20 @@ export const CityPreview = {
         e.dataTransfer.dropEffect = "move";
 
         if (State.draggingId && State.draggingId !== id) {
-          if (State.lastActiveCard && State.lastActiveCard !== card) {
-            State.lastActiveCard.classList.remove("drag-over-top", "drag-over-bottom");
-            State.lastActiveCard._cachedRect = null;
-          }
-          State.lastActiveCard = card;
-
-          if (!card._cachedRect) {
-            card._cachedRect = card.getBoundingClientRect();
+          if (lastActiveCard !== card) {
+            if (lastActiveCard) {
+              lastActiveCard.classList.remove("drag-over-top", "drag-over-bottom");
+            }
+            lastActiveCard = card;
+            lastActiveCardRect = null;
           }
 
-          const relativeY = e.clientY - card._cachedRect.top;
-          const middleY = card._cachedRect.height / 2;
+          if (!lastActiveCardRect) {
+            lastActiveCardRect = card.getBoundingClientRect();
+          }
+
+          const relativeY = e.clientY - lastActiveCardRect.top;
+          const middleY = lastActiveCardRect.height / 2;
 
           if (relativeY < middleY) {
             card.classList.add("drag-over-top");
@@ -162,9 +174,9 @@ export const CityPreview = {
 
       card.addEventListener("dragleave", () => {
         card.classList.remove("drag-over-top", "drag-over-bottom");
-        card._cachedRect = null;
-        if (State.lastActiveCard === card) {
-          State.lastActiveCard = null;
+        if (lastActiveCard === card) {
+          lastActiveCard = null;
+          lastActiveCardRect = null;
         }
       });
 

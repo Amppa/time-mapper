@@ -424,11 +424,10 @@ describe("MapUtils.mapPosition", () => {
     assert.ok(pos.y >= 0 && pos.y <= 100);
   });
 
-  it("caches the computed base position on the city object", () => {
+  it("leaves the city data untouched but keeps the position stable", () => {
     const city = { lng: 121.5, lat: 25.0 };
     const first = MapUtils.mapPosition(city);
-    assert.equal(typeof city._cx, "number");
-    assert.equal(typeof city._cy, "number");
+    assert.equal(Object.keys(city).length, 2);
     assert.deepEqual(MapUtils.mapPosition(city), first);
   });
 });

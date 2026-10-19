@@ -33,7 +33,6 @@ export const State = {
   activeScrubId: null,    // id of the active scrub line
   draggingId: null,
   cityLimit: 10,
-  lastActiveCard: null,
   _localCity: null,
   _cachedCityList: null,
   _cachedCityIndex: null,
@@ -64,7 +63,6 @@ export const State = {
     this.scrubs = [];
     this.activeScrubId = null;
     this.draggingId = null;
-    this.lastActiveCard = null;
     this.makeBaseHours();
   },
 

@@ -350,6 +350,9 @@ export const PeriodUtils = {
   }
 };
 
+/** lng/lat -> base-map percentage, memoised per city object. */
+const basePositionCache = new WeakMap();
+
 export const MapUtils = {
   /**
    * Longitude of the subsolar point (where the sun is directly overhead)
@@ -408,14 +411,21 @@ export const MapUtils = {
   },
 
   mapPosition(city) {
-    if (city._cx === undefined) {
+    // Base-map position depends only on lng/lat, so it is memoised per city
+    // object. A WeakMap keeps the cache off the city data itself: an edited
+    // custom city is a new object, so its old entry is collected with it.
+    let base = basePositionCache.get(city);
+    if (!base) {
       const hasLngLat = typeof city.lng === "number" && typeof city.lat === "number";
-      city._cx = hasLngLat ? this.lngToX(city.lng) : city.x;
-      city._cy = hasLngLat ? this.latToY(city.lat) : city.y;
+      base = {
+        x: hasLngLat ? this.lngToX(city.lng) : city.x,
+        y: hasLngLat ? this.latToY(city.lat) : city.y
+      };
+      basePositionCache.set(city, base);
     }
     return {
-      x: MathUtils.clamp(this.calibrateX(city._cx), 0, 100),
-      y: MathUtils.clamp(this.calibrateY(city._cy), 0, 100)
+      x: MathUtils.clamp(this.calibrateX(base.x), 0, 100),
+      y: MathUtils.clamp(this.calibrateY(base.y), 0, 100)
     };
   },
 
