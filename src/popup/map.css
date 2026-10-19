@@ -67,7 +67,6 @@
 .hour-lines {
   position: absolute;
   inset: 0;
-  background-image: var(--hour-lines-gradient);
   pointer-events: none;
 }
 

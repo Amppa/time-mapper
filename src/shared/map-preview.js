@@ -239,7 +239,6 @@ export const MapPreview = {
   renderHourLines(refs, offsetHours = 0) {
     if (!refs.hourLines) return;
     refs.hourLines.innerHTML = "";
-    refs.hourLines.style.backgroundImage = "none";
 
     const frag = document.createDocumentFragment();
     for (const { x: rawX } of this.hourLinePositions(offsetHours)) {
