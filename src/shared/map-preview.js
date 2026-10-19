@@ -114,15 +114,24 @@ export const MapPreview = {
     return button;
   },
 
+  /**
+   * Full pins mount (sync immediate + schedule deferred pins).
+   * Used by options preview, tests, and full repaints.
+   */
   renderPins(refs, onCityToggle) {
     this.renderPinsImmediate(refs, onCityToggle);
     this.mountDeferredPins(refs);
   },
 
+  /** Alias for renderPins to make synchronous/full intent explicit. */
+  renderPinsSync(refs, onCityToggle) {
+    this.renderPins(refs, onCityToggle);
+  },
+
   /**
-   * First-paint path: transforms, labels for selected cities, and the
-   * immediate (selected + local) pins only. No background pins, no night
-   * decorations — those wait for mountDeferredPins / renderNightDecorations.
+   * Fast-path immediate reconciler: updates transforms, labels, and mounts/patches
+   * visible & selected pins without wiping the DOM. Background catalog pins are
+   * deferred to mountDeferredPins on idle.
    */
   renderPinsImmediate(refs, onCityToggle) {
     if (refs.mapImg) {
@@ -280,13 +289,15 @@ export const MapPreview = {
     this._deferredIdleTimer = schedule(() => {
       this._deferredIdleTimer = null;
       if (!refs.cityLayer) return;
+      const currentMountedSet = new Set(Array.from(refs.cityLayer.children).map((el) => el.dataset?.id));
       const deferredFrag = document.createDocumentFragment();
       const curOffset = State.selectedOffsetHours || 0;
       const curSubsolar = MapUtils.subsolarLng(this.shiftedNow(curOffset));
       const curCurve = this.calcNightPoints(curOffset).curve;
       const selectedSet = new Set(State.selectedIds);
       deferredCities.forEach((city) => {
-        if (refs.cityLayer.querySelector(`[data-id="${city.id}"]`)) return;
+        if (currentMountedSet.has(city.id)) return;
+        currentMountedSet.add(city.id);
         deferredFrag.append(this._createPinElement(city, selectedSet.has(city.id), curOffset, curSubsolar, curCurve));
       });
       if (deferredFrag.childNodes.length > 0) {
@@ -333,6 +344,9 @@ export const MapPreview = {
 
   calcNightPoints(offsetHours) {
     const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(offsetHours));
+    if (this._cachedNightPoints && this._cachedNightPoints.subsolarLng === subsolarLng) {
+      return this._cachedNightPoints.points;
+    }
 
     const points = [];
     // Numeric curve for isCityInNight lookups: same calibrated viewport
@@ -349,6 +363,7 @@ export const MapPreview = {
     // Keep the string array as the return value (SVG path building reads it);
     // stash the numeric curve alongside for night lookups.
     points.curve = curve;
+    this._cachedNightPoints = { subsolarLng, points };
     return points;
   },
 
@@ -410,16 +425,16 @@ export const MapPreview = {
 
     // Shading itself is cheap and needed for first paint; bands/lines/ticks
     // are decorations that can wait for idle (see renderNightDecorations).
-    this.renderNightShading(refs, offsetHours);
+    const activePts = this.renderNightShading(refs, offsetHours);
 
     if (!skipPinsUpdate) {
-      this.updatePinsNightState(refs, offsetHours);
+      this.updatePinsNightState(refs, offsetHours, activePts?.curve);
     }
   },
 
   /** SVG shading only (no bands/lines/ticks); shared by sync and idle paths. */
   renderNightShading(refs, offsetHours = 0) {
-    if (!refs.nightPath) return;
+    if (!refs.nightPath) return null;
     if (refs.nightAreaOverlay) {
       refs.nightAreaOverlay.style.transform = `translateY(${State.mapSettings.mapYOffset || 0}px)`;
     }
@@ -435,6 +450,7 @@ export const MapPreview = {
     }
     const activeFraction = State.getActiveScrubFraction();
     this.updateMapCityTimes(refs, activeFraction);
+    return activePts;
   },
 
   /** Bands + hour lines + timeline ticks; deferred past first paint and cached by offset. */
@@ -499,11 +515,12 @@ export const MapPreview = {
   },
 
   /** Synchronize .is-night class on all rendered pins */
-  updatePinsNightState(refs, offsetHours = 0) {
+  updatePinsNightState(refs, offsetHours = 0, cachedCurve = null) {
     if (!refs.cityLayer) return;
     const allCities = State.allCities();
     const pinElements = refs.cityLayer.querySelectorAll(".city-pin");
     if (!pinElements.length) return;
+    const curve = cachedCurve || this.calcNightPoints(offsetHours).curve;
     const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(offsetHours));
     pinElements.forEach((btn, idx) => {
       // Phased mounting appends deferred pins after the selected ones, so DOM
@@ -511,7 +528,7 @@ export const MapPreview = {
       // authoritative; the index is only a fallback for unmarked pins.
       const city = (btn.dataset.id ? State.findCity(btn.dataset.id) : null) || allCities[idx];
       if (city) {
-        btn.classList.toggle("is-night", this.isCityInNight(city, offsetHours, subsolarLng));
+        btn.classList.toggle("is-night", this.isCityInNight(city, offsetHours, subsolarLng, curve));
       }
     });
   },
