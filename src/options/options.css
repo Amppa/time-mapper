@@ -4,6 +4,14 @@
    Style strictly mirrors ../_chrome-ext-template
    ========================================================================== */
 
+/* Options-page local tokens. Shared palette lives in ../shared/tokens.css;
+   these only cover surfaces unique to this page. */
+:root {
+  --input-bg: var(--bg-elevated);
+  --danger-hover-bg: rgba(239, 68, 68, 0.12);
+  --search-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -522,19 +530,9 @@ details[open]>.collapsible-summary::after {
 }
 
 /* ==========================================================================
-   Cities list & add-city search (shared with popup settings.css)
-   Copied verbatim so the options page looks identical to the popup.
+   Cities list & add-city search (options page only — the popup panel that
+   used to render these was removed, so nothing here is shared any more)
    ========================================================================== */
-
-.current-cities-container h4,
-.add-city-section h4 {
-  margin: 0 0 8px 0;
-  font-size: 11px;
-  color: var(--text-secondary);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
 
 .current-cities-list {
   display: flex;
@@ -843,43 +841,6 @@ details[open]>.collapsible-summary::after {
 .search-result-details {
   font-size: 10px;
   color: var(--text-secondary);
-}
-
-.settings-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.settings-actions-wide {
-  margin-top: 16px;
-}
-
-.settings-actions-spacer {
-  flex: 1;
-}
-
-.panel-options-link-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid var(--divider);
-}
-
-.options-link-btn {
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  color: var(--accent-solid);
-  transition: color 0.2s ease;
-}
-
-.options-link-btn:hover {
-  color: var(--accent-hover);
 }
 
 /* Scrollbar polish */

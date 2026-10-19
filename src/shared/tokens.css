@@ -7,8 +7,6 @@
   /* ------------------------------------------------------------------------
      1. Spacing & Typography Tokens
      ------------------------------------------------------------------------ */
-  --space-xs: 0.25rem;   /* 4px */
-  --space-sm: 0.5rem;    /* 8px */
   --space-md: 0.75rem;   /* 12px */
   --space-lg: 1rem;      /* 16px */
   --space-xl: 1.25rem;   /* 20px */
@@ -22,7 +20,6 @@
   /* ------------------------------------------------------------------------
      2. Shape & Animation Tokens
      ------------------------------------------------------------------------ */
-  --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
@@ -43,7 +40,6 @@
      3. Brand Accent
      ------------------------------------------------------------------------ */
   --accent-gradient: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
-  --accent-shadow: rgba(14, 165, 233, 0.35);
   --accent-solid: #0ea5e9;
 
   /* ------------------------------------------------------------------------
@@ -53,7 +49,6 @@
   --bg-primary: #121214;
   --bg-card: #242429;
   --bg-elevated: #23232a;
-  --bg-stat: #1d1d23;
   --text-primary: #f0f0f2;
   --text-secondary: #909099;
   --divider: rgba(255, 255, 255, 0.08);
@@ -64,7 +59,9 @@
 
   --track-off: #333338;
   --knob: #ffffff;
-  --stat-number: #ffffff;
+
+  --scroll-thumb: #3a3a46;
+  --scroll-thumb-hover: #525263;
 }
 
 :root[data-theme="dark"] {
@@ -72,7 +69,6 @@
   --bg-primary: #121214;
   --bg-card: #242429;
   --bg-elevated: #23232a;
-  --bg-stat: #1d1d23;
   --text-primary: #f0f0f2;
   --text-secondary: #909099;
   --divider: rgba(255, 255, 255, 0.08);
@@ -83,7 +79,9 @@
 
   --track-off: #333338;
   --knob: #ffffff;
-  --stat-number: #ffffff;
+
+  --scroll-thumb: #3a3a46;
+  --scroll-thumb-hover: #525263;
 }
 
 :root[data-theme="light"] {
@@ -94,7 +92,6 @@
   --bg-primary: #eef0f3;
   --bg-card: #ffffff;
   --bg-elevated: #e5e7eb;
-  --bg-stat: #f1f3f6;
   --text-primary: #1a1a1e;
   --text-secondary: #5f5f61;
   --divider: rgba(0, 0, 0, 0.1);
@@ -105,7 +102,9 @@
 
   --track-off: #c9ccd3;
   --knob: #ffffff;
-  --stat-number: #0284c7;
+
+  --scroll-thumb: #c9ccd3;
+  --scroll-thumb-hover: #9ca3af;
 }
 
 /* ==========================================================================
