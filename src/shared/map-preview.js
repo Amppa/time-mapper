@@ -115,6 +115,16 @@ export const MapPreview = {
   },
 
   renderPins(refs, onCityToggle) {
+    this.renderPinsImmediate(refs, onCityToggle);
+    this.mountDeferredPins(refs);
+  },
+
+  /**
+   * First-paint path: transforms, labels for selected cities, and the
+   * immediate (selected + local) pins only. No background pins, no night
+   * decorations — those wait for mountDeferredPins / renderNightDecorations.
+   */
+  renderPinsImmediate(refs, onCityToggle) {
     if (refs.mapImg) {
       refs.mapImg.style.transform = `translateY(calc(-50% + ${State.mapSettings.mapYOffset || 0}px))`;
     }
@@ -241,21 +251,62 @@ export const MapPreview = {
     if (refs.cityLayer) refs.cityLayer.append(pinFrag);
     if (refs.mapTimeLabelLayer && labelFrag) refs.mapTimeLabelLayer.append(labelFrag);
 
-    // Defer remaining background city pins to next animation frame
+    // Deferred: append pins for the rest of the catalog in small batches so
+    // the first paint only pays for selected + local pins. Popup re-entry
+    // goes through mountDeferredPins on idle instead.
+    this._queueDeferredPins(refs, deferredCities);
+  },
+
+  /** Idle-mount remaining catalog pins without re-rendering anything else. */
+  mountDeferredPins(refs) {
+    if (!refs.cityLayer) return;
+    const selectedSet = new Set(State.selectedIds);
+    const deferredCities = State.allCities().filter((city) => {
+      if (!city || selectedSet.has(city.id)) return false;
+      if (city.id === "local" && !selectedSet.has("local")) return false;
+      return !refs.cityLayer.querySelector(`[data-id="${city.id}"]`);
+    });
+    if (deferredCities.length === 0) return;
+    this._queueDeferredPins(refs, deferredCities);
+  },
+
+  _queueDeferredPins(refs, deferredCities) {
+    // Defer remaining background city pins in small batches
     if (deferredCities.length > 0 && refs.cityLayer) {
-      this._deferredMountTimer = requestAnimationFrame(() => {
+      if (this._deferredMountTimer) {
+        cancelAnimationFrame(this._deferredMountTimer);
         this._deferredMountTimer = null;
+      }
+      if (this._deferredIdleTimer) {
+        if (typeof cancelIdleCallback === "function") cancelIdleCallback(this._deferredIdleTimer);
+        else clearTimeout(this._deferredIdleTimer);
+        this._deferredIdleTimer = null;
+      }
+      const schedule = typeof requestIdleCallback === "function"
+        ? (fn) => requestIdleCallback(fn, { timeout: 1000 })
+        : (fn) => setTimeout(fn, 0);
+      const BATCH = 10;
+      let idx = 0;
+      const step = () => {
+        this._deferredMountTimer = null;
+        this._deferredIdleTimer = null;
         if (!refs.cityLayer) return;
         const deferredFrag = document.createDocumentFragment();
         const curOffset = State.selectedOffsetHours || 0;
         const curSubsolar = MapUtils.subsolarLng(this.shiftedNow(curOffset));
         const curCurve = this.calcNightPoints(curOffset).curve;
-        deferredCities.forEach((city) => {
+        const batch = deferredCities.slice(idx, idx + BATCH);
+        idx += BATCH;
+        batch.forEach((city) => {
           if (refs.cityLayer.querySelector(`[data-id="${city.id}"]`)) return;
           deferredFrag.append(this._createPinElement(city, false, curOffset, curSubsolar, curCurve));
         });
         refs.cityLayer.append(deferredFrag);
-      });
+        if (idx < deferredCities.length) {
+          this._deferredIdleTimer = schedule(step);
+        }
+      };
+      this._deferredIdleTimer = schedule(step);
     }
   },
 
@@ -372,9 +423,9 @@ export const MapPreview = {
   renderNightArea(refs, offsetHours = 0, skipPinsUpdate = false) {
     if (!refs.nightPath) return;
 
-    this.renderMapTimeline(refs, offsetHours);
-    this.renderHourLines(refs, offsetHours);
-    this.renderHourBands(refs, offsetHours);
+    // Shading itself is cheap and needed for first paint; bands/lines/ticks
+    // are decorations that can wait for idle (see renderNightDecorations).
+    this.renderNightShading(refs, offsetHours);
 
     if (refs.nightAreaOverlay) {
       refs.nightAreaOverlay.style.transform = `translateY(${State.mapSettings.mapYOffset || 0}px)`;
@@ -401,6 +452,33 @@ export const MapPreview = {
     if (!skipPinsUpdate) {
       this.updatePinsNightState(refs, offsetHours);
     }
+  },
+
+  /** SVG shading only (no bands/lines/ticks); shared by sync and idle paths. */
+  renderNightShading(refs, offsetHours = 0) {
+    if (!refs.nightPath) return;
+    if (refs.nightAreaOverlay) {
+      refs.nightAreaOverlay.style.transform = `translateY(${State.mapSettings.mapYOffset || 0}px)`;
+    }
+    const activePts = this.calcNightPoints(offsetHours);
+    refs.nightPath.setAttribute("d", `M 0,100 L ${activePts.join(" L ")} L 100,100 Z`);
+    if (refs.nightPathRef) {
+      if (!this._cachedNowPath || Math.abs(Date.now() - (this._cachedNowPathTime || 0)) > 60000) {
+        const realNowPts = this.calcNightPoints(0);
+        this._cachedNowPath = `M ${realNowPts.join(" L ")}`;
+        this._cachedNowPathTime = Date.now();
+      }
+      refs.nightPathRef.setAttribute("d", this._cachedNowPath);
+    }
+    const activeFraction = State.getActiveScrubFraction();
+    this.updateMapCityTimes(refs, activeFraction);
+  },
+
+  /** Bands + hour lines + timeline ticks; deferred past first paint. */
+  renderNightDecorations(refs, offsetHours = 0) {
+    this.renderMapTimeline(refs, offsetHours);
+    this.renderHourLines(refs, offsetHours);
+    this.renderHourBands(refs, offsetHours);
   },
 
   /**

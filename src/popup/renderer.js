@@ -24,6 +24,18 @@ export const Renderer = {
     MapPreview.renderPins(MapPreview.collectRefs(document), () => Renderer.render());
   },
 
+  /** Immediate pins only (selected + local); background pins mount on idle. */
+  renderMapImmediate() {
+    MapPreview.renderPinsImmediate(MapPreview.collectRefs(document), () => Renderer.render());
+  },
+
+  /** Background pins + night decorations; safe to defer past first paint. */
+  renderMapDeferred() {
+    const refs = MapPreview.collectRefs(document);
+    MapPreview.mountDeferredPins(refs);
+    MapPreview.renderNightDecorations(refs, State.selectedOffsetHours);
+  },
+
   renderRows() {
     TimelinePreview.renderRows(TimelinePreview.collectRefs(document));
   },
@@ -39,13 +51,20 @@ export const Renderer = {
   render() {
     State.makeBaseHours();
     this.renderNowText();
-    this.renderMap();
+    this.renderMapImmediate();
     this.renderRows();
     const timelineRefs = TimelinePreview.collectRefs(document);
     TimelinePreview.renderNowLine(timelineRefs);
     TimelinePreview.renderScrubLine(timelineRefs);
     this.renderNightArea(State.selectedOffsetHours, true);
     this.applyVisibilitySettings();
+    // Background pins (10/batch) + night decorations paint on idle so the
+    // first paint only pays for selected pins + shading.
+    if (typeof requestIdleCallback === "function") {
+      requestIdleCallback(() => this.renderMapDeferred(), { timeout: 1000 });
+    } else {
+      setTimeout(() => this.renderMapDeferred(), 0);
+    }
   },
 
   renderNowLine() {
