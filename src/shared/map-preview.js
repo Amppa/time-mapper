@@ -24,6 +24,7 @@ export const MapPreview = {
   collectRefs(root) {
     const q = (sel) => root.querySelector(sel);
     return {
+      mapShell: q(".map-shell"),
       mapImg: q(".world-map"),
       cityLayer: q(".city-layer"),
       timezoneHoverBands: q("#timezoneHoverBands") || q(".timezone-hover-bands"),
@@ -422,6 +423,66 @@ export const MapPreview = {
     this.renderPins(refs, onCityToggle);
     this.renderNightArea(refs, offsetHours);
     this.applyVisibility(refs);
+  },
+
+  /**
+   * Wire clicking on the map background to generate and add a custom timezone city.
+   * Accurately calculates coordinates relative to refs.cityLayer to prevent Y-offset.
+   */
+  wireMapClick(refs, onCityAdded) {
+    const targetEl = refs.mapShell || (refs.cityLayer ? refs.cityLayer.parentElement : null);
+    if (!targetEl || targetEl._hasMapClickDelegation) return;
+    targetEl._hasMapClickDelegation = true;
+
+    targetEl.addEventListener("click", (e) => {
+      if (e.target.closest(".city-pin")) return;
+      if (!refs.cityLayer) return;
+
+      const layerRect = refs.cityLayer.getBoundingClientRect();
+      if (!layerRect.width || !layerRect.height) return;
+
+      const clickX = ((e.clientX - layerRect.left) / layerRect.width) * 100;
+      const clickY = ((e.clientY - layerRect.top) / layerRect.height) * 100;
+
+      const x = MathUtils.clamp(MapUtils.uncalibrateX(clickX), 0, 100);
+      const y = MathUtils.clamp(MapUtils.uncalibrateY(clickY), 0, 100);
+      const lng = Number(MapUtils.xToLng(x).toFixed(2));
+      const lat = Number(MapUtils.yToLat(y).toFixed(2));
+
+      const offset = MathUtils.clamp(Math.round(lng / 15), -12, 12);
+      const offsetText = offset >= 0 ? `+${offset}` : `${offset}`;
+      const name = `UTC${offsetText}`;
+
+      let zone;
+      if (offset === 0) {
+        zone = "Etc/GMT";
+      } else if (offset > 0) {
+        zone = `Etc/GMT-${offset}`;
+      } else {
+        zone = `Etc/GMT+${Math.abs(offset)}`;
+      }
+
+      const newCity = {
+        id: `custom-utc-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        name,
+        zone,
+        x,
+        y,
+        lng,
+        lat
+      };
+
+      if (State.selectedIds.length >= State.cityLimit) {
+        return;
+      }
+
+      State.customCities = [...State.customCities, newCity];
+      State.saveCustomCities();
+      State.toggleCity(newCity.id);
+      if (typeof onCityAdded === "function") {
+        onCityAdded(newCity);
+      }
+    });
   },
 };
 

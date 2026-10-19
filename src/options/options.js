@@ -83,6 +83,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  if (mapPreviewRefs) {
+    MapPreview.wireMapClick(mapPreviewRefs, renderPreviews);
+  }
+
   /**
    * Apply translations across the options page based on State.currentLang
    */

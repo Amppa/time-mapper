@@ -266,6 +266,7 @@ export const CityPreview = {
         };
 
         if (isNewCustom) {
+          card.dataset.id = targetId;
           State.customCities = [...State.customCities, updatedCity];
           State.selectedIds = State.selectedIds.map((selectedId) => (selectedId === city.id ? targetId : selectedId));
           State.saveCustomCities();
@@ -301,7 +302,16 @@ export const CityPreview = {
       });
 
       removeBtn.addEventListener("click", () => {
-        State.toggleCity(city.id);
+        const currentId = card.dataset.id || id;
+        State.toggleCity(currentId);
+        if (currentId.startsWith("custom-") || State.customCities.some((c) => c.id === currentId)) {
+          State.customCities = State.customCities.filter((c) => c.id !== currentId);
+          State.saveCustomCities();
+        }
+        CityPreview.renderCurrentCitiesList(refs, onReorder);
+        if (typeof onReorder === "function") {
+          onReorder();
+        }
       });
 
       refs.currentCitiesList.append(card);

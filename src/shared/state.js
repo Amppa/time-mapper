@@ -263,7 +263,7 @@ export const State = {
   toggleCity(id) {
     if (this.selectedIds.includes(id)) {
       this.selectedIds = this.selectedIds.filter((item) => item !== id);
-      if (id.startsWith("custom-")) {
+      if (id.startsWith("custom-") || this.customCities.some((city) => city.id === id)) {
         this.customCities = this.customCities.filter((city) => city.id !== id);
         this.saveCustomCities();
       }
