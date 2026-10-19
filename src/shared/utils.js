@@ -439,42 +439,6 @@ export const TimelineUtils = {
     return (hours + minutes / 60) / 24;
   },
 
-  /**
-   * Grid geometry of the hours row, expressed relative to the timeline panel:
-   * where the grid starts and how wide it is. Returns null when the timeline
-   * has not been laid out yet (or `scope` is not a searchable root).
-   *
-   * `scope` is the timeline panel element (or an ancestor of it); it defaults
-   * to `document` for the popup. Needed because the options page hosts a
-   * second, independent timeline that must measure its own geometry.
-   */
-  gridGeometry(scope) {
-    const root = scope && scope.querySelector ? scope : (typeof document !== "undefined" ? document : null);
-    if (!root) return null;
-    const hoursEl = root.querySelector(".timeline-row .hours");
-    const panelEl = root.matches && root.matches(".timeline-panel") ? root : root.querySelector(".timeline-panel");
-    if (!hoursEl || !panelEl || !hoursEl.getBoundingClientRect || !panelEl.getBoundingClientRect) return null;
-    const gridRect = hoursEl.getBoundingClientRect();
-    const panelRect = panelEl.getBoundingClientRect();
-    return {
-      gridLeft: gridRect.left - panelRect.left,
-      gridWidth: gridRect.width
-    };
-  },
-
-  /** Convert a 0-1 day fraction to a pixel offset inside the timeline panel. */
-  fractionToLeft(fraction, scope, geo = null) {
-    const g = geo || this.gridGeometry(scope);
-    if (!g) return 0;
-    return g.gridLeft + fraction * g.gridWidth;
-  },
-
-  leftToFraction(pxLeft, scope, geo = null) {
-    const g = geo || this.gridGeometry(scope);
-    if (!g) return 0;
-    return MathUtils.clamp((pxLeft - g.gridLeft) / g.gridWidth, 0, 1);
-  },
-
   formatFractionTime(fraction) {
     if (typeof fraction !== "number" || isNaN(fraction)) return "--:--";
     let totalMinutes = Math.round(fraction * 24 * 60);

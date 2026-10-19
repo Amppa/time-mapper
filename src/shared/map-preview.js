@@ -123,11 +123,6 @@ export const MapPreview = {
     this.mountDeferredPins(refs);
   },
 
-  /** Alias for renderPins to make synchronous/full intent explicit. */
-  renderPinsSync(refs, onCityToggle) {
-    this.renderPins(refs, onCityToggle);
-  },
-
   /**
    * Fast-path immediate reconciler: updates transforms, labels, and mounts/patches
    * visible & selected pins without wiping the DOM. Background catalog pins are
