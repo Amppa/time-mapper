@@ -1,22 +1,12 @@
 /* ==========================================================================
    Shared Map Tokens — TimeMapper
-   Minimap / pin / night / scrub palette consumed by the popup
-   (settings.css keeps only layout vars) and by the options-page live
-   previews. Same three-block structure as the theme system: light
-   default, explicit dark override, OS-follow fallback before theme.js
-   runs. color-scheme and fonts stay in the page stylesheets.
+   Minimap / pin / night palette consumed by the popup and the options-page
+   live previews. Dual-block structure matching theme.js: light default
+   and explicit dark override.
    ========================================================================== */
 
 :root,
 :root[data-theme="light"] {
-  --now-line-color: #ea580c;
-  --now-line-shadow: rgba(234, 88, 12, 0.35);
-  --scrub-rgb: 217, 119, 6;
-  --scrub-color: rgba(var(--scrub-rgb), 0.85);
-  --scrub-shadow: rgba(var(--scrub-rgb), 0.25);
-  --scrub-active-color: #ea580c;
-  --scrub-active-shadow: rgba(234, 88, 12, 0.45);
-  --scrub-reset-btn-bg: #d97706;
   --unselected-pin: #f2ba68;
   --night-pin: #ffc56f;
   --selected-pin: #de6b23;
@@ -37,14 +27,6 @@
 }
 
 :root[data-theme="dark"] {
-  --now-line-color: #fb923c;
-  --now-line-shadow: rgba(251, 146, 60, 0.50);
-  --scrub-rgb: 251, 191, 36;
-  --scrub-color: rgba(var(--scrub-rgb), 0.90);
-  --scrub-shadow: rgba(var(--scrub-rgb), 0.35);
-  --scrub-active-color: #f97316;
-  --scrub-active-shadow: rgba(249, 115, 22, 0.60);
-  --scrub-reset-btn-bg: #d97706;
   --unselected-pin: #dba825;
   --night-pin: #91701d;
   --selected-pin: #fb923c;
