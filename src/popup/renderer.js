@@ -28,8 +28,8 @@ export const Renderer = {
     TimelinePreview.renderRows(TimelinePreview.collectRefs(document));
   },
 
-  renderNightArea(offsetHours = 0) {
-    MapPreview.renderNightArea(MapPreview.collectRefs(document), offsetHours);
+  renderNightArea(offsetHours = 0, skipPinsUpdate = false) {
+    MapPreview.renderNightArea(MapPreview.collectRefs(document), offsetHours, skipPinsUpdate);
   },
 
   applyVisibilitySettings() {
@@ -44,7 +44,7 @@ export const Renderer = {
     const timelineRefs = TimelinePreview.collectRefs(document);
     TimelinePreview.renderNowLine(timelineRefs);
     TimelinePreview.renderScrubLine(timelineRefs);
-    this.renderNightArea(State.selectedOffsetHours);
+    this.renderNightArea(State.selectedOffsetHours, true);
     this.applyVisibilitySettings();
   },
 

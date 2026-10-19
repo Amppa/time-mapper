@@ -104,21 +104,28 @@ export const TimelinePreview = {
       const numCells = F > 0 ? 25 : 24;
       const hoursFrag = document.createDocumentFragment();
 
+      const startDate = new Date(State.baseHours[0].getTime() - F * 3600000);
+      const startHour = TimeUtils.hourInZone(startDate, city.zone);
+      let currentDateStr = TimeUtils.dateInZone(startDate, city.zone);
+
       for (let index = 0; index < numCells; index++) {
-        const cellDate = new Date(State.baseHours[0].getTime() + (index - F) * 3600000);
-        const cityHour = TimeUtils.hourInZone(cellDate, city.zone);
+        const cityHour = (startHour + index) % 24;
         const cell = document.createElement("div");
         cell.className = "hour-cell";
         cell.dataset.index = String(index);
-        cell.textContent = String(cityHour).padStart(2, "0");
-        cell.title = `${cityName} ${TimeUtils.formatTime(cellDate, city.zone)}`;
+        const hourStr = String(cityHour).padStart(2, "0");
+        cell.textContent = hourStr;
+        cell.title = `${cityName} ${hourStr}:00`;
 
         // Show date badge at the transition of the day (00:00) OR at the very first cell (index 0)
         if (cityHour === 0 || index === 0) {
-          const dateStr = TimeUtils.dateInZone(cellDate, city.zone);
+          if (cityHour === 0 && index > 0) {
+            const cellDate = new Date(startDate.getTime() + index * 3600000);
+            currentDateStr = TimeUtils.dateInZone(cellDate, city.zone);
+          }
           const dateBadge = document.createElement("span");
           dateBadge.className = "date-badge";
-          dateBadge.textContent = dateStr;
+          dateBadge.textContent = currentDateStr;
           cell.appendChild(dateBadge);
         }
 

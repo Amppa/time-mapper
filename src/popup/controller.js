@@ -58,9 +58,7 @@ export const AppController = {
     this.wireMapClick();
 
     I18nUtils.applyAttributes();
-    requestAnimationFrame(() => {
-      Renderer.render();
-    });
+    Renderer.render();
 
     // Listen to settings changes from Options page
     window.addEventListener("storage", () => {

@@ -97,6 +97,23 @@ export const MapPreview = {
     return this.collectRefs(mount);
   },
 
+  _createPinElement(city, isSelected, currentOffset, subsolarLng) {
+    const position = MapUtils.mapPosition(city);
+    const button = document.createElement("button");
+    button.type = "button";
+    const isNight = this.isCityInNight(city, currentOffset, subsolarLng);
+    button.className = `city-pin${isSelected ? " is-selected" : ""}${isNight ? " is-night" : ""}`;
+    button.style.left = `${position.x}%`;
+    button.style.top = `${position.y}%`;
+    button.dataset.id = city.id;
+    button.dataset.zone = city.zone;
+
+    const cityName = I18nUtils.getCityName(city);
+    button.title = cityName;
+    button.setAttribute("aria-label", I18nUtils.getTranslation("selectCity", { name: cityName }));
+    return button;
+  },
+
   renderPins(refs, onCityToggle) {
     if (refs.mapImg) {
       refs.mapImg.style.transform = `translateY(calc(-50% + ${State.mapSettings.mapYOffset || 0}px))`;
@@ -135,13 +152,14 @@ export const MapPreview = {
     const existingPins = refs.cityLayer ? Array.from(refs.cityLayer.children) : [];
     const currentOffset = State.selectedOffsetHours || 0;
     const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(currentOffset));
+    const selectedSet = new Set(State.selectedIds);
 
-    // In-place patch if structure matches (same cities in same order)
-    if (existingPins.length === allCities.length &&
-        existingPins.every((btn, idx) => btn.dataset.id === allCities[idx].id)) {
-      existingPins.forEach((btn, idx) => {
-        const city = allCities[idx];
-        const isSelected = State.selectedIds.includes(city.id);
+    // In-place patch if all pins are already mounted
+    if (existingPins.length === allCities.length) {
+      existingPins.forEach((btn) => {
+        const city = State.findCity(btn.dataset.id);
+        if (!city) return;
+        const isSelected = selectedSet.has(city.id);
         const isNight = this.isCityInNight(city, currentOffset, subsolarLng);
         btn.classList.toggle("is-selected", isSelected);
         btn.classList.toggle("is-night", isNight);
@@ -174,30 +192,27 @@ export const MapPreview = {
       return;
     }
 
+    // Cancel pending deferred mounting if re-rendering before it fired
+    if (this._deferredMountTimer) {
+      cancelAnimationFrame(this._deferredMountTimer);
+      this._deferredMountTimer = null;
+    }
+
     if (refs.cityLayer) refs.cityLayer.innerHTML = "";
     if (refs.mapTimeLabelLayer) refs.mapTimeLabelLayer.innerHTML = "";
+
+    // Phased mounting: prioritize selected cities + local city for immediate first paint
+    const immediateCities = allCities.filter((c) => selectedSet.has(c.id) || c.id === "local");
+    const deferredCities = allCities.filter((c) => !selectedSet.has(c.id) && c.id !== "local");
 
     const pinFrag = document.createDocumentFragment();
     const labelFrag = refs.mapTimeLabelLayer ? document.createDocumentFragment() : null;
 
-    State.allCities().forEach((city) => {
-      const position = MapUtils.mapPosition(city);
-      const button = document.createElement("button");
-      button.type = "button";
-      const isSelected = State.selectedIds.includes(city.id);
-      const isNight = this.isCityInNight(city, currentOffset, subsolarLng);
-      button.className = `city-pin${isSelected ? " is-selected" : ""}${isNight ? " is-night" : ""}`;
-      button.style.left = `${position.x}%`;
-      button.style.top = `${position.y}%`;
-      button.dataset.id = city.id;
-      button.dataset.zone = city.zone;
+    immediateCities.forEach((city) => {
+      pinFrag.append(this._createPinElement(city, selectedSet.has(city.id), currentOffset, subsolarLng));
 
-      const cityName = I18nUtils.getCityName(city);
-      button.title = cityName;
-      button.setAttribute("aria-label", I18nUtils.getTranslation("selectCity", { name: cityName }));
-      pinFrag.append(button);
-
-      if (isSelected && labelFrag) {
+      if (selectedSet.has(city.id) && labelFrag) {
+        const position = MapUtils.mapPosition(city);
         const label = document.createElement("div");
         label.className = "map-time-label";
         label.style.left = `${position.x}%`;
@@ -218,6 +233,22 @@ export const MapPreview = {
 
     if (refs.cityLayer) refs.cityLayer.append(pinFrag);
     if (refs.mapTimeLabelLayer && labelFrag) refs.mapTimeLabelLayer.append(labelFrag);
+
+    // Defer remaining background city pins to next animation frame
+    if (deferredCities.length > 0 && refs.cityLayer) {
+      this._deferredMountTimer = requestAnimationFrame(() => {
+        this._deferredMountTimer = null;
+        if (!refs.cityLayer) return;
+        const deferredFrag = document.createDocumentFragment();
+        const curOffset = State.selectedOffsetHours || 0;
+        const curSubsolar = MapUtils.subsolarLng(this.shiftedNow(curOffset));
+        deferredCities.forEach((city) => {
+          if (refs.cityLayer.querySelector(`[data-id="${city.id}"]`)) return;
+          deferredFrag.append(this._createPinElement(city, false, curOffset, curSubsolar));
+        });
+        refs.cityLayer.append(deferredFrag);
+      });
+    }
   },
 
   /**
@@ -323,7 +354,7 @@ export const MapPreview = {
     refs.timezoneHoverBands.append(frag);
   },
 
-  renderNightArea(refs, offsetHours = 0) {
+  renderNightArea(refs, offsetHours = 0, skipPinsUpdate = false) {
     if (!refs.nightPath) return;
 
     this.renderMapTimeline(refs, offsetHours);
@@ -340,15 +371,21 @@ export const MapPreview = {
 
     // Static reference curve — shows the night area boundary at the true "now" time (offset = 0)
     if (refs.nightPathRef) {
-      const realNowPts = this.calcNightPoints(0);
-      refs.nightPathRef.setAttribute("d", `M ${realNowPts.join(" L ")}`);
+      if (!this._cachedNowPath || Math.abs(Date.now() - (this._cachedNowPathTime || 0)) > 60000) {
+        const realNowPts = this.calcNightPoints(0);
+        this._cachedNowPath = `M ${realNowPts.join(" L ")}`;
+        this._cachedNowPathTime = Date.now();
+      }
+      refs.nightPathRef.setAttribute("d", this._cachedNowPath);
     }
 
     // Live update local times for selected cities on the map
     const activeFraction = State.getActiveScrubFraction();
     this.updateMapCityTimes(refs, activeFraction);
 
-    this.updatePinsNightState(refs, offsetHours);
+    if (!skipPinsUpdate) {
+      this.updatePinsNightState(refs, offsetHours);
+    }
   },
 
   /**
