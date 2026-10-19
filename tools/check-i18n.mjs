@@ -140,7 +140,10 @@ console.log("\n=== 6. dictionary keys still referenced somewhere ===");
 const jsSources = ["src/popup/controller.js", "src/popup/renderer.js", "src/options/options.js", "src/shared/utils.js", "src/shared/map-preview.js", "src/shared/timeline-preview.js", "src/shared/city-preview.js"];
 const literalUses = new Set(usedKeys);
 for (const f of jsSources) {
-  for (const m of read(f).matchAll(/getTranslation\(\s*"([^"]+)"/g)) literalUses.add(m[1]);
+  const source = read(f);
+  for (const m of source.matchAll(/getTranslation\(\s*"([^"]+)"/g)) literalUses.add(m[1]);
+  // Indirect keys: a table of { labelKey: "..." } resolved by getTranslation(meta.labelKey).
+  for (const m of source.matchAll(/labelKey:\s*"([^"]+)"/g)) literalUses.add(m[1]);
 }
 for (const lang of uiLangs) {
   const unused = keys(i18nTranslations[lang]).filter((k) => !literalUses.has(k));

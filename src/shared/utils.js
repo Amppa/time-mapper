@@ -113,7 +113,7 @@ export const TimeUtils = {
   formatTime(date, zone, options = {}) {
     try {
       const resolved = this.resolveZone(zone);
-      const locale = CONFIG.localeMap[State.currentLang] || "en-US";
+      const locale = I18nUtils.getLocale() || "en-US";
       const formatter = this.getFormatter(locale, {
         timeZone: resolved,
         hour: "2-digit",
@@ -228,6 +228,27 @@ export const TimeUtils = {
 
 export const I18nUtils = {
   /**
+   * Active UI language. `State.currentLang`'s setter is the only writer
+   * (via setLang), so this module never has to reach for the State singleton
+   * to resolve a string.
+   */
+  _lang: "zh",
+
+  setLang(lang) {
+    this._lang = lang;
+  },
+
+  /** Internal code, falling back to the default language. */
+  getLang() {
+    return this._lang || "zh";
+  },
+
+  /** BCP-47 locale for date/time formatting. */
+  getLocale() {
+    return CONFIG.localeMap[this.getLang()];
+  },
+
+  /**
    * The one place that maps translation keys onto the DOM. Both the popup and
    * the options page call applyAttributes(); neither should re-implement it.
    * `pick`/`put` describe how each attribute type reads its key and writes its
@@ -249,7 +270,7 @@ export const I18nUtils = {
    * random language inside an otherwise translated page.
    */
   applyAttributes(root = document) {
-    const lang = (typeof State !== "undefined" && State.currentLang) || "zh";
+    const lang = this.getLang();
     const dict = i18nTranslations[lang];
 
     if (!dict) {
@@ -272,7 +293,7 @@ export const I18nUtils = {
   },
 
   getTranslation(key, params = {}) {
-    const lang = (typeof State !== "undefined" && State.currentLang) || "zh";
+    const lang = this.getLang();
     let text = i18nTranslations[lang]?.[key] || "";
     for (const [pKey, pVal] of Object.entries(params)) {
       text = text.replace(`{${pKey}}`, pVal);
@@ -285,7 +306,7 @@ export const I18nUtils = {
     if (city.id.startsWith("custom-")) {
       return city.name;
     }
-    const lang = (typeof State !== "undefined" && State.currentLang) || "zh";
+    const lang = this.getLang();
     if (city.id === "local") {
       if (city.matchingId) {
         return i18nCityNames[lang]?.[city.matchingId] || city.matchingId;
@@ -328,6 +349,9 @@ export const PeriodUtils = {
     return { ...period, ...this.getPeriodColors(idx) };
   }
 };
+
+/** lng/lat -> base-map percentage, memoised per city object. */
+const basePositionCache = new WeakMap();
 
 export const MapUtils = {
   /**
@@ -387,14 +411,21 @@ export const MapUtils = {
   },
 
   mapPosition(city) {
-    if (city._cx === undefined) {
+    // Base-map position depends only on lng/lat, so it is memoised per city
+    // object. A WeakMap keeps the cache off the city data itself: an edited
+    // custom city is a new object, so its old entry is collected with it.
+    let base = basePositionCache.get(city);
+    if (!base) {
       const hasLngLat = typeof city.lng === "number" && typeof city.lat === "number";
-      city._cx = hasLngLat ? this.lngToX(city.lng) : city.x;
-      city._cy = hasLngLat ? this.latToY(city.lat) : city.y;
+      base = {
+        x: hasLngLat ? this.lngToX(city.lng) : city.x,
+        y: hasLngLat ? this.latToY(city.lat) : city.y
+      };
+      basePositionCache.set(city, base);
     }
     return {
-      x: MathUtils.clamp(this.calibrateX(city._cx), 0, 100),
-      y: MathUtils.clamp(this.calibrateY(city._cy), 0, 100)
+      x: MathUtils.clamp(this.calibrateX(base.x), 0, 100),
+      y: MathUtils.clamp(this.calibrateY(base.y), 0, 100)
     };
   },
 
@@ -437,42 +468,6 @@ export const TimelineUtils = {
     }
 
     return (hours + minutes / 60) / 24;
-  },
-
-  /**
-   * Grid geometry of the hours row, expressed relative to the timeline panel:
-   * where the grid starts and how wide it is. Returns null when the timeline
-   * has not been laid out yet (or `scope` is not a searchable root).
-   *
-   * `scope` is the timeline panel element (or an ancestor of it); it defaults
-   * to `document` for the popup. Needed because the options page hosts a
-   * second, independent timeline that must measure its own geometry.
-   */
-  gridGeometry(scope) {
-    const root = scope && scope.querySelector ? scope : (typeof document !== "undefined" ? document : null);
-    if (!root) return null;
-    const hoursEl = root.querySelector(".timeline-row .hours");
-    const panelEl = root.matches && root.matches(".timeline-panel") ? root : root.querySelector(".timeline-panel");
-    if (!hoursEl || !panelEl || !hoursEl.getBoundingClientRect || !panelEl.getBoundingClientRect) return null;
-    const gridRect = hoursEl.getBoundingClientRect();
-    const panelRect = panelEl.getBoundingClientRect();
-    return {
-      gridLeft: gridRect.left - panelRect.left,
-      gridWidth: gridRect.width
-    };
-  },
-
-  /** Convert a 0-1 day fraction to a pixel offset inside the timeline panel. */
-  fractionToLeft(fraction, scope, geo = null) {
-    const g = geo || this.gridGeometry(scope);
-    if (!g) return 0;
-    return g.gridLeft + fraction * g.gridWidth;
-  },
-
-  leftToFraction(pxLeft, scope, geo = null) {
-    const g = geo || this.gridGeometry(scope);
-    if (!g) return 0;
-    return MathUtils.clamp((pxLeft - g.gridLeft) / g.gridWidth, 0, 1);
   },
 
   formatFractionTime(fraction) {

@@ -89,8 +89,8 @@ function run() {
     ],
 
     "Map projection": [
-      // mapPosition memoises _cx/_cy onto the city object, so the cold path has
-      // to build throwaway cities to be measured at all.
+      // mapPosition memoises the base position in a WeakMap keyed by the city
+      // object, so the cold path has to build throwaway cities to be measured at all.
       bench(`mapPosition() x${N} cold`, () => {
         for (const c of cities) MapUtils.mapPosition({ lng: c.lng, lat: c.lat });
       }, { iters: 200, budgetMs: 5 }),

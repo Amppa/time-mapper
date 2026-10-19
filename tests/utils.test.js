@@ -424,11 +424,10 @@ describe("MapUtils.mapPosition", () => {
     assert.ok(pos.y >= 0 && pos.y <= 100);
   });
 
-  it("caches the computed base position on the city object", () => {
+  it("leaves the city data untouched but keeps the position stable", () => {
     const city = { lng: 121.5, lat: 25.0 };
     const first = MapUtils.mapPosition(city);
-    assert.equal(typeof city._cx, "number");
-    assert.equal(typeof city._cy, "number");
+    assert.equal(Object.keys(city).length, 2);
     assert.deepEqual(MapUtils.mapPosition(city), first);
   });
 });
@@ -564,78 +563,6 @@ describe("TimelineUtils.getNowFraction", () => {
   });
 });
 
-describe("TimelineUtils.gridGeometry", () => {
-  const hours = { getBoundingClientRect: () => ({ left: 120, width: 600 }) };
-  const panel = { getBoundingClientRect: () => ({ left: 20, width: 800 }) };
-
-  function makeScope(elements, isPanel = false) {
-    return {
-      querySelector(selector) { return elements[selector] || null; },
-      matches(selector) { return isPanel === true && selector === ".timeline-panel"; },
-      getBoundingClientRect: isPanel === true ? () => ({ left: 20, width: 800 }) : undefined
-    };
-  }
-
-  it("returns grid offsets relative to the timeline panel", () => {
-    const geo = TimelineUtils.gridGeometry(makeScope({
-      ".timeline-row .hours": hours,
-      ".timeline-panel": panel
-    }));
-    assert.equal(geo.gridLeft, 100);
-    assert.equal(geo.gridWidth, 600);
-  });
-
-  it("measures against the scope itself when it is the panel", () => {
-    const geo = TimelineUtils.gridGeometry(makeScope({ ".timeline-row .hours": hours }, true));
-    assert.equal(geo.gridLeft, 100);
-    assert.equal(geo.gridWidth, 600);
-  });
-
-  it("returns null when the grid or panel is missing", () => {
-    assert.equal(TimelineUtils.gridGeometry(makeScope({ ".timeline-panel": panel })), null);
-    assert.equal(TimelineUtils.gridGeometry(makeScope({ ".timeline-row .hours": hours })), null);
-  });
-
-  it("returns null when the elements cannot be measured", () => {
-    assert.equal(TimelineUtils.gridGeometry(makeScope({
-      ".timeline-row .hours": {},
-      ".timeline-panel": {}
-    })), null);
-  });
-
-  it("returns null when there is neither a scope nor a document", () => {
-    delete globalThis.document;
-    assert.equal(TimelineUtils.gridGeometry({}), null);
-  });
-});
-
-describe("TimelineUtils fraction/px conversion", () => {
-  const geo = { gridLeft: 100, gridWidth: 600 };
-
-  it("converts a day fraction into a panel offset", () => {
-    assert.equal(TimelineUtils.fractionToLeft(0, null, geo), 100);
-    assert.equal(TimelineUtils.fractionToLeft(0.5, null, geo), 400);
-    assert.equal(TimelineUtils.fractionToLeft(1, null, geo), 700);
-  });
-
-  it("converts a panel offset back into a day fraction", () => {
-    assert.equal(TimelineUtils.leftToFraction(100, null, geo), 0);
-    assert.equal(TimelineUtils.leftToFraction(400, null, geo), 0.5);
-    assert.equal(TimelineUtils.leftToFraction(700, null, geo), 1);
-  });
-
-  it("clamps an out-of-range offset", () => {
-    assert.equal(TimelineUtils.leftToFraction(0, null, geo), 0);
-    assert.equal(TimelineUtils.leftToFraction(9999, null, geo), 1);
-  });
-
-  it("returns 0 when no geometry is available", () => {
-    delete globalThis.document;
-    assert.equal(TimelineUtils.fractionToLeft(0.5, {}), 0);
-    assert.equal(TimelineUtils.leftToFraction(400, {}), 0);
-  });
-});
-
 describe("TimelineUtils.formatFractionTime", () => {
   it("formats a day fraction as HH:MM", () => {
     assert.equal(TimelineUtils.formatFractionTime(0), "00:00");
@@ -696,6 +623,21 @@ describe("I18nUtils.getTranslation", () => {
 
   it("returns an empty string for a missing key", () => {
     assert.equal(I18nUtils.getTranslation("__missing_key__"), "");
+  });
+});
+
+describe("I18nUtils language source", () => {
+  it("resolves strings from its own language, not from State", () => {
+    State.currentLang = "zh";
+    I18nUtils.setLang("en");
+    assert.equal(I18nUtils.getTranslation("mapSettings"), i18nTranslations.en.mapSettings);
+    assert.equal(I18nUtils.getLocale(), CONFIG.localeMap.en);
+    I18nUtils.setLang("zh");
+  });
+
+  it("falls back to the default language when none was set", () => {
+    I18nUtils.setLang("");
+    assert.equal(I18nUtils.getLang(), "zh");
   });
 });
 

@@ -199,7 +199,7 @@ export const TimelinePreview = {
       if (isActive) {
         handle.classList.add("is-dragging");
       }
-      handle.setAttribute("aria-label", "Drag to shift night area view");
+      handle.setAttribute("aria-label", I18nUtils.getTranslation("dragScrubAria"));
 
       // Top knob with time and delete button [ HH:mm × ]
       const topKnob = document.createElement("div");

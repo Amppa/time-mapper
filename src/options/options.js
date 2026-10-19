@@ -178,19 +178,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const PERIOD_META = {
     2: [
-      { key: "day", label: "白天", icon: "☀️" },
-      { key: "night", label: "晚上", icon: "🌙" }
+      { key: "day", labelKey: "periodDay", icon: "☀️" },
+      { key: "night", labelKey: "periodNight", icon: "🌙" }
     ],
     3: [
-      { key: "day", label: "白天", icon: "☀️" },
-      { key: "evening", label: "傍晚", icon: "🌇" },
-      { key: "night", label: "深夜", icon: "🌙" }
+      { key: "day", labelKey: "periodDay", icon: "☀️" },
+      { key: "evening", labelKey: "periodEvening", icon: "🌇" },
+      { key: "night", labelKey: "periodLateNight", icon: "🌙" }
     ],
     4: [
-      { key: "morning", label: "早晨", icon: "🌅" },
-      { key: "day", label: "白天", icon: "☀️" },
-      { key: "evening", label: "傍晚", icon: "🌇" },
-      { key: "night", label: "晚上", icon: "🌙" }
+      { key: "morning", labelKey: "periodMorning", icon: "🌅" },
+      { key: "day", labelKey: "periodDay", icon: "☀️" },
+      { key: "evening", labelKey: "periodEvening", icon: "🌇" },
+      { key: "night", labelKey: "periodNight", icon: "🌙" }
     ]
   };
 
@@ -206,7 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cell.className = "hour-cell interactive-hour-cell";
       cell.textContent = String(h).padStart(2, "0");
       cell.dataset.hour = String(h);
-      cell.title = `Hour ${String(h).padStart(2, "0")}:00`;
+      cell.title = I18nUtils.getTranslation("hourCellTitle", { time: `${String(h).padStart(2, "0")}:00` });
 
       const styleInfo = PeriodUtils.getHourStyle(h);
       cell.style.backgroundColor = styleInfo.color;
@@ -232,14 +232,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const metaList = PERIOD_META[count] || PERIOD_META[3];
 
     State.timePeriods.forEach((period, idx) => {
-      const meta = metaList[idx] || { label: `時段 ${idx + 1}`, icon: "⏰" };
+      const meta = metaList[idx] || { labelKey: "periodFallback", icon: "⏰" };
+      const label = I18nUtils.getTranslation(meta.labelKey, { index: idx + 1 });
       const divider = document.createElement("div");
       divider.className = "timeline-divider";
       divider.dataset.periodIndex = String(idx);
       divider.style.left = `${(period.start / 24) * 100}%`;
       divider.setAttribute("tabindex", "0");
       divider.setAttribute("role", "slider");
-      divider.setAttribute("aria-label", `${meta.label} 起始時間`);
+      divider.setAttribute("aria-label", I18nUtils.getTranslation("periodStartAria", { label }));
       divider.setAttribute("aria-valuenow", String(period.start));
 
       // Top knob with icon & hour text
