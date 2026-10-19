@@ -97,11 +97,11 @@ export const MapPreview = {
     return this.collectRefs(mount);
   },
 
-  _createPinElement(city, isSelected, currentOffset, subsolarLng) {
+  _createPinElement(city, isSelected, currentOffset, subsolarLng, nightCurve = null) {
     const position = MapUtils.mapPosition(city);
     const button = document.createElement("button");
     button.type = "button";
-    const isNight = this.isCityInNight(city, currentOffset, subsolarLng);
+    const isNight = this.isCityInNight(city, currentOffset, subsolarLng, nightCurve);
     button.className = `city-pin${isSelected ? " is-selected" : ""}${isNight ? " is-night" : ""}`;
     button.style.left = `${position.x}%`;
     button.style.top = `${position.y}%`;
@@ -114,7 +114,26 @@ export const MapPreview = {
     return button;
   },
 
+  /**
+   * Full pins mount (sync immediate + schedule deferred pins).
+   * Used by options preview, tests, and full repaints.
+   */
   renderPins(refs, onCityToggle) {
+    this.renderPinsImmediate(refs, onCityToggle);
+    this.mountDeferredPins(refs);
+  },
+
+  /** Alias for renderPins to make synchronous/full intent explicit. */
+  renderPinsSync(refs, onCityToggle) {
+    this.renderPins(refs, onCityToggle);
+  },
+
+  /**
+   * Fast-path immediate reconciler: updates transforms, labels, and mounts/patches
+   * visible & selected pins without wiping the DOM. Background catalog pins are
+   * deferred to mountDeferredPins on idle.
+   */
+  renderPinsImmediate(refs, onCityToggle) {
     if (refs.mapImg) {
       refs.mapImg.style.transform = `translateY(calc(-50% + ${State.mapSettings.mapYOffset || 0}px))`;
     }
@@ -149,111 +168,142 @@ export const MapPreview = {
     refs._onCityToggle = onCityToggle;
 
     const allCities = State.allCities();
-    const existingPins = refs.cityLayer ? Array.from(refs.cityLayer.children) : [];
     const currentOffset = State.selectedOffsetHours || 0;
     const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(currentOffset));
+    // One shared terminator curve for all pins: replaces 70x trig with lookups.
+    const nightCurve = this.calcNightPoints(currentOffset).curve;
     const selectedSet = new Set(State.selectedIds);
+    const validCityIdSet = new Set(allCities.map((c) => c.id));
 
-    // In-place patch only when the mounted pins are exactly the live cities, as a
-    // set: phased mounting reorders the DOM, so index order is not comparable.
-    // A length-only check lets a same-sized edit (one city added while another
-    // was removed) skip the rebuild and leave a stale pin behind forever.
-    const mountedIds = new Set(existingPins.map((btn) => btn.dataset.id));
-    if (existingPins.length === allCities.length &&
-        allCities.every((city) => mountedIds.has(city.id))) {
-      existingPins.forEach((btn) => {
-        const city = State.findCity(btn.dataset.id);
-        if (!city) return;
-        const isSelected = selectedSet.has(city.id);
-        const isNight = this.isCityInNight(city, currentOffset, subsolarLng);
-        btn.classList.toggle("is-selected", isSelected);
-        btn.classList.toggle("is-night", isNight);
-      });
+    if (!refs.cityLayer) return;
 
-      // Synchronize label layer for selected cities
-      if (refs.mapTimeLabelLayer) {
-        const existingLabels = Array.from(refs.mapTimeLabelLayer.children);
-        const labelsMatch = existingLabels.length === State.selectedIds.length &&
-          existingLabels.every((lbl, idx) => lbl.dataset.id === State.selectedIds[idx]);
-        if (!labelsMatch) {
-          refs.mapTimeLabelLayer.innerHTML = "";
-          const lblFrag = document.createDocumentFragment();
-          State.selectedIds.forEach((id) => {
-            const city = State.findCity(id);
-            if (!city) return;
-            const position = MapUtils.mapPosition(city);
-            const label = document.createElement("div");
-            label.className = "map-time-label";
-            label.style.left = `${position.x}%`;
-            label.style.top = `${position.y}%`;
-            label.dataset.id = city.id;
-            label.dataset.zone = city.zone;
-            lblFrag.append(label);
-          });
-          refs.mapTimeLabelLayer.append(lblFrag);
-        }
-        this.updateMapCityTimes(refs, activeFraction);
-      }
-      return;
-    }
-
-    // Cancel pending deferred mounting if re-rendering before it fired
-    if (this._deferredMountTimer) {
-      cancelAnimationFrame(this._deferredMountTimer);
-      this._deferredMountTimer = null;
-    }
-
-    if (refs.cityLayer) refs.cityLayer.innerHTML = "";
-    if (refs.mapTimeLabelLayer) refs.mapTimeLabelLayer.innerHTML = "";
-
-    // Phased mounting: prioritize selected cities + local city for immediate first paint
-    const immediateCities = allCities.filter((c) => selectedSet.has(c.id) || c.id === "local");
-    const deferredCities = allCities.filter((c) => !selectedSet.has(c.id) && c.id !== "local");
-
-    const pinFrag = document.createDocumentFragment();
-    const labelFrag = refs.mapTimeLabelLayer ? document.createDocumentFragment() : null;
-
-    immediateCities.forEach((city) => {
-      pinFrag.append(this._createPinElement(city, selectedSet.has(city.id), currentOffset, subsolarLng));
-
-      if (selectedSet.has(city.id) && labelFrag) {
-        const position = MapUtils.mapPosition(city);
-        const label = document.createElement("div");
-        label.className = "map-time-label";
-        label.style.left = `${position.x}%`;
-        label.style.top = `${position.y}%`;
-        label.dataset.id = city.id;
-        label.dataset.zone = city.zone;
-
-        if (targetDate) {
-          label.textContent = TimeUtils.formatTime(targetDate, city.zone);
-          label.style.display = "";
-        } else {
-          label.style.display = "none";
-        }
-
-        labelFrag.append(label);
+    // Map existing mounted pins by data-id
+    const mountedPinsMap = new Map();
+    Array.from(refs.cityLayer.children).forEach((el) => {
+      const id = el.dataset?.id;
+      if (!id) return;
+      if (!validCityIdSet.has(id)) {
+        // Obsolete custom city removed
+        el.remove();
+      } else {
+        mountedPinsMap.set(id, el);
       }
     });
 
-    if (refs.cityLayer) refs.cityLayer.append(pinFrag);
-    if (refs.mapTimeLabelLayer && labelFrag) refs.mapTimeLabelLayer.append(labelFrag);
-
-    // Defer remaining background city pins to next animation frame
-    if (deferredCities.length > 0 && refs.cityLayer) {
-      this._deferredMountTimer = requestAnimationFrame(() => {
-        this._deferredMountTimer = null;
-        if (!refs.cityLayer) return;
-        const deferredFrag = document.createDocumentFragment();
-        const curOffset = State.selectedOffsetHours || 0;
-        const curSubsolar = MapUtils.subsolarLng(this.shiftedNow(curOffset));
-        deferredCities.forEach((city) => {
-          if (refs.cityLayer.querySelector(`[data-id="${city.id}"]`)) return;
-          deferredFrag.append(this._createPinElement(city, false, curOffset, curSubsolar));
-        });
-        refs.cityLayer.append(deferredFrag);
+    // 1. Initial mount if cityLayer is completely empty
+    if (mountedPinsMap.size === 0) {
+      const immediateCities = allCities.filter((c) => selectedSet.has(c.id) || c.id === "local");
+      const pinFrag = document.createDocumentFragment();
+      immediateCities.forEach((city) => {
+        pinFrag.append(this._createPinElement(city, selectedSet.has(city.id), currentOffset, subsolarLng, nightCurve));
       });
+      refs.cityLayer.append(pinFrag);
+    } else {
+      // 2. Incremental update: update selected & night classes on already-mounted pins
+      for (const [id, btn] of mountedPinsMap) {
+        const city = State.findCity(id);
+        if (!city) continue;
+        const isSelected = selectedSet.has(city.id);
+        const isNight = this.isCityInNight(city, currentOffset, subsolarLng, nightCurve);
+        btn.classList.toggle("is-selected", isSelected);
+        btn.classList.toggle("is-night", isNight);
+      }
+
+      // 3. Ensure any selected city not yet mounted gets mounted immediately
+      const missingSelectedFrag = document.createDocumentFragment();
+      selectedSet.forEach((id) => {
+        if (!mountedPinsMap.has(id)) {
+          const city = State.findCity(id);
+          if (city) {
+            const el = this._createPinElement(city, true, currentOffset, subsolarLng, nightCurve);
+            missingSelectedFrag.append(el);
+            mountedPinsMap.set(id, el);
+          }
+        }
+      });
+      if (missingSelectedFrag.childNodes.length > 0) {
+        refs.cityLayer.append(missingSelectedFrag);
+      }
     }
+
+    // Synchronize label layer for selected cities without wiping unchanged labels
+    if (refs.mapTimeLabelLayer) {
+      const existingLabelMap = new Map();
+      Array.from(refs.mapTimeLabelLayer.children).forEach((lbl) => {
+        const id = lbl.dataset?.id;
+        if (!id || !selectedSet.has(id)) {
+          lbl.remove();
+        } else {
+          existingLabelMap.set(id, lbl);
+        }
+      });
+
+      const labelFrag = document.createDocumentFragment();
+      State.selectedIds.forEach((id) => {
+        if (!existingLabelMap.has(id)) {
+          const city = State.findCity(id);
+          if (!city) return;
+          const position = MapUtils.mapPosition(city);
+          const label = document.createElement("div");
+          label.className = "map-time-label";
+          label.style.left = `${position.x}%`;
+          label.style.top = `${position.y}%`;
+          label.dataset.id = city.id;
+          label.dataset.zone = city.zone;
+          if (targetDate) {
+            label.textContent = TimeUtils.formatTime(targetDate, city.zone);
+            label.style.display = "";
+          } else {
+            label.style.display = "none";
+          }
+          labelFrag.append(label);
+        }
+      });
+      if (labelFrag.childNodes.length > 0) {
+        refs.mapTimeLabelLayer.append(labelFrag);
+      }
+      this.updateMapCityTimes(refs, activeFraction);
+    }
+  },
+
+  /** Idle-mount remaining catalog pins in one step without re-rendering anything else. */
+  mountDeferredPins(refs) {
+    if (!refs.cityLayer) return;
+    const existingIds = new Set(Array.from(refs.cityLayer.children).map((el) => el.dataset?.id));
+    const deferredCities = State.allCities().filter((city) => {
+      if (!city || existingIds.has(city.id)) return false;
+      return true;
+    });
+    if (deferredCities.length === 0) return;
+
+    if (this._deferredIdleTimer) {
+      if (typeof cancelIdleCallback === "function") cancelIdleCallback(this._deferredIdleTimer);
+      else clearTimeout(this._deferredIdleTimer);
+      this._deferredIdleTimer = null;
+    }
+
+    const schedule = typeof requestIdleCallback === "function"
+      ? (fn) => requestIdleCallback(fn, { timeout: 1000 })
+      : (fn) => setTimeout(fn, 0);
+
+    this._deferredIdleTimer = schedule(() => {
+      this._deferredIdleTimer = null;
+      if (!refs.cityLayer) return;
+      const currentMountedSet = new Set(Array.from(refs.cityLayer.children).map((el) => el.dataset?.id));
+      const deferredFrag = document.createDocumentFragment();
+      const curOffset = State.selectedOffsetHours || 0;
+      const curSubsolar = MapUtils.subsolarLng(this.shiftedNow(curOffset));
+      const curCurve = this.calcNightPoints(curOffset).curve;
+      const selectedSet = new Set(State.selectedIds);
+      deferredCities.forEach((city) => {
+        if (currentMountedSet.has(city.id)) return;
+        currentMountedSet.add(city.id);
+        deferredFrag.append(this._createPinElement(city, selectedSet.has(city.id), curOffset, curSubsolar, curCurve));
+      });
+      if (deferredFrag.childNodes.length > 0) {
+        refs.cityLayer.append(deferredFrag);
+      }
+    });
   },
 
   /**
@@ -294,15 +344,26 @@ export const MapPreview = {
 
   calcNightPoints(offsetHours) {
     const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(offsetHours));
+    if (this._cachedNightPoints && this._cachedNightPoints.subsolarLng === subsolarLng) {
+      return this._cachedNightPoints.points;
+    }
 
     const points = [];
+    // Numeric curve for isCityInNight lookups: same calibrated viewport
+    // coordinates as the SVG path, so pins and shading always agree.
+    const curve = [];
     for (let x = 0; x <= 100; x += 2) {
       const lng = MapUtils.getXLongitude(x);
       const lat = Math.atan(-Math.cos((lng - subsolarLng) * Math.PI / 180) / NIGHT_TAN_DEC)
         * 180 / Math.PI + NIGHT_Y_SHIFT;
       const { x: px, y: py } = MapUtils.mapPosition({ lng, lat });
       points.push(`${px.toFixed(1)},${py.toFixed(1)}`);
+      curve.push({ x: px, y: py });
     }
+    // Keep the string array as the return value (SVG path building reads it);
+    // stash the numeric curve alongside for night lookups.
+    points.curve = curve;
+    this._cachedNightPoints = { subsolarLng, points };
     return points;
   },
 
@@ -362,19 +423,23 @@ export const MapPreview = {
   renderNightArea(refs, offsetHours = 0, skipPinsUpdate = false) {
     if (!refs.nightPath) return;
 
-    this.renderMapTimeline(refs, offsetHours);
-    this.renderHourLines(refs, offsetHours);
-    this.renderHourBands(refs, offsetHours);
+    // Shading itself is cheap and needed for first paint; bands/lines/ticks
+    // are decorations that can wait for idle (see renderNightDecorations).
+    const activePts = this.renderNightShading(refs, offsetHours);
 
+    if (!skipPinsUpdate) {
+      this.updatePinsNightState(refs, offsetHours, activePts?.curve);
+    }
+  },
+
+  /** SVG shading only (no bands/lines/ticks); shared by sync and idle paths. */
+  renderNightShading(refs, offsetHours = 0) {
+    if (!refs.nightPath) return null;
     if (refs.nightAreaOverlay) {
       refs.nightAreaOverlay.style.transform = `translateY(${State.mapSettings.mapYOffset || 0}px)`;
     }
-
-    // Dynamic filled night area — follows the active scrub line offset
     const activePts = this.calcNightPoints(offsetHours);
     refs.nightPath.setAttribute("d", `M 0,100 L ${activePts.join(" L ")} L 100,100 Z`);
-
-    // Static reference curve — shows the night area boundary at the true "now" time (offset = 0)
     if (refs.nightPathRef) {
       if (!this._cachedNowPath || Math.abs(Date.now() - (this._cachedNowPathTime || 0)) > 60000) {
         const realNowPts = this.calcNightPoints(0);
@@ -383,38 +448,79 @@ export const MapPreview = {
       }
       refs.nightPathRef.setAttribute("d", this._cachedNowPath);
     }
-
-    // Live update local times for selected cities on the map
     const activeFraction = State.getActiveScrubFraction();
     this.updateMapCityTimes(refs, activeFraction);
+    return activePts;
+  },
 
-    if (!skipPinsUpdate) {
-      this.updatePinsNightState(refs, offsetHours);
+  /** Bands + hour lines + timeline ticks; deferred past first paint and cached by offset. */
+  renderNightDecorations(refs, offsetHours = 0) {
+    if (this._lastDecorOffset === offsetHours && refs.hourLines && refs.hourLines.children.length > 0) {
+      return;
     }
+    this._lastDecorOffset = offsetHours;
+    this.renderMapTimeline(refs, offsetHours);
+    this.renderHourLines(refs, offsetHours);
+    this.renderHourBands(refs, offsetHours);
   },
 
   /**
    * Determine if a city is inside the night curve (terminator) at the given offset.
    * `cachedSubsolarLng` allows batch callers to avoid recomputing subsolar longitude.
+   * `cachedCurve` (from calcNightPoints().curve) allows skipping the per-city
+   * trigonometry entirely: the pin shares the exact curve the shading draws,
+   * so color and shadow can never disagree by 1px.
    */
-  isCityInNight(city, offsetHours = 0, cachedSubsolarLng = null) {
+  isCityInNight(city, offsetHours = 0, cachedSubsolarLng = null, cachedCurve = null) {
+    const cityPos = MapUtils.mapPosition(city);
+    if (cachedCurve && cachedCurve.length > 0) {
+      return this._isNightFromCurve(cityPos, cachedCurve);
+    }
     const { lng } = MapUtils.lngLatOf(city);
     const subsolarLng = cachedSubsolarLng !== null
       ? cachedSubsolarLng
       : MapUtils.subsolarLng(this.shiftedNow(offsetHours));
     const termLat = Math.atan(-Math.cos((lng - subsolarLng) * Math.PI / 180) / NIGHT_TAN_DEC)
       * 180 / Math.PI + NIGHT_Y_SHIFT;
-    const cityPos = MapUtils.mapPosition(city);
     const termPos = MapUtils.mapPosition({ lng, lat: termLat });
     return cityPos.y >= termPos.y;
   },
 
+  /** Table lookup against the terminator polyline (51 pts, x step 2). */
+  _isNightFromCurve(cityPos, curve) {
+    const x = cityPos.x;
+    // Clamp to endpoints when calibration pushes pins off the curve span.
+    if (x <= curve[0].x) return cityPos.y >= curve[0].y;
+    const last = curve[curve.length - 1];
+    if (x >= last.x) return cityPos.y >= last.y;
+    // Linear scan over 51 pts is cheaper than trig; find bracketing segment.
+    for (let i = 0; i < curve.length - 1; i++) {
+      const a = curve[i];
+      const b = curve[i + 1];
+      if (x >= a.x && x <= b.x) {
+        const span = b.x - a.x;
+        const t = span > 0 ? (x - a.x) / span : 0;
+        const curveY = a.y + (b.y - a.y) * t;
+        return cityPos.y >= curveY;
+      }
+    }
+    // Non-monotonic calibration fallback: nearest point.
+    let best = curve[0];
+    let bestDist = Math.abs(x - best.x);
+    for (let i = 1; i < curve.length; i++) {
+      const d = Math.abs(x - curve[i].x);
+      if (d < bestDist) { bestDist = d; best = curve[i]; }
+    }
+    return cityPos.y >= best.y;
+  },
+
   /** Synchronize .is-night class on all rendered pins */
-  updatePinsNightState(refs, offsetHours = 0) {
+  updatePinsNightState(refs, offsetHours = 0, cachedCurve = null) {
     if (!refs.cityLayer) return;
     const allCities = State.allCities();
     const pinElements = refs.cityLayer.querySelectorAll(".city-pin");
     if (!pinElements.length) return;
+    const curve = cachedCurve || this.calcNightPoints(offsetHours).curve;
     const subsolarLng = MapUtils.subsolarLng(this.shiftedNow(offsetHours));
     pinElements.forEach((btn, idx) => {
       // Phased mounting appends deferred pins after the selected ones, so DOM
@@ -422,7 +528,7 @@ export const MapPreview = {
       // authoritative; the index is only a fallback for unmarked pins.
       const city = (btn.dataset.id ? State.findCity(btn.dataset.id) : null) || allCities[idx];
       if (city) {
-        btn.classList.toggle("is-night", this.isCityInNight(city, offsetHours, subsolarLng));
+        btn.classList.toggle("is-night", this.isCityInNight(city, offsetHours, subsolarLng, curve));
       }
     });
   },
