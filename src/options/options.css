@@ -12,7 +12,19 @@
   --search-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
+/* Reserve the scrollbar gutter permanently. Without it, a page whose height
+   hovers around the viewport threshold flips between "scrollbar present" and
+   "scrollbar absent"; the resulting ~17px width change reflows the fixed
+   360px settings column, changes the height again and restarts the cycle,
+   which reads as a scrollbar blinking in and out. Declaring it on the root
+   element propagates to the viewport; the body rule keeps it stable if the
+   body ever becomes the scrolling box. */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
+  scrollbar-gutter: stable;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-sans);
@@ -114,11 +126,11 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--divider);
   border-radius: var(--radius-lg);
-  padding: var(--space-lg) var(--space-md);
+  padding: var(--space-xl);
   transition: border-color var(--transition-base);
 
   & .section-title {
-    font-size: var(--font-lg);
+    font-size: var(--font-xl);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: var(--space-md);
@@ -389,6 +401,53 @@ details[open]>.collapsible-summary::after {
    so the popup's toggle keeps its own palette. */
 .switch input:checked+.slider {
   background: #F9BE6C;
+}
+
+/* ==========================================================================
+   Dual-Column Adaptations for Settings Column (360px)
+   .settings-card is used by both columns. The preview card has room for the
+   roomy padding; the fixed 360px settings track needs the tighter one, and
+   without the override every settings card inherited the preview sizing.
+   Component-level compacting (city card grid, hour cell type) already lives
+   in the base rules in options-cities.css / options-periods.css, because
+   those components appear in the settings column only.
+   ========================================================================== */
+
+.settings-column .settings-card {
+  padding: var(--space-lg) var(--space-md);
+}
+
+.settings-column .settings-card .section-title {
+  font-size: var(--font-lg);
+  margin-bottom: var(--space-md);
+}
+
+.settings-column .settings-card .collapsible-summary .section-title {
+  margin-bottom: 0;
+}
+
+/* Map Texture Calibration Sliders in 360px Column.
+   Pinned explicitly here rather than left to the shared rule: a label and a
+   slider side by side need more than 360px, so the column must never fall
+   back to a horizontal arrangement. */
+.settings-column .slider-control-group {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.settings-column .slider-control-group .slider-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.settings-column .slider-control-group .settings-slider {
+  flex: 1;
+  width: auto;
+  min-width: 80px;
 }
 
 /* ==========================================================================
