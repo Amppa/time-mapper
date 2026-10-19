@@ -25,6 +25,7 @@ export const CityPreview = {
       currentCitiesList: q("#currentCitiesList"),
       searchCityInput: q("#searchCityInput"),
       searchCityBtn: q("#searchCityBtn"),
+      searchStatus: q("#searchStatus"),
       searchResultsList: q("#searchResultsList"),
       clearAllButton: q("#clearAllButton"),
       resetButton: q("#resetButton"),
@@ -331,6 +332,17 @@ export const CityPreview = {
   },
 
   /**
+   * One quiet line under the search row. Empty message hides it, so the
+   * healthy state shows nothing at all.
+   */
+  setSearchStatus(refs, message, isError = false) {
+    if (!refs.searchStatus) return;
+    refs.searchStatus.textContent = message || "";
+    refs.searchStatus.hidden = !message;
+    refs.searchStatus.classList.toggle("is-error", !!message && isError);
+  },
+
+  /**
    * Wire the add-city search (Open-Meteo geocoding API).
    * `onCityAdded` is called after a city is added so the page can repaint.
    */
@@ -349,6 +361,7 @@ export const CityPreview = {
 
       refs.searchCityBtn.textContent = "⏳";
       refs.searchCityBtn.style.pointerEvents = "none";
+      CityPreview.setSearchStatus(refs, "");
       refs.searchResultsList.hidden = true;
       refs.searchResultsList.innerHTML = "";
 
@@ -384,7 +397,7 @@ export const CityPreview = {
                 evt.stopPropagation();
 
                 if (State.selectedIds.length >= State.cityLimit) {
-                  alert(I18nUtils.getTranslation("cityLimitReached") || `最多顯示${State.cityLimit}個城市。`);
+                  CityPreview.setSearchStatus(refs, I18nUtils.getTranslation("cityLimitReached"), true);
                   return;
                 }
 
@@ -412,12 +425,12 @@ export const CityPreview = {
             });
             refs.searchResultsList.hidden = false;
           } else {
-            alert(I18nUtils.getTranslation("cityNotFound") || "City not found");
+            CityPreview.setSearchStatus(refs, I18nUtils.getTranslation("cityNotFound"), true);
           }
         })
         .catch((err) => {
           console.error(err);
-          alert("Network error. Please try again.");
+          CityPreview.setSearchStatus(refs, I18nUtils.getTranslation("searchNetworkError"), true);
         })
         .finally(() => {
           refs.searchCityBtn.textContent = I18nUtils.getTranslation("searchBtn") || "Search";

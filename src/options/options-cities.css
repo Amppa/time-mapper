@@ -256,6 +256,17 @@
   min-width: 0;
 }
 
+/* Quiet one-line feedback under the search row; hidden while nothing to report. */
+.search-status {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.search-status.is-error {
+  color: #ff3b30;
+}
+
 .search-container {
   position: relative;
 }
