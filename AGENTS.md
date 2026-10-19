@@ -17,6 +17,10 @@
 - Touch only lines and files required for the task. Zero unrelated refactoring or reformatting.
 - Clean up obsolete code created by your changes in the same pass.
 
-## 4. Documentation Map
+## 4. Verification Policy
+- **No Automatic Verification**: Do NOT run automatic/headless/browser verifications (e.g., Puppeteer, test scripts) unless explicitly requested by the developer. Verification is strictly human-controlled.
+
+## 5. Documentation Map
 - Project coding standards & MV3 checklists: [DEVELOPMENT.md](DEVELOPMENT.md)
 - System architecture & data flows: [ARCHITECTURE.md](ARCHITECTURE.md) *(Optional / As needed)*
+
