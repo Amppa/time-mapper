@@ -3,9 +3,14 @@
 ## 1. Quick Runbook
 
 ```bash
-# Verify i18n and dictionary consistency (must pass before commit)
+# Run every pre-commit check (must pass before commit)
+npm test
+#   check:i18n — dictionaries, data-i18n keys, language plumbing
+#   check:css  — var() resolution per page, dead selectors, duplicate blocks
+
+# Or individually
 node tools/check-i18n.mjs
-# or: npm run check:i18n
+node tools/check-css.mjs
 
 # Profile the popup: web vitals, long tasks and a DevTools-compatible trace
 npm install          # first run only, pulls puppeteer
@@ -44,7 +49,8 @@ When adding a new setting or feature:
 1. [ ] **Config / State**: Register key & default in `src/shared/config.js`, handle persistence in `state.js`.
 2. [ ] **i18n**: Add strings for `zh`, `en`, and `es` in `src/shared/i18n.js`.
 3. [ ] **UI**: Add `.control-group` row in `options.html` (and `popup.html` if exposed).
-4. [ ] **Verification**: Run `node tools/check-i18n.mjs` (0 failures).
+4. [ ] **Styles**: Declare any new `var(--x)` in a stylesheet the page actually loads. `check-css.mjs` resolves references per page, so a token defined only in `popup/settings.css` is invisible to `options.html`.
+5. [ ] **Verification**: Run `npm test` (0 failures).
 
 ---
 

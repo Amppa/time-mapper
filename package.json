@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "check:i18n": "node tools/check-i18n.mjs",
+    "check:css": "node tools/check-css.mjs",
+    "test": "npm run check:i18n && npm run check:css",
     "profile:popup": "node tools/profile-popup.mjs"
   },
   "devDependencies": {
