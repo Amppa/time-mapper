@@ -352,7 +352,7 @@ details[open]>.collapsible-summary::after {
   position: relative;
   overflow: visible;
   background: var(--bg-primary);
-  border: 1px solid var(--divider, rgba(255, 255, 255, 0.15));
+  border: 1px solid var(--divider);
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   padding: 0;
@@ -425,7 +425,7 @@ details[open]>.collapsible-summary::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--radius-sm);
   background: #ffffff;
   color: #111111;
   border: 1px solid rgba(0, 0, 0, 0.25);
@@ -452,11 +452,11 @@ details[open]>.collapsible-summary::after {
 .timeline-divider.is-dragging .timeline-divider-knob {
   transform: scale(1.18);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
-  border-color: var(--accent-solid, #F9BE6C);
+  border-color: var(--accent-solid);
 }
 
 .timeline-divider.is-dragging .timeline-divider-line {
-  background: var(--accent-solid, #F9BE6C);
+  background: var(--accent-solid);
   width: 3px;
 }
 

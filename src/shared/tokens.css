@@ -147,7 +147,7 @@
       background: var(--accent-gradient);
 
       &::before {
-        transform: translateX(var(--switch-travel, 18px));
+        transform: translateX(var(--switch-travel));
       }
     }
 

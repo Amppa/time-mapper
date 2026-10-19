@@ -289,11 +289,19 @@ for (const { page, links } of pages) {
     ok(`${page}: ${referenced.size} var() reference(s) resolve across ${links.length} stylesheet(s)`);
   }
 
-  // A fallback is fine when nothing in the repo defines the name. It is not
-  // fine when the name exists but only on a page this one does not load.
+  // Classify every fallback-backed reference. Three cases, and only the
+  // third is acceptable:
+  //   name defined here      -> the fallback can never fire, so it is dead
+  //                             weight that would mask a future scope break
+  //   name defined elsewhere -> the fallback is hiding another page's token,
+  //                             and the two pages render different colours
+  //   name defined nowhere   -> a genuine defensive default, leave it alone
   for (const [name, where] of masked) {
-    if (defined.has(name)) continue;
-    const owners = [...definedAnywhere.get(name) || []].filter((f) => !links.includes(f));
+    if (defined.has(name)) {
+      warn(`${page}: var(${name}, fallback) is inert, the name is already defined here [${where.join(", ")}]`);
+      continue;
+    }
+    const owners = [...(definedAnywhere.get(name) || [])].filter((f) => !links.includes(f));
     if (!owners.length) continue;
     warn(`${page}: var(${name}, fallback) hides a token only defined in ${owners.join(", ")} [${where.join(", ")}]`);
   }

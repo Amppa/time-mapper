@@ -232,7 +232,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-sm, 4px);
+  border-radius: var(--radius-sm);
   background: #ffffff;
   color: #111111;
   border: 1px solid rgba(0, 0, 0, 0.25);

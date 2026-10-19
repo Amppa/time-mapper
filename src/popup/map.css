@@ -110,7 +110,7 @@
 }
 
 .timezone-band:hover {
-  background: var(--timezone-hover-bg, rgba(245, 158, 11, 0.18));
+  background: var(--timezone-hover-bg);
 }
 
 .city-layer {
@@ -140,7 +140,7 @@
 }
 
 .city-pin.is-night:not(.is-selected) {
-  background: var(--night-pin, #ffc56f);
+  background: var(--night-pin);
 }
 
 .city-pin.is-selected {
