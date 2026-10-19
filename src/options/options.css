@@ -917,6 +917,10 @@ details[open]>.collapsible-summary::after {
   margin-bottom: var(--space-md);
 }
 
+.settings-column .settings-card .collapsible-summary .section-title {
+  margin-bottom: 0;
+}
+
 /* Single-line City Card: [drag] [name] [zone] [lng] [lat] [remove] */
 .settings-column .current-city-card {
   grid-template-columns: 16px 56px 1fr 46px 46px 20px;
