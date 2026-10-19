@@ -4,7 +4,7 @@
 
 import { CONFIG } from "./config.js";
 import { cityCatalog } from "./cities.js";
-import { TimeUtils, TimelineUtils } from "./utils.js";
+import { TimeUtils, TimelineUtils, I18nUtils } from "./utils.js";
 
 /** localStorage can throw (quota exceeded, blocked storage); a failed write must not break the UI. */
 function safeSetItem(key, value) {
@@ -18,7 +18,15 @@ export const State = {
   customCities: [],
   mapSettings: {},
   timePeriods: [],
-  currentLang: "zh",
+  _currentLang: "zh",
+  /** Assigning here is the one way the language changes; it pushes to I18nUtils so no consumer can go stale. */
+  get currentLang() {
+    return this._currentLang;
+  },
+  set currentLang(lang) {
+    this._currentLang = lang;
+    I18nUtils.setLang(lang);
+  },
   baseHours: [],
   nowLineMode: "local",   // 'local' | 'firstCity'
   scrubs: [],             // array of { id, fraction } objects

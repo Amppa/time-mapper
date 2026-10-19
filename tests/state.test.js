@@ -10,7 +10,7 @@ import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { CONFIG } from "../src/shared/config.js";
 import { State } from "../src/shared/state.js";
-import { TimeUtils, TimelineUtils } from "../src/shared/utils.js";
+import { TimeUtils, TimelineUtils, I18nUtils } from "../src/shared/utils.js";
 import { installMockStorage, uninstallMockStorage } from "./helpers/mock-storage.js";
 
 const EPSILON = 1e-9;
@@ -433,6 +433,15 @@ describe("State language", () => {
     State.saveLanguage("kr");
     assert.equal(State.currentLang, "en");
     assert.equal(storage.getItem(CONFIG.languageKey), null);
+  });
+
+  it("pushes every language change to I18nUtils", () => {
+    State.currentLang = "es";
+    assert.equal(I18nUtils.getLang(), "es");
+    State.saveLanguage("en");
+    assert.equal(I18nUtils.getLang(), "en");
+    State.currentLang = "zh";
+    assert.equal(I18nUtils.getLang(), "zh");
   });
 });
 

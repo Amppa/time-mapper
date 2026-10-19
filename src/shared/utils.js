@@ -113,7 +113,7 @@ export const TimeUtils = {
   formatTime(date, zone, options = {}) {
     try {
       const resolved = this.resolveZone(zone);
-      const locale = CONFIG.localeMap[State.currentLang] || "en-US";
+      const locale = I18nUtils.getLocale() || "en-US";
       const formatter = this.getFormatter(locale, {
         timeZone: resolved,
         hour: "2-digit",
@@ -228,6 +228,27 @@ export const TimeUtils = {
 
 export const I18nUtils = {
   /**
+   * Active UI language. `State.currentLang`'s setter is the only writer
+   * (via setLang), so this module never has to reach for the State singleton
+   * to resolve a string.
+   */
+  _lang: "zh",
+
+  setLang(lang) {
+    this._lang = lang;
+  },
+
+  /** Internal code, falling back to the default language. */
+  getLang() {
+    return this._lang || "zh";
+  },
+
+  /** BCP-47 locale for date/time formatting. */
+  getLocale() {
+    return CONFIG.localeMap[this.getLang()];
+  },
+
+  /**
    * The one place that maps translation keys onto the DOM. Both the popup and
    * the options page call applyAttributes(); neither should re-implement it.
    * `pick`/`put` describe how each attribute type reads its key and writes its
@@ -249,7 +270,7 @@ export const I18nUtils = {
    * random language inside an otherwise translated page.
    */
   applyAttributes(root = document) {
-    const lang = (typeof State !== "undefined" && State.currentLang) || "zh";
+    const lang = this.getLang();
     const dict = i18nTranslations[lang];
 
     if (!dict) {
@@ -272,7 +293,7 @@ export const I18nUtils = {
   },
 
   getTranslation(key, params = {}) {
-    const lang = (typeof State !== "undefined" && State.currentLang) || "zh";
+    const lang = this.getLang();
     let text = i18nTranslations[lang]?.[key] || "";
     for (const [pKey, pVal] of Object.entries(params)) {
       text = text.replace(`{${pKey}}`, pVal);
@@ -285,7 +306,7 @@ export const I18nUtils = {
     if (city.id.startsWith("custom-")) {
       return city.name;
     }
-    const lang = (typeof State !== "undefined" && State.currentLang) || "zh";
+    const lang = this.getLang();
     if (city.id === "local") {
       if (city.matchingId) {
         return i18nCityNames[lang]?.[city.matchingId] || city.matchingId;

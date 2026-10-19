@@ -627,6 +627,21 @@ describe("I18nUtils.getTranslation", () => {
   });
 });
 
+describe("I18nUtils language source", () => {
+  it("resolves strings from its own language, not from State", () => {
+    State.currentLang = "zh";
+    I18nUtils.setLang("en");
+    assert.equal(I18nUtils.getTranslation("mapSettings"), i18nTranslations.en.mapSettings);
+    assert.equal(I18nUtils.getLocale(), CONFIG.localeMap.en);
+    I18nUtils.setLang("zh");
+  });
+
+  it("falls back to the default language when none was set", () => {
+    I18nUtils.setLang("");
+    assert.equal(I18nUtils.getLang(), "zh");
+  });
+});
+
 describe("I18nUtils.getCityName", () => {
   it("returns an empty string for a missing city", () => {
     assert.equal(I18nUtils.getCityName(null), "");
