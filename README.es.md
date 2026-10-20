@@ -2,11 +2,20 @@
 
 [English](README.md) | [繁體中文](README.zh-TW.md) | **Español**
 
+[![Chrome Web Store](https://img.shields.io/badge/Chrome_Web_Store-TimeMapper-4285F4?style=flat&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/hlhcfeakjfdmgdlcfbpbblmlmobmljkf?utm_source=item-share-cb)
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?style=flat&logo=github-sponsors)](https://github.com/sponsors/Amppa)
+
 Una extensión de Chrome para comparar la hora en varios husos horarios. Haz clic en las ciudades del mapa mundial y alinea sus días en una línea de tiempo de 24 horas para encontrar un momento que le sirva a todos.
 
 ---
 
 ## Instalación
+
+### Chrome Web Store (Recomendado)
+
+Instálala directamente desde [Chrome Web Store](https://chromewebstore.google.com/detail/hlhcfeakjfdmgdlcfbpbblmlmobmljkf?utm_source=item-share-cb).
+
+### Manual (Modo desarrollador)
 
 1. Descarga o clona este repositorio.
 2. Abre Chrome y entra en `chrome://extensions/`.
@@ -39,7 +48,7 @@ Haz clic en el botón ⚙ de la barra superior para abrir la página de ajustes.
 | **Textura del mapa** | Ajusta los desplazamientos de longitud/latitud, la escala de ancho/alto y el desplazamiento vertical, y después restablece los valores predeterminados. |
 | **Periodos** | Elige entre 2, 3 o 4 periodos resaltados y arrastra los tiradores sobre la cuadrícula de 24 horas para fijar sus tramos horarios, o restablece los valores predeterminados. También eliges la referencia de la línea actual (la hora local del navegador o la de la primera ciudad). |
 
-Cada número de periodos trae su propia paleta para el tema claro y el oscuro, así que las bandas se siguen leyendo al cambiar de tema. Tus ciudades, periodos y la calibración del mapa se guardan en el `localStorage` del navegador y se restauran la próxima vez que abras la ventana.
+Cada número de periodos trae su propia paleta para el tema claro y el oscuro, así que las bandas se siguen leyendo al cambiar de tema. Los ajustes principales (ciudades, ciudades personalizadas, periodos, idioma y referencia de la línea actual) se sincronizan entre tus dispositivos mediante `chrome.storage.sync`, mientras que el tema visual y la calibración del mapa se guardan en el `localStorage` local.
 
 ---
 
@@ -48,6 +57,14 @@ Cada número de periodos trae su propia paleta para el tema claro y el oscuro, a
 Búscala en la sección **Ciudades** de la página de ajustes. Los resultados vienen de la [API de geocodificación de Open-Meteo](https://geocoding-api.open-meteo.com/), así que buscar requiere conexión a internet. La ciudad que elijas se coloca en el mapa con sus propias coordenadas y se recuerda para la próxima vez.
 
 Para añadir una ciudad permanentemente a la lista integrada, edita `cityCatalog` en `src/shared/cities.js`. Las constantes que convierten longitud/latitud en una posición del mapa están documentadas en el bloque `PROJECTION`, al principio de `src/shared/config.js`.
+
+---
+
+## Apoyo y patrocinio
+
+Si TimeMapper te resulta útil, puedes apoyar su desarrollo:
+
+[![Sponsor on GitHub](https://img.shields.io/badge/Sponsor_on_GitHub-%E2%9D%A4-ea4aaa?style=for-the-badge&logo=github-sponsors)](https://github.com/sponsors/Amppa)
 
 ---
 

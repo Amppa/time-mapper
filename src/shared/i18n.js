@@ -59,6 +59,9 @@ export const i18nTranslations = {
     periodStartAria: "{label} 起始時間",
     dragScrubAria: "拖曳以調整時間標記",
     hourCellTitle: "時間 {time}",
+    sponsorCardTitle: "贊助支持",
+    sponsorDesc: "喜歡 TimeMapper 嗎？歡迎請作者喝杯咖啡！",
+    sponsorBtn: "☕ Buy me a coffee",
   },
   en: {
     nowTextLoading: "Loading current time...",
@@ -120,6 +123,9 @@ export const i18nTranslations = {
     periodStartAria: "{label} start time",
     dragScrubAria: "Drag to move this time marker",
     hourCellTitle: "Hour {time}",
+    sponsorCardTitle: "Support",
+    sponsorDesc: "Enjoying TimeMapper? Buy the author a coffee!",
+    sponsorBtn: "☕ Buy me a coffee",
   },
   es: {
     nowTextLoading: "Cargando la hora actual...",
@@ -181,6 +187,9 @@ export const i18nTranslations = {
     periodStartAria: "Hora de inicio de {label}",
     dragScrubAria: "Arrastra para mover este marcador",
     hourCellTitle: "Hora {time}",
+    sponsorCardTitle: "Apoyo",
+    sponsorDesc: "¿Te gusta TimeMapper? ¡Invítale un café al autor!",
+    sponsorBtn: "☕ Buy me a coffee",
   }
 };
 

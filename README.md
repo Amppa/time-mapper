@@ -2,11 +2,20 @@
 
 **English** | [繁體中文](README.zh-TW.md) | [Español](README.es.md)
 
+[![Chrome Web Store](https://img.shields.io/badge/Chrome_Web_Store-TimeMapper-4285F4?style=flat&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/hlhcfeakjfdmgdlcfbpbblmlmobmljkf?utm_source=item-share-cb)
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?style=flat&logo=github-sponsors)](https://github.com/sponsors/Amppa)
+
 A Chrome extension popup for comparing time across timezones. Click cities on a world map and line up their days on a 24-hour timeline, so you can find a moment that works for everyone.
 
 ---
 
 ## Install
+
+### Chrome Web Store (Recommended)
+
+Install directly from the [Chrome Web Store](https://chromewebstore.google.com/detail/hlhcfeakjfdmgdlcfbpbblmlmobmljkf?utm_source=item-share-cb).
+
+### Manual (Developer mode)
 
 1. Download or clone this repository.
 2. Open Chrome and go to `chrome://extensions/`.
@@ -39,7 +48,7 @@ Click the ⚙ button in the top bar to open the settings page. The language and 
 | **Map Texture** | Fine-tune the map's longitude/latitude offsets, width/height scale and vertical offset, then restore the defaults. |
 | **Time Periods** | Pick 2, 3 or 4 highlighted periods, then drag the handles on the 24-hour grid to set their hour ranges, or restore the defaults. Also choose what the now line is measured against (your browser's local time, or the first city). |
 
-Each period count ships with its own colour scheme for light and dark, so the bands stay readable when you switch theme. Your cities, periods and map calibration are saved in the browser's `localStorage` and restored the next time you open the popup.
+Each period count ships with its own colour scheme for light and dark, so the bands stay readable when you switch theme. Core settings (cities, custom cities, periods, language, now-line reference) sync across devices via `chrome.storage.sync`, while appearance theme and map calibration remain in local `localStorage`.
 
 ---
 
@@ -48,6 +57,14 @@ Each period count ships with its own colour scheme for light and dark, so the ba
 Search for it in the **Cities** section of the settings page. Results come from the [Open-Meteo geocoding API](https://geocoding-api.open-meteo.com/), so searching needs a network connection. The city you pick is placed on the map from its own coordinates and remembered for next time.
 
 To add a city permanently to the built-in list, edit `cityCatalog` in `src/shared/cities.js`. The constants that turn longitude/latitude into a map position are documented in the `PROJECTION` block at the top of `src/shared/config.js`.
+
+---
+
+## Support / Sponsor
+
+If you find TimeMapper helpful, consider supporting its development:
+
+[![Sponsor on GitHub](https://img.shields.io/badge/Sponsor_on_GitHub-%E2%9D%A4-ea4aaa?style=for-the-badge&logo=github-sponsors)](https://github.com/sponsors/Amppa)
 
 ---
 

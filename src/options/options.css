@@ -450,6 +450,46 @@ details[open]>.collapsible-summary::after {
   min-width: 80px;
 }
 
+/* Sponsor Card in Settings Column */
+.settings-column .sponsor-card {
+  padding: var(--space-md);
+}
+
+.sponsor-control-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.sponsor-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--btn-bg);
+  border: 1px solid var(--divider);
+  color: var(--text-primary);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    background: rgba(234, 74, 170, 0.12);
+    border-color: #ea4aaa;
+    color: #ea4aaa;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
 /* ==========================================================================
    Responsive Breakpoint: Single-Column Fallback for Small Screens (< 1180px)
    ========================================================================== */
