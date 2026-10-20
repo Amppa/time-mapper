@@ -68,6 +68,12 @@ If you find TimeMapper helpful, consider supporting its development:
 
 ---
 
+## Privacy
+
+TimeMapper does not collect or transmit any personal data. Read our full [Privacy Policy](PRIVACY.md).
+
+---
+
 ## Checking translations
 
 `node tools/check-i18n.mjs` verifies that the dictionaries in `src/shared/i18n.js` still cover every string the pages ask for. Run it after adding a UI string, a language, or a city.

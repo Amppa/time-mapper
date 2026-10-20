@@ -68,6 +68,12 @@ Si TimeMapper te resulta útil, puedes apoyar su desarrollo:
 
 ---
 
+## Privacidad
+
+TimeMapper no recopila ni transmite ningún dato personal. Consulta nuestra [Política de privacidad (PRIVACY.md)](PRIVACY.md).
+
+---
+
 ## Comprobar las traducciones
 
 `node tools/check-i18n.mjs` comprueba que los diccionarios de `src/shared/i18n.js` sigan cubriendo todas las cadenas que usan las páginas. Ejecútalo después de añadir una cadena, un idioma o una ciudad.

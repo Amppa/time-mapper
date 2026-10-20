@@ -68,6 +68,12 @@
 
 ---
 
+## 隱私權政策
+
+TimeMapper 不收集或傳輸任何個人隱私資料。完整聲明請參閱 [隱私權政策 (PRIVACY.md)](PRIVACY.md)。
+
+---
+
 ## 翻譯檢查
 
 `node tools/check-i18n.mjs` 會檢查 `src/shared/i18n.js` 的字典是否仍涵蓋兩個頁面用到的每個字串。新增介面字串、語言或城市之後跑一次。
