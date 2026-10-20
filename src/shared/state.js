@@ -4,6 +4,7 @@
 
 import { CONFIG } from "./config.js";
 import { cityCatalog } from "./cities.js";
+import { Storage, SYNC_TO_LOCAL } from "./storage.js";
 import { TimeUtils, TimelineUtils, I18nUtils } from "./utils.js";
 
 /** localStorage can throw (quota exceeded, blocked storage); a failed write must not break the UI. */
@@ -13,12 +14,60 @@ function safeSetItem(key, value) {
   } catch { }
 }
 
+/** Mirror to the local snapshot (synchronously) and push to chrome.storage.sync. */
+function persist(localKey, value) {
+  Storage.persist(localKey, SYNC_TO_LOCAL[localKey], value);
+}
+
+/** Tolerate JSON strings (localStorage mirrors) and real values (sync store). */
+function asValue(raw) {
+  if (typeof raw === "string") {
+    try { return JSON.parse(raw); } catch { return undefined; }
+  }
+  return raw;
+}
+
+/** Map placement percentages: non-numeric falls back to 50, values clamp to 0-100. */
+function clampMapPercent(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 50;
+  return Math.min(100, Math.max(0, n));
+}
+
+/**
+ * Whitelist normalization for custom cities (schema: id, name, zone, x, y, lng, lat).
+ * Returns null for entries that cannot be repaired.
+ */
+export function sanitizeCustomCity(city) {
+  if (!city || typeof city !== "object") return null;
+  if (typeof city.id !== "string" || !city.id) return null;
+  if (typeof city.name !== "string" || !city.name.trim()) return null;
+  if (typeof city.zone !== "string" || !city.zone) return null;
+  const x = clampMapPercent(city.x);
+  const y = clampMapPercent(city.y);
+  const lng = Number(city.lng);
+  const lat = Number(city.lat);
+  return {
+    id: city.id,
+    name: city.name.trim().slice(0, 50),
+    zone: city.zone,
+    x,
+    y,
+    lng: Number.isFinite(lng) ? Number(lng.toFixed(4)) : undefined,
+    lat: Number.isFinite(lat) ? Number(lat.toFixed(4)) : undefined
+  };
+}
+
 export const State = {
   selectedIds: [],
   customCities: [],
   mapSettings: {},
   timePeriods: [],
   _currentLang: "zh",
+  /** "auto" | "zh" | "en" | "es"; device-local, never synced (DECIDED-1). */
+  _languagePreference: "auto",
+  /** Last explicit language received from the sync store. */
+  _syncedLanguage: null,
   /** Assigning here is the one way the language changes; it pushes to I18nUtils so no consumer can go stale. */
   get currentLang() {
     return this._currentLang;
@@ -48,29 +97,43 @@ export const State = {
     return (activeFraction - TimelineUtils.getNowFraction()) * 24;
   },
 
-  init() {
+  async init() {
     this._localCity = null;
     this._cachedCityList = null;
     this._cachedCityIndex = null;
     this._cachedCustomCities = null;
-    this.currentLang = this.loadLanguage();
-    this.timePeriods = this.loadTimePeriods();
+    const loaded = await Storage.loadSyncData();
+    const v = loaded.values;
+    this._languagePreference = loaded.languagePreference;
+    this._syncedLanguage = v[CONFIG.syncKeys.language];
+    this.currentLang = this.resolveLanguage();
+    this.timePeriods = this.resolveTimePeriods(asValue(v[CONFIG.syncKeys.timePeriods]));
     this.mapSettings = this.loadMapSettings();
-    this.customCities = this.loadCustomCities();
+    this.customCities = this.resolveCustomCities(asValue(v[CONFIG.syncKeys.customCities]));
     this.cityLimit = CONFIG.maxCities;
-    this.selectedIds = this.loadSelection();
-    this.nowLineMode = this.loadNowLineMode();
+    this.selectedIds = this.resolveSelection(asValue(v[CONFIG.syncKeys.cities]));
+    this.nowLineMode = this.resolveNowLineMode(asValue(v[CONFIG.syncKeys.nowLineMode]));
     this.scrubs = [];
     this.activeScrubId = null;
     this.draggingId = null;
     this.makeBaseHours();
   },
 
-  loadLanguage() {
-    try {
-      const saved = localStorage.getItem(CONFIG.languageKey);
-      if (saved && CONFIG.supportedLanguages.includes(saved)) return saved;
-    } catch { }
+  /**
+   * Preference wins when explicit; "auto" resolves from this device's
+   * navigator. The synced `language` value is a plain explicit fallback.
+   */
+  resolveLanguage() {
+    const pref = this._languagePreference;
+    if (pref && pref !== "auto" && CONFIG.supportedLanguages.includes(pref)) return pref;
+    if (pref === "auto" || pref) return this.detectNavigatorLanguage();
+    // Fresh device with no local preference: follow the synced explicit choice.
+    const synced = asValue(this._syncedLanguage);
+    if (synced && CONFIG.supportedLanguages.includes(synced)) return synced;
+    return this.detectNavigatorLanguage();
+  },
+
+  detectNavigatorLanguage() {
     const navLang = (navigator.language || navigator.userLanguage || "zh").toLowerCase();
     if (navLang.startsWith("en")) return "en";
     if (navLang.startsWith("es")) return "es";
@@ -79,44 +142,40 @@ export const State = {
 
   /** Stored preference for the options-page dropdown: "auto" when unset. */
   getLanguagePreference() {
-    try {
-      const saved = localStorage.getItem(CONFIG.languageKey);
-      if (saved === "auto") return "auto";
-      if (saved && CONFIG.supportedLanguages.includes(saved)) return saved;
-    } catch { }
-    return "auto";
+    return this._languagePreference || "auto";
   },
 
   saveLanguage(lang) {
+    if (lang !== "auto" && !CONFIG.supportedLanguages.includes(lang)) return;
+    this._languagePreference = lang;
+    safeSetItem(CONFIG.languagePreferenceKey, lang);
     if (lang === "auto") {
-      safeSetItem(CONFIG.languageKey, "auto");
-      this.currentLang = this.loadLanguage();
+      // "auto" is device-local; the synced value stays as the last explicit choice.
+      this.currentLang = this.detectNavigatorLanguage();
       return;
     }
-    if (!CONFIG.supportedLanguages.includes(lang)) return;
     this.currentLang = lang;
+    // The mirror stays a raw string (historical format); sync takes the plain value.
     safeSetItem(CONFIG.languageKey, lang);
+    Storage.persist(null, CONFIG.syncKeys.language, lang);
   },
 
-  loadTimePeriods() {
+  resolveTimePeriods(saved) {
     const fallback = () => JSON.parse(JSON.stringify(CONFIG.defaultTimePeriods));
-    try {
-      const saved = JSON.parse(localStorage.getItem(CONFIG.timePeriodsKey));
-      // Colors were user-customizable before hardcode; keep ranges only.
-      if (Array.isArray(saved) && saved.length >= 2 && saved.length <= 4 &&
-        saved.every((p) => p && Number.isFinite(Number(p.start)) && Number.isFinite(Number(p.end)))) {
-        return saved.map((p, i) => ({
-          name: p.name || `period${i + 1}`,
-          start: Number(p.start),
-          end: Number(p.end)
-        }));
-      }
-    } catch { }
+    // Colors were user-customizable before hardcode; keep ranges only.
+    if (Array.isArray(saved) && saved.length >= 2 && saved.length <= 4 &&
+      saved.every((p) => p && Number.isFinite(Number(p.start)) && Number.isFinite(Number(p.end)))) {
+      return saved.map((p, i) => ({
+        name: p.name || `period${i + 1}`,
+        start: Number(p.start),
+        end: Number(p.end)
+      }));
+    }
     return fallback();
   },
 
   saveTimePeriods() {
-    safeSetItem(CONFIG.timePeriodsKey, JSON.stringify(this.timePeriods));
+    persist(CONFIG.timePeriodsKey, this.timePeriods);
   },
 
   loadMapSettings() {
@@ -145,47 +204,28 @@ export const State = {
     safeSetItem(CONFIG.mapSettingsKey, JSON.stringify(this.mapSettings));
   },
 
-  loadCustomCities() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(CONFIG.customCitiesKey));
-      if (Array.isArray(saved)) {
-        return saved
-          .filter((city) => city && typeof city.id === "string" && typeof city.name === "string" && typeof city.zone === "string")
-          .map((city) => ({
-            id: city.id,
-            name: city.name,
-            zone: city.zone,
-            x: Number.isFinite(Number(city.x)) ? Number(city.x) : 50,
-            y: Number.isFinite(Number(city.y)) ? Number(city.y) : 50,
-            lng: Number.isFinite(Number(city.lng)) ? Number(city.lng) : undefined,
-            lat: Number.isFinite(Number(city.lat)) ? Number(city.lat) : undefined
-          }));
-      }
-    } catch {
-      localStorage.removeItem(CONFIG.customCitiesKey);
+  resolveCustomCities(saved) {
+    if (Array.isArray(saved)) {
+      return saved.map(sanitizeCustomCity).filter((c) => c !== null);
     }
     return [];
   },
 
   saveCustomCities() {
-    safeSetItem(CONFIG.customCitiesKey, JSON.stringify(this.customCities));
+    persist(CONFIG.customCitiesKey, this.customCities);
   },
 
-  loadSelection() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(CONFIG.storageKey));
-      if (Array.isArray(saved)) {
-        // Storage is user-writable; keep the first occurrence of each id only.
-        return [...new Set(saved)].filter((id) => this.findCity(id)).slice(0, this.cityLimit);
-      }
-    } catch {
-      localStorage.removeItem(CONFIG.storageKey);
+  resolveSelection(saved) {
+    const limit = this.cityLimit || CONFIG.maxCities;
+    if (Array.isArray(saved)) {
+      // Storage is user-writable; keep the first occurrence of each id only.
+      return [...new Set(saved)].filter((id) => this.findCity(id)).slice(0, limit);
     }
-    return [...CONFIG.defaultSelection].slice(0, this.cityLimit);
+    return [...CONFIG.defaultSelection].slice(0, limit);
   },
 
   saveSelection() {
-    safeSetItem(CONFIG.storageKey, JSON.stringify(this.selectedIds));
+    persist(CONFIG.storageKey, this.selectedIds);
   },
 
   getActiveScrubFraction() {
@@ -242,17 +282,14 @@ export const State = {
     return this._cachedCityIndex.get(id);
   },
 
-  loadNowLineMode() {
-    try {
-      const saved = localStorage.getItem(CONFIG.nowLineModeKey);
-      if (saved === "local" || saved === "firstCity") return saved;
-    } catch { }
+  resolveNowLineMode(saved) {
+    if (saved === "local" || saved === "firstCity") return saved;
     return "local";
   },
 
   saveNowLineMode(mode) {
     this.nowLineMode = mode;
-    safeSetItem(CONFIG.nowLineModeKey, mode);
+    persist(CONFIG.nowLineModeKey, mode);
   },
 
   makeBaseHours() {

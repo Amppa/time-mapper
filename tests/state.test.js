@@ -9,7 +9,7 @@
 import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { CONFIG } from "../src/shared/config.js";
-import { State } from "../src/shared/state.js";
+import { State, sanitizeCustomCity } from "../src/shared/state.js";
 import { TimeUtils, TimelineUtils, I18nUtils } from "../src/shared/utils.js";
 import { installMockStorage, uninstallMockStorage } from "./helpers/mock-storage.js";
 
@@ -29,6 +29,12 @@ function seedStorage(entries) {
   return storage;
 }
 
+/** Mirror a stored localStorage value the way State.init tolerates it. */
+function asStored(raw) {
+  if (raw === null) return undefined;
+  try { return JSON.parse(raw); } catch { return undefined; }
+}
+
 let storage;
 
 beforeEach(() => {
@@ -44,8 +50,8 @@ afterEach(() => {
  * ------------------------------------------------------------------ */
 
 describe("State.init", () => {
-  it("applies the configured defaults", () => {
-    State.init();
+  it("applies the configured defaults", async () => {
+    await State.init();
     assert.equal(State.cityLimit, CONFIG.maxCities);
     assert.equal(State.cityLimit, 10);
     assert.deepEqual(State.selectedIds, CONFIG.defaultSelection);
@@ -57,38 +63,39 @@ describe("State.init", () => {
     assert.equal(State.baseHours.length, 24);
   });
 
-  it("fills map settings from the defaults", () => {
-    State.init();
+  it("fills map settings from the defaults", async () => {
+    await State.init();
     assert.deepEqual(State.mapSettings, CONFIG.defaultMapSettings);
   });
 
-  it("does not mutate the shared default period objects", () => {
+  it("does not mutate the shared default period objects", async () => {
+    await State.init();
     State.timePeriods[0].name = "mutated";
-    State.init();
+    await State.init();
     assert.equal(CONFIG.defaultTimePeriods[0].name, "period1");
   });
 
-  it("is repeatable and restores the persisted selection", () => {
-    State.init();
+  it("is repeatable and restores the persisted selection", async () => {
+    await State.init();
     State.toggleCity("paris");
     State.scrubs = [{ id: "scrub_1", fraction: 0.25 }];
     State.activeScrubId = "scrub_1";
-    State.init();
+    await State.init();
     assert.deepEqual(State.selectedIds, [...CONFIG.defaultSelection, "paris"]);
     assert.deepEqual(State.scrubs, []);
     assert.equal(State.activeScrubId, null);
   });
 
-  it("builds 24 hourly base hours one hour apart", () => {
-    State.init();
+  it("builds 24 hourly base hours one hour apart", async () => {
+    await State.init();
     for (let i = 1; i < State.baseHours.length; i++) {
       const gap = State.baseHours[i].getTime() - State.baseHours[i - 1].getTime();
       assert.equal(gap, 3600000, `gap at index ${i}`);
     }
   });
 
-  it("anchors base hours to local midnight of the first city's zone", () => {
-    State.init();
+  it("anchors base hours to local midnight of the first city's zone", async () => {
+    await State.init();
     const localZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
     assert.equal(TimeUtils.hourInZone(State.baseHours[0], localZone), 0);
     assert.equal(State.baseHours[0].getMinutes(), 0);
@@ -109,8 +116,8 @@ describe("State.init", () => {
  * ------------------------------------------------------------------ */
 
 describe("State.toggleCity", () => {
-  beforeEach(() => {
-    State.init();
+  beforeEach(async () => {
+    await State.init();
   });
 
   it("adds a city and persists the selection", () => {
@@ -152,8 +159,8 @@ describe("State.toggleCity", () => {
 });
 
 describe("city limit", () => {
-  beforeEach(() => {
-    State.init();
+  beforeEach(async () => {
+    await State.init();
   });
 
   function fillToLimit() {
@@ -188,19 +195,24 @@ describe("city limit", () => {
   });
 });
 
-describe("State.loadSelection", () => {
+describe("State.resolveSelection", () => {
+  /** Read the localStorage mirror the way init does (JSON-tolerant) and resolve. */
+  function resolveStored() {
+    return State.resolveSelection(asStored(storage.getItem(CONFIG.storageKey)));
+  }
+
   it("falls back to the default selection when nothing is stored", () => {
-    assert.deepEqual(State.loadSelection(), CONFIG.defaultSelection);
+    assert.deepEqual(resolveStored(), CONFIG.defaultSelection);
   });
 
   it("drops ids that are not in the catalog", () => {
     storage.setItem(CONFIG.storageKey, JSON.stringify(["tokyo", "not-a-city", "paris"]));
-    assert.deepEqual(State.loadSelection(), ["tokyo", "paris"]);
+    assert.deepEqual(resolveStored(), ["tokyo", "paris"]);
   });
 
   it("collapses duplicated ids, keeping the first occurrence", () => {
     storage.setItem(CONFIG.storageKey, JSON.stringify(["tokyo", "paris", "tokyo", "paris", "oslo"]));
-    assert.deepEqual(State.loadSelection(), ["tokyo", "paris", "oslo"]);
+    assert.deepEqual(resolveStored(), ["tokyo", "paris", "oslo"]);
   });
 
   it("counts a city once towards the limit", () => {
@@ -208,7 +220,7 @@ describe("State.loadSelection", () => {
       "tokyo", "tokyo", "tokyo", "paris", "paris", "berlin", "london",
       "sydney", "toronto", "moscow", "madrid", "rome", "oslo"
     ]));
-    const selection = State.loadSelection();
+    const selection = resolveStored();
     assert.equal(new Set(selection).size, selection.length);
     // 13 stored entries collapse to 10 distinct cities, which exactly fills the cap.
     assert.equal(selection.length, CONFIG.maxCities);
@@ -218,16 +230,16 @@ describe("State.loadSelection", () => {
     ]);
   });
 
-  it("never yields a duplicate through init", () => {
+  it("never yields a duplicate through init", async () => {
     storage.setItem(CONFIG.storageKey, JSON.stringify(["tokyo", "tokyo", "local", "local"]));
-    State.init();
+    await State.init();
     assert.deepEqual(State.selectedIds, ["tokyo", "local"]);
     assert.equal(new Set(State.selectedIds).size, State.selectedIds.length);
   });
 
   it("ignores a stored value that is not an array", () => {
     storage.setItem(CONFIG.storageKey, JSON.stringify({ tokyo: true }));
-    assert.deepEqual(State.loadSelection(), CONFIG.defaultSelection);
+    assert.deepEqual(resolveStored(), CONFIG.defaultSelection);
   });
 
   it("truncates an oversized stored selection to the city limit", () => {
@@ -235,13 +247,14 @@ describe("State.loadSelection", () => {
       "tokyo", "paris", "berlin", "london", "sydney", "toronto", "moscow",
       "madrid", "rome", "vienna", "oslo", "dublin"
     ]));
-    assert.equal(State.loadSelection().length, CONFIG.maxCities);
+    assert.equal(resolveStored().length, CONFIG.maxCities);
   });
 
-  it("removes the corrupt entry so init() does not retry it", () => {
+  it("recovers from corrupt JSON without rewriting storage", () => {
     storage.setItem(CONFIG.storageKey, "{not json");
-    State.init();
-    assert.equal(storage.getItem(CONFIG.storageKey), null);
+    assert.deepEqual(resolveStored(), CONFIG.defaultSelection);
+    // The mirror is repaired lazily on the next successful write, not on read.
+    assert.equal(storage.getItem(CONFIG.storageKey), "{not json");
   });
 });
 
@@ -250,8 +263,13 @@ describe("State.loadSelection", () => {
  * ------------------------------------------------------------------ */
 
 describe("State time periods", () => {
+  /** Resolve from the localStorage mirror the way init does. */
+  function resolveStored() {
+    return State.resolveTimePeriods(asStored(storage.getItem(CONFIG.timePeriodsKey)));
+  }
+
   it("returns the defaults when nothing is stored", () => {
-    assert.deepEqual(State.loadTimePeriods(), CONFIG.defaultTimePeriods);
+    assert.deepEqual(resolveStored(), CONFIG.defaultTimePeriods);
   });
 
   it("normalises stored periods and fills in missing names", () => {
@@ -259,7 +277,7 @@ describe("State time periods", () => {
       { start: "6", end: "11" },
       { name: "night", start: 20, end: 5 }
     ]));
-    assert.deepEqual(State.loadTimePeriods(), [
+    assert.deepEqual(resolveStored(), [
       { name: "period1", start: 6, end: 11 },
       { name: "night", start: 20, end: 5 }
     ]);
@@ -267,7 +285,7 @@ describe("State time periods", () => {
 
   it("rejects a stored list with too few entries", () => {
     storage.setItem(CONFIG.timePeriodsKey, JSON.stringify([{ name: "only", start: 0, end: 23 }]));
-    assert.deepEqual(State.loadTimePeriods(), CONFIG.defaultTimePeriods);
+    assert.deepEqual(resolveStored(), CONFIG.defaultTimePeriods);
   });
 
   it("rejects a stored list with too many entries", () => {
@@ -275,7 +293,7 @@ describe("State time periods", () => {
       { start: 0, end: 3 }, { start: 4, end: 7 }, { start: 8, end: 11 },
       { start: 12, end: 15 }, { start: 16, end: 23 }
     ]));
-    assert.deepEqual(State.loadTimePeriods(), CONFIG.defaultTimePeriods);
+    assert.deepEqual(resolveStored(), CONFIG.defaultTimePeriods);
   });
 
   it("rejects entries with non-numeric boundaries", () => {
@@ -283,12 +301,12 @@ describe("State time periods", () => {
       { start: 0, end: "morning" },
       { start: 12, end: 23 }
     ]));
-    assert.deepEqual(State.loadTimePeriods(), CONFIG.defaultTimePeriods);
+    assert.deepEqual(resolveStored(), CONFIG.defaultTimePeriods);
   });
 
   it("rejects a stored value that is not an array", () => {
     storage.setItem(CONFIG.timePeriodsKey, JSON.stringify({ a: 1 }));
-    assert.deepEqual(State.loadTimePeriods(), CONFIG.defaultTimePeriods);
+    assert.deepEqual(resolveStored(), CONFIG.defaultTimePeriods);
   });
 
   it("round-trips through saveTimePeriods", () => {
@@ -298,7 +316,7 @@ describe("State time periods", () => {
     ];
     State.timePeriods = periods;
     State.saveTimePeriods();
-    assert.deepEqual(State.loadTimePeriods(), periods);
+    assert.deepEqual(resolveStored(), periods);
   });
 });
 
@@ -355,8 +373,13 @@ describe("State map settings", () => {
  * ------------------------------------------------------------------ */
 
 describe("State custom cities", () => {
+  /** Resolve from the localStorage mirror the way init does. */
+  function resolveStored() {
+    return State.resolveCustomCities(asStored(storage.getItem(CONFIG.customCitiesKey)));
+  }
+
   it("returns an empty list when nothing is stored", () => {
-    assert.deepEqual(State.loadCustomCities(), []);
+    assert.deepEqual(resolveStored(), []);
   });
 
   it("keeps well-formed entries and fills missing coordinates", () => {
@@ -364,7 +387,7 @@ describe("State custom cities", () => {
       { id: "custom-a", name: "A", zone: "UTC", x: 12, y: 34, lng: 1, lat: 2 },
       { id: "custom-b", name: "B", zone: "Europe/Paris" }
     ]));
-    assert.deepEqual(State.loadCustomCities(), [
+    assert.deepEqual(resolveStored(), [
       { id: "custom-a", name: "A", zone: "UTC", x: 12, y: 34, lng: 1, lat: 2 },
       { id: "custom-b", name: "B", zone: "Europe/Paris", x: 50, y: 50, lng: undefined, lat: undefined }
     ]);
@@ -372,25 +395,53 @@ describe("State custom cities", () => {
 
   it("drops entries missing id, name or zone", () => {
     storage.setItem(CONFIG.customCitiesKey, JSON.stringify([
-      { id: "custom-a", name: "A", zone: "UTC" },
+      { id: "custom-a", name: "A", zone: "UTC", x: 1, y: 1 },
       { id: "custom-b", zone: "UTC" },
       { name: "C", zone: "UTC" },
       null
     ]));
-    assert.deepEqual(State.loadCustomCities().map((c) => c.id), ["custom-a"]);
+    assert.deepEqual(resolveStored().map((c) => c.id), ["custom-a"]);
   });
 
   it("ignores a stored value that is not an array", () => {
     storage.setItem(CONFIG.customCitiesKey, JSON.stringify({ a: 1 }));
-    assert.deepEqual(State.loadCustomCities(), []);
+    assert.deepEqual(resolveStored(), []);
   });
 
   it("round-trips through saveCustomCities", () => {
     State.customCities = [{ id: "custom-a", name: "A", zone: "UTC", x: 10, y: 20 }];
     State.saveCustomCities();
-    assert.deepEqual(State.loadCustomCities(), [
+    assert.deepEqual(resolveStored(), [
       { id: "custom-a", name: "A", zone: "UTC", x: 10, y: 20, lng: undefined, lat: undefined }
     ]);
+  });
+});
+
+describe("sanitizeCustomCity", () => {
+  it("truncates long names to 50 characters", () => {
+    const city = sanitizeCustomCity({
+      id: "custom-x", name: "N".repeat(80), zone: "UTC", x: 10, y: 20, lng: 1.23456789, lat: 2
+    });
+    assert.equal(city.name.length, 50);
+  });
+
+  it("rounds coordinates to 4 decimals", () => {
+    const city = sanitizeCustomCity({ id: "c", name: "C", zone: "UTC", x: 1, y: 2, lng: 12.3456789, lat: -98.7654321 });
+    assert.equal(city.lng, 12.3457);
+    assert.equal(city.lat, -98.7654);
+  });
+
+  it("clamps off-range map coordinates", () => {
+    const city = sanitizeCustomCity({ id: "c", name: "C", zone: "UTC", x: 140, y: -5 });
+    assert.equal(city.x, 100);
+    assert.equal(city.y, 0);
+  });
+
+  it("rejects entries without the required identity fields", () => {
+    assert.equal(sanitizeCustomCity(null), null);
+    assert.equal(sanitizeCustomCity({ id: "c", name: "C", x: 1, y: 1 }), null);
+    assert.equal(sanitizeCustomCity({ name: "C", zone: "UTC", x: 1, y: 1 }), null);
+    assert.equal(sanitizeCustomCity({ id: "c", zone: "UTC", x: 1, y: 1 }), null);
   });
 });
 
@@ -399,39 +450,66 @@ describe("State custom cities", () => {
  * ------------------------------------------------------------------ */
 
 describe("State language", () => {
-  it("restores a supported language", () => {
-    storage.setItem(CONFIG.languageKey, "es");
-    assert.equal(State.loadLanguage(), "es");
+  beforeEach(() => {
+    State._languagePreference = "auto";
+    State._syncedLanguage = null;
   });
 
-  it("ignores an unsupported stored language", () => {
-    storage.setItem(CONFIG.languageKey, "kr");
-    assert.ok(CONFIG.supportedLanguages.includes(State.loadLanguage()));
+  it("restores a supported explicit preference", () => {
+    storage.setItem(CONFIG.languagePreferenceKey, "es");
+    State._languagePreference = "es";
+    assert.equal(State.resolveLanguage(), "es");
   });
 
-  it("defaults the preference to auto", () => {
+  it("ignores an unsupported stored preference", () => {
+    State._languagePreference = "kr";
+    State._syncedLanguage = null;
+    assert.ok(CONFIG.supportedLanguages.includes(State.resolveLanguage()));
+  });
+
+  it("defaults the preference to auto", async () => {
+    await State.init();
     assert.equal(State.getLanguagePreference(), "auto");
   });
 
-  it("round-trips the preference", () => {
-    assert.equal(State.getLanguagePreference(), "auto");
-    storage.setItem(CONFIG.languageKey, "auto");
+  it("round-trips the preference", async () => {
+    await State.init();
     assert.equal(State.getLanguagePreference(), "auto");
 
     State.saveLanguage("en");
     assert.equal(State.currentLang, "en");
     assert.equal(State.getLanguagePreference(), "en");
+    assert.equal(storage.getItem(CONFIG.languagePreferenceKey), "en");
     assert.equal(storage.getItem(CONFIG.languageKey), "en");
 
     State.saveLanguage("auto");
-    assert.equal(storage.getItem(CONFIG.languageKey), "auto");
+    assert.equal(storage.getItem(CONFIG.languagePreferenceKey), "auto");
+    assert.equal(State.getLanguagePreference(), "auto");
   });
 
+  it("never syncs auto but keeps the last explicit synced value", async () => {
+    await State.init();
+    State.saveLanguage("es");
+    State.saveLanguage("auto");
+    // The explicit "es" remains the mirror/sync value; auto resolves locally.
+    assert.equal(storage.getItem(CONFIG.languageKey), "es");
+    assert.ok(CONFIG.supportedLanguages.includes(State.currentLang));
+  });
+
+  it("follows the synced explicit choice on a fresh device", () => {
+    State._languagePreference = null;
+    State._syncedLanguage = JSON.stringify("en");
+    assert.equal(State.resolveLanguage(), "en");
+    State._syncedLanguage = JSON.stringify("kr");
+    assert.ok(CONFIG.supportedLanguages.includes(State.resolveLanguage()));
+    State._languagePreference = "auto";
+  });
   it("ignores an unsupported saveLanguage call", () => {
     State.currentLang = "en";
     State.saveLanguage("kr");
     assert.equal(State.currentLang, "en");
     assert.equal(storage.getItem(CONFIG.languageKey), null);
+    assert.equal(storage.getItem(CONFIG.languagePreferenceKey), null);
   });
 
   it("pushes every language change to I18nUtils", () => {
@@ -445,19 +523,23 @@ describe("State language", () => {
 });
 
 describe("State now-line mode", () => {
+  function resolveStored() {
+    return State.resolveNowLineMode(asStored(storage.getItem(CONFIG.nowLineModeKey)));
+  }
+
   it("defaults to local", () => {
-    assert.equal(State.loadNowLineMode(), "local");
+    assert.equal(resolveStored(), "local");
   });
 
   it("round-trips a supported mode", () => {
     State.saveNowLineMode("firstCity");
     assert.equal(State.nowLineMode, "firstCity");
-    assert.equal(State.loadNowLineMode(), "firstCity");
+    assert.equal(resolveStored(), "firstCity");
   });
 
   it("ignores an unsupported stored mode", () => {
-    storage.setItem(CONFIG.nowLineModeKey, "moon-phase");
-    assert.equal(State.loadNowLineMode(), "local");
+    storage.setItem(CONFIG.nowLineModeKey, JSON.stringify("moon-phase"));
+    assert.equal(resolveStored(), "local");
   });
 });
 
@@ -466,8 +548,8 @@ describe("State now-line mode", () => {
  * ------------------------------------------------------------------ */
 
 describe("State.allCities / findCity", () => {
-  beforeEach(() => {
-    State.init();
+  beforeEach(async () => {
+    await State.init();
   });
 
   it("puts the local city first", () => {
@@ -501,8 +583,8 @@ describe("State.allCities / findCity", () => {
  * ------------------------------------------------------------------ */
 
 describe("scrub lines", () => {
-  beforeEach(() => {
-    State.init();
+  beforeEach(async () => {
+    await State.init();
   });
 
   it("starts with no scrubs", () => {
@@ -534,10 +616,10 @@ describe("scrub lines", () => {
     assert.equal(State.getActiveScrubFraction(), null);
   });
 
-  it("clears scrubs on init", () => {
+  it("clears scrubs on init", async () => {
     State.scrubs = [{ id: "scrub_1", fraction: 0.25 }];
     State.activeScrubId = "scrub_1";
-    State.init();
+    await State.init();
     assert.deepEqual(State.scrubs, []);
     assert.equal(State.activeScrubId, null);
     assert.equal(State.selectedOffsetHours, 0);
@@ -582,9 +664,9 @@ describe("corrupted storage recovery", () => {
   ];
 
   for (const key of CORRUPT_KEYS) {
-    it(`recovers from invalid JSON in ${key}`, () => {
+    it(`recovers from invalid JSON in ${key}`, async () => {
       storage.setItem(key, "{{{ not json");
-      assert.doesNotThrow(() => State.init());
+      await State.init();
       assert.equal(typeof State.currentLang, "string");
       assert.deepEqual(State.timePeriods, CONFIG.defaultTimePeriods);
       assert.deepEqual(State.mapSettings, CONFIG.defaultMapSettings);
@@ -593,15 +675,15 @@ describe("corrupted storage recovery", () => {
     });
   }
 
-  it("recovers when every key is corrupt", () => {
+  it("recovers when every key is corrupt", async () => {
     for (const key of CORRUPT_KEYS) storage.setItem(key, "nope");
-    assert.doesNotThrow(() => State.init());
+    await State.init();
     assert.deepEqual(State.selectedIds, CONFIG.defaultSelection);
   });
 
-  it("recovers when the stored language is corrupt", () => {
+  it("recovers when the stored language is corrupt", async () => {
     storage.setItem(CONFIG.languageKey, "");
-    assert.doesNotThrow(() => State.init());
+    await State.init();
     assert.ok(CONFIG.supportedLanguages.includes(State.currentLang));
   });
 
@@ -614,9 +696,9 @@ describe("corrupted storage recovery", () => {
     };
     globalThis.localStorage = throwing;
     try {
-      assert.doesNotThrow(() => State.loadTimePeriods());
-      assert.deepEqual(State.loadTimePeriods(), CONFIG.defaultTimePeriods);
-      assert.doesNotThrow(() => State.loadNowLineMode());
+      assert.doesNotThrow(() => State.resolveTimePeriods(undefined));
+      assert.deepEqual(State.resolveTimePeriods(undefined), CONFIG.defaultTimePeriods);
+      assert.doesNotThrow(() => State.resolveNowLineMode(undefined));
       // Every save path goes through the same guard, so a quota error can never
       // abort an interaction (drag-reorder, map click, slider) mid-write.
       for (const save of [

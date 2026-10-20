@@ -25,9 +25,9 @@ function makeStatusElement() {
 
 let storage;
 
-beforeEach(() => {
+beforeEach(async () => {
   storage = installMockStorage();
-  State.init();
+  await State.init();
 });
 
 afterEach(() => {

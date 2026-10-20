@@ -33,11 +33,15 @@ let onWriteError = (keys, err) => {
   console.warn("[TimeMapper] sync write failed for", Object.keys(keys || {}), err);
 };
 
-/** Synchronous localStorage read + JSON parse; null on missing/corrupt. */
+/**
+ * Synchronous localStorage read + JSON parse. Plain strings that are not
+ * valid JSON (the historical raw language/mode values) come back as-is.
+ */
 function readLocalJson(key) {
   try {
     const raw = localStorage.getItem(key);
-    return raw === null ? null : JSON.parse(raw);
+    if (raw === null) return null;
+    try { return JSON.parse(raw); } catch { return raw; }
   } catch {
     return null;
   }
@@ -81,7 +85,7 @@ export const Storage = {
         continue;
       }
       const mirrored = readLocalJson(SYNC_TO_LOCAL[syncKey]);
-      if (mirrored !== null) out.values[syncKey] = mirrored;
+      if (mirrored !== null && mirrored !== undefined) out.values[syncKey] = mirrored;
     }
 
     // "auto" is device-local and never synced; its marker lives only in localStorage.
