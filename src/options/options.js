@@ -15,7 +15,7 @@ import { TimelinePreview } from "../shared/timeline-preview.js";
 import { CityPreview } from "../shared/city-preview.js";
 import { Storage } from "../shared/storage.js";
 
-document.addEventListener("DOMContentLoaded", async () => {
+async function initOptions() {
   await State.init();
 
   // Surface sync write failures (quota, revoked permission) in the existing
@@ -88,7 +88,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (timelinePreviewRefs && mapPreviewRefs) {
     TimelinePreview.wireScrub(timelinePreviewRefs, {
       renderScrubLine: () => TimelinePreview.renderScrubLine(timelinePreviewRefs),
-      renderNightArea: (offsetHours) => MapPreview.renderNightArea(mapPreviewRefs, offsetHours),
+      renderNightArea: (offsetHours) => {
+        MapPreview.renderNightArea(mapPreviewRefs, offsetHours);
+        MapPreview.renderNightDecorations(mapPreviewRefs, offsetHours);
+      },
     });
   }
 
@@ -486,6 +489,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // 4. Appearance / Theme dropdown
+  function renderThemeSegment() {
+    if (!themeSelect) return;
+    themeSelect.value = localStorage.getItem("theme") || "auto";
+  }
+
   if (themeSelect) {
     themeSelect.addEventListener("change", () => {
       if (globalThis.TimeMapperTheme) {
@@ -544,4 +552,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Keep clock labels fresh like the popup does
   setInterval(() => renderPreviews(), 60 * 1000);
-});
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initOptions);
+} else {
+  initOptions();
+}

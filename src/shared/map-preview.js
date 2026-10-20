@@ -568,6 +568,7 @@ export const MapPreview = {
   renderAll(refs, onCityToggle, offsetHours = 0) {
     this.renderPins(refs, onCityToggle);
     this.renderNightArea(refs, offsetHours);
+    this.renderNightDecorations(refs, offsetHours);
     this.applyVisibility(refs);
   },
 
