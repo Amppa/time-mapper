@@ -13,9 +13,18 @@ import { TimeMapperVersion } from "../shared/version.js";
 import { MapPreview } from "../shared/map-preview.js";
 import { TimelinePreview } from "../shared/timeline-preview.js";
 import { CityPreview } from "../shared/city-preview.js";
+import { Storage } from "../shared/storage.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-  State.init();
+document.addEventListener("DOMContentLoaded", async () => {
+  await State.init();
+
+  // Surface sync write failures (quota, revoked permission) in the existing
+  // inline status line instead of blocking dialogs.
+  Storage.setWriteErrorHook(() => {
+    if (cityRefs) {
+      CityPreview.setSearchStatus(cityRefs, I18nUtils.getTranslation("storageWriteFailed"), true);
+    }
+  });
 
   const versionLabel = document.getElementById("versionLabel");
   if (globalThis.TimeMapperVersion) {
@@ -502,7 +511,7 @@ document.addEventListener("DOMContentLoaded", () => {
     CityPreview.wireResetButtons(cityRefs, renderPreviews);
   }
 
-  // Listen to changes from other contexts (e.g. Popup)
+  // Local-only keys (theme, mapSettings) still travel via localStorage events.
   window.addEventListener("storage", () => {
     State.init();
     applyLanguage();
@@ -510,6 +519,20 @@ document.addEventListener("DOMContentLoaded", () => {
     renderPeriodControls();
     renderThemeSegment();
     renderPreviews();
+  });
+
+  // Sync-key changes from the popup, other devices or other options tabs.
+  const syncedKeys = new Set(Object.values(CONFIG.syncKeys));
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== "sync") return;
+    if (!Object.keys(changes).some((key) => syncedKeys.has(key))) return;
+    State.init().then(() => {
+      applyLanguage();
+      renderMapControls();
+      renderPeriodControls();
+      renderThemeSegment();
+      renderPreviews();
+    });
   });
 
   // Initial UI Render
