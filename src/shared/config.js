@@ -49,6 +49,7 @@ export const CONFIG = {
     mapSettings: "worldTimeAlignerMapSettings_v4"
   },
   /** localStorage key holding the explicit-vs-auto language preference. */
+  languagePreferenceKey: "worldTimeAlignerLanguagePref",
   languagePreferenceValues: ["auto", "zh", "en", "es"],
   defaultMapSettings: {
     lngOffset: 1.0,
