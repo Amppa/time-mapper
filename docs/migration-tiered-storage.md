@@ -1,9 +1,10 @@
 # Migration Plan: Tiered Storage & Hardened Sync (rev.2)
 
+> rev.3 records the developer's decisions on all three open items; ready for
+> implementation.
 > rev.2 corrects the technical errors found in review against the current
 > codebase (schema mismatch, quota model, sync-permission prompt, async
 > migration scope, migration trigger, language/auto conflict, listener split).
-> Items marked **[OPEN]** require a product decision before implementation.
 
 ## 1. Core principle: tiered storage
 
@@ -15,18 +16,15 @@ zero-latency settings in `localStorage`.
 | `cities` (selected id list) | ☁️ `chrome.storage.sync` | Core user setting; tiny payload (≤10 id strings) |
 | `customCities` | ☁️ `chrome.storage.sync` | User-added search results; schema see §2-C |
 | `timePeriods` | ☁️ `chrome.storage.sync` | Personal schedule split |
-| `language` | ☁️ `chrome.storage.sync` | See **[OPEN-1]** below |
+| `language` | ☁️ `chrome.storage.sync` | Explicit choices only; see DECIDED-1 below |
 | `nowLineMode` | ☁️ `chrome.storage.sync` | Now-line reference preference |
 | `theme` | 💻 `localStorage` | 0 ms synchronous read in `<head>`; no FOUC |
 | `mapSettings` | 💻 `localStorage` | Local-only; map calibration is device-bound |
 
-**[OPEN-1] `language = "auto"` vs sync.** `auto` currently means "resolve from
-`navigator.language` on this device" (`state.js loadLanguage`). If synced
-verbatim, a zh device's auto value overwrites an en device's resolved UI.
-Proposed policy: sync only explicit choices (`zh`/`en`/`es`); when the local
-preference is `auto`, do not write `language` to sync and ignore the synced
-value if the local key is `auto`. Alternative: accept last-write-wins.
-Decision needed.
+**DECIDED-1 (2026-10-20) `language = "auto"` is never synced.** `auto` stays a
+device-local preference (localStorage remains the source of truth for the
+dropdown). Only explicit `zh`/`en`/`es` selections are written to sync and
+applied on other devices (when that device's local preference is not `auto`).
 
 ## 2. Runtime rules
 
@@ -69,8 +67,9 @@ Decision needed.
 - Size reality check: max 10 selected cities, but **definitions are never
   pruned today** — `toggleCity` deletes a definition only when re-toggle removes
   it. Long-term accumulation is the real risk, not 8 KB per-item overflow.
-  Pruning unused definitions is a **separate small change** **[OPEN-2: prune on
-  delete vs. keep for re-add]**.
+  Pruning unused definitions: **DECIDED-2 (2026-10-20) — delete on deselect.**
+  `toggleCity` removing a custom city from the selection also deletes its
+  definition; no orphan definitions accumulate.
 
 ### Rule D — Cross-page sync (split listeners explicitly)
 - Sync keys (`cities`, `customCities`, `timePeriods`, `language`, `nowLineMode`):
@@ -107,8 +106,10 @@ Decision needed.
 - `manifest.json` currently declares **no `permissions`**. Adding
   `"storage"` is a new-permission declaration: the Chrome Web Store update will
   prompt existing users to accept new permissions, and the extension is
-  disabled until accepted. **[OPEN-3: accept the re-prompt, or gate the rollout]**
-  This is a release decision, owned by the developer.
+  disabled until accepted. **DECIDED-3 (2026-10-20) — Option A: normal release.**
+  Ship `"storage"` together with the sync feature so the prompt is immediately
+  explained by the new cross-device syncing; update notes call it out.
+  (One-time cost per user; `storage` is the mildest permission class.)
 
 ## 5. Async refactor scope (larger than rev.1 claimed)
 
