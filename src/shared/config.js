@@ -29,6 +29,27 @@ export const CONFIG = {
   /** Maps an internal UI language code to the BCP-47 locale used for date/time formatting. */
   localeMap: { zh: "zh-TW", en: "en-US", es: "es-ES" },
   nowLineModeKey: "worldTimeAlignerNowLineMode",
+  /**
+   * Tiered storage (see docs/migration-tiered-storage.md).
+   * Sync keys mirror into chrome.storage.sync (short clean names) while the
+   * legacy localStorage keys above stay as the device-local source of truth
+   * and as rollback fuel for the migration.
+   */
+  syncKeys: {
+    cities: "cities",
+    customCities: "customCities",
+    timePeriods: "timePeriods",
+    language: "language",
+    nowLineMode: "nowLineMode",
+    migratedAt: "migratedAt"
+  },
+  /** Device-local only: never written to sync. */
+  localOnlyKeys: {
+    theme: "theme",
+    mapSettings: "worldTimeAlignerMapSettings_v4"
+  },
+  /** localStorage key holding the explicit-vs-auto language preference. */
+  languagePreferenceValues: ["auto", "zh", "en", "es"],
   defaultMapSettings: {
     lngOffset: 1.0,
     latOffset: 20.7,
