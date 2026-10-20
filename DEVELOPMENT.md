@@ -19,6 +19,9 @@ npm run bench          # hot path benchmarks with per-call budgets (~2 s)
 # Profile the popup: web vitals, long tasks and a DevTools-compatible trace
 npm install          # first run only, pulls puppeteer
 npm run profile:popup # writes traces/*.trace.json
+
+# Build release zip for Chrome Web Store
+node tools/build-zip.mjs
 ```
 
 ### Unit Tests

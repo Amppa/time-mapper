@@ -10,7 +10,8 @@
     "test:coverage": "node --test --experimental-test-coverage tests/*.test.js",
     "bench": "node tools/bench.mjs",
     "test": "npm run check:i18n && npm run check:css && npm run test:unit",
-    "profile:popup": "node tools/profile-popup.mjs"
+    "profile:popup": "node tools/profile-popup.mjs",
+    "build:zip": "node tools/build-zip.mjs"
   },
   "devDependencies": {
     "puppeteer": "^24.4.0"
