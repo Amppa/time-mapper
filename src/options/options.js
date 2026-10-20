@@ -489,10 +489,6 @@ async function initOptions() {
   }
 
   // 4. Appearance / Theme dropdown
-  function renderThemeSegment() {
-    if (!themeSelect) return;
-    themeSelect.value = localStorage.getItem("theme") || "auto";
-  }
 
   if (themeSelect) {
     themeSelect.addEventListener("change", () => {
