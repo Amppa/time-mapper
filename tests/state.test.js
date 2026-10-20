@@ -10,6 +10,7 @@ import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { CONFIG } from "../src/shared/config.js";
 import { State, sanitizeCustomCity } from "../src/shared/state.js";
+import { SYNC_TO_LOCAL } from "../src/shared/storage.js";
 import { TimeUtils, TimelineUtils, I18nUtils } from "../src/shared/utils.js";
 import { installMockStorage, uninstallMockStorage } from "./helpers/mock-storage.js";
 
@@ -524,7 +525,7 @@ describe("State language", () => {
 
 describe("State now-line mode", () => {
   function resolveStored() {
-    return State.resolveNowLineMode(asStored(storage.getItem(CONFIG.nowLineModeKey)));
+    return State.resolveNowLineMode(asStored(storage.getItem(SYNC_TO_LOCAL[CONFIG.syncKeys.nowLineMode])));
   }
 
   it("defaults to local", () => {
@@ -538,7 +539,7 @@ describe("State now-line mode", () => {
   });
 
   it("ignores an unsupported stored mode", () => {
-    storage.setItem(CONFIG.nowLineModeKey, JSON.stringify("moon-phase"));
+    storage.setItem(SYNC_TO_LOCAL[CONFIG.syncKeys.nowLineMode], JSON.stringify("moon-phase"));
     assert.equal(resolveStored(), "local");
   });
 });

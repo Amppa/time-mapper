@@ -12,34 +12,7 @@ import assert from "node:assert/strict";
 import { CONFIG } from "../src/shared/config.js";
 import { Storage } from "../src/shared/storage.js";
 import { installMockStorage, uninstallMockStorage } from "./helpers/mock-storage.js";
-
-/** Minimal chrome.storage.sync double. */
-function installMockChrome(initial = {}) {
-  const data = { ...initial };
-  const calls = [];
-  globalThis.chrome = {
-    storage: {
-      sync: {
-        async get(keys) {
-          calls.push(["get", keys]);
-          const list = Array.isArray(keys) ? keys : [keys];
-          const out = {};
-          for (const k of list) if (data[k] !== undefined) out[k] = data[k];
-          return out;
-        },
-        async set(items) {
-          calls.push(["set", { ...items }]);
-          Object.assign(data, items);
-        }
-      }
-    }
-  };
-  return {
-    data,
-    calls,
-    restore() { delete globalThis.chrome; }
-  };
-}
+import { installMockChrome } from "./helpers/mock-chrome-storage.js";
 
 let storage;
 let chromeMock;
@@ -111,7 +84,7 @@ describe("Storage legacy migration", () => {
     assert.equal(first.values[CONFIG.syncKeys.nowLineMode], "firstCity");
     assert.ok(chromeMock.data[CONFIG.syncKeys.migratedAt], "sentinel written");
 
-    const sent = chromeMock.calls.filter(([op]) => op === "set");
+    const sent = chromeMock.setCalls();
     assert.equal(sent.length, 1, "exactly one migration write");
   });
 
@@ -121,7 +94,7 @@ describe("Storage legacy migration", () => {
     const { values } = await Storage.loadSyncData();
     // Sentinel present, sync store empty: the mirror serves the local fallback.
     assert.deepEqual(values[CONFIG.syncKeys.cities], ["stale-legacy"]);
-    const sent = chromeMock.calls.filter(([op]) => op === "set");
+    const sent = chromeMock.setCalls();
     assert.equal(sent.length, 0);
   });
 

@@ -15,14 +15,14 @@ function safeSetItem(key, value) {
 }
 
 /** Mirror to the local snapshot (synchronously) and push to chrome.storage.sync. */
-function persist(localKey, value) {
-  Storage.persist(localKey, SYNC_TO_LOCAL[localKey], value);
+function persist(syncKey, value) {
+  Storage.persist(SYNC_TO_LOCAL[syncKey], syncKey, value);
 }
 
 /** Tolerate JSON strings (localStorage mirrors) and real values (sync store). */
 function asValue(raw) {
   if (typeof raw === "string") {
-    try { return JSON.parse(raw); } catch { return undefined; }
+    try { return JSON.parse(raw); } catch { return raw; }
   }
   return raw;
 }
@@ -175,7 +175,7 @@ export const State = {
   },
 
   saveTimePeriods() {
-    persist(CONFIG.timePeriodsKey, this.timePeriods);
+    persist(CONFIG.syncKeys.timePeriods, this.timePeriods);
   },
 
   loadMapSettings() {
@@ -212,7 +212,7 @@ export const State = {
   },
 
   saveCustomCities() {
-    persist(CONFIG.customCitiesKey, this.customCities);
+    persist(CONFIG.syncKeys.customCities, this.customCities);
   },
 
   resolveSelection(saved) {
@@ -225,7 +225,7 @@ export const State = {
   },
 
   saveSelection() {
-    persist(CONFIG.storageKey, this.selectedIds);
+    persist(CONFIG.syncKeys.cities, this.selectedIds);
   },
 
   getActiveScrubFraction() {
@@ -289,7 +289,7 @@ export const State = {
 
   saveNowLineMode(mode) {
     this.nowLineMode = mode;
-    persist(CONFIG.nowLineModeKey, mode);
+    persist(CONFIG.syncKeys.nowLineMode, mode);
   },
 
   makeBaseHours() {

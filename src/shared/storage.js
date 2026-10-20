@@ -18,7 +18,9 @@ export const SYNC_TO_LOCAL = {
   [CONFIG.syncKeys.customCities]: CONFIG.customCitiesKey,
   [CONFIG.syncKeys.timePeriods]: CONFIG.timePeriodsKey,
   [CONFIG.syncKeys.language]: CONFIG.languageKey,
-  [CONFIG.syncKeys.nowLineMode]: CONFIG.nowLineModeKey
+  // Distinct from CONFIG.nowLineModeKey: that name is taken by the legacy
+  // "worldTimeAlignerNowLineMode" mirror and must not collide in SYNC_TO_LOCAL.
+  [CONFIG.syncKeys.nowLineMode]: "worldTimeAlignerSyncedNowLineMode"
 };
 
 function hasSync() {
