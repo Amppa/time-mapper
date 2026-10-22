@@ -1,5 +1,5 @@
 .map-panel {
-  background: var(--bg-primary);
+  background: var(--bg-card);
   border: 1px solid var(--divider);
   border-radius: 8px;
   overflow: hidden;
