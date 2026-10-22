@@ -199,24 +199,7 @@
   border-color: var(--input-focus-border);
 }
 
-.search-bar-row button {
-  min-height: 30px;
-  padding: 0 12px;
-  border: 1px solid var(--btn-primary-bg);
-  border-radius: 7px;
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: none;
-}
-
-.search-bar-row button:hover {
-  background: var(--btn-primary-hover-bg);
-  border-color: var(--btn-primary-hover-bg);
-}
-
+.search-bar-row button,
 .city-list-actions button,
 .city-list-actions .text-button {
   min-height: 30px;
@@ -231,6 +214,7 @@
   transition: none;
 }
 
+.search-bar-row button:hover,
 .city-list-actions button:hover,
 .city-list-actions .text-button:hover {
   background: var(--btn-bg-hover);
