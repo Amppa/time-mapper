@@ -15,6 +15,7 @@ let lastActiveCard = null;
 let lastActiveCardRect = null;
 
 export const CityPreview = {
+  isReordering: false,
   /**
    * Collect the nodes this module renders into. `root` is `document` in the
    * popup or the mount element built by each page.
@@ -189,11 +190,13 @@ export const CityPreview = {
       card.addEventListener("drop", (e) => {
         e.preventDefault();
         const draggedId = State.draggingId;
+        const dropTop = card.classList.contains("drag-over-top");
+        CityPreview.clearCardDragState(refs);
+
         if (draggedId && draggedId !== id) {
           const oldIndex = State.selectedIds.indexOf(draggedId);
           const newIndex = State.selectedIds.indexOf(id);
           if (oldIndex !== -1 && newIndex !== -1) {
-            const dropTop = card.classList.contains("drag-over-top");
             let insertIndex;
             if (oldIndex < newIndex) {
               insertIndex = dropTop ? newIndex - 1 : newIndex;
@@ -201,21 +204,67 @@ export const CityPreview = {
               insertIndex = dropTop ? newIndex : newIndex + 1;
             }
 
-            const list = [...State.selectedIds];
-            list.splice(oldIndex, 1);
-            list.splice(insertIndex, 0, draggedId);
-            State.selectedIds = list;
-            State.saveSelection();
+            if (insertIndex !== oldIndex && refs.currentCitiesList) {
+              CityPreview.isReordering = true;
+              const allCards = Array.from(refs.currentCitiesList.querySelectorAll(".current-city-card"));
+              const draggedCard = allCards.find((c) => c.dataset.id === draggedId);
+              if (!draggedCard) {
+                CityPreview.isReordering = false;
+                return;
+              }
 
-            // Repaint the list so the new order is visible immediately.
-            CityPreview.renderCurrentCitiesList(refs);
-            // Notify the page to repaint dependent UI (timeline rows, map previews).
-            if (typeof onReorder === "function") {
-              onReorder();
+              // 1. Capture current positions
+              const firstRects = new Map();
+              allCards.forEach((c) => {
+                firstRects.set(c.dataset.id, c.getBoundingClientRect());
+              });
+
+              // 2. Update State
+              const list = [...State.selectedIds];
+              list.splice(oldIndex, 1);
+              list.splice(insertIndex, 0, draggedId);
+              State.selectedIds = list;
+              State.saveSelection();
+
+              // 3. Move dragged DOM element in-place (no innerHTML teardown)
+              if (dropTop) {
+                refs.currentCitiesList.insertBefore(draggedCard, card);
+              } else {
+                refs.currentCitiesList.insertBefore(draggedCard, card.nextSibling);
+              }
+
+              // 4. Measure new positions and animate via Web Animations API
+              const REORDER_DURATION_MS = 250;
+              const reorderedCards = Array.from(refs.currentCitiesList.querySelectorAll(".current-city-card"));
+              reorderedCards.forEach((c) => {
+                const firstRect = firstRects.get(c.dataset.id);
+                if (firstRect) {
+                  const lastRect = c.getBoundingClientRect();
+                  const deltaY = firstRect.top - lastRect.top;
+                  if (deltaY !== 0 && typeof c.animate === "function") {
+                    c.animate([
+                      { transform: `translateY(${deltaY}px)` },
+                      { transform: "translateY(0)" }
+                    ], {
+                      duration: REORDER_DURATION_MS,
+                      easing: "cubic-bezier(0.2, 0, 0, 1)"
+                    });
+                  }
+                }
+              });
+
+              setTimeout(() => {
+                CityPreview.isReordering = false;
+              }, REORDER_DURATION_MS + 50);
+
+              // 5. Notify dependent previews (map & timeline)
+              if (typeof onReorder === "function") {
+                onReorder();
+              }
+              return;
             }
           }
         }
-        CityPreview.clearCardDragState(refs);
       });
 
       const handleAutoSave = () => {

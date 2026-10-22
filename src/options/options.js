@@ -73,7 +73,10 @@ async function initOptions() {
    */
   function renderCities() {
     if (!cityRefs) return;
-    CityPreview.renderCurrentCitiesList(cityRefs, renderPreviews);
+    CityPreview.renderCurrentCitiesList(cityRefs, () => {
+      renderMapPreview();
+      renderTimelinePreview();
+    });
   }
 
   /** Repaint both previews + cities (selection / language / periods / storage). */
@@ -529,6 +532,7 @@ async function initOptions() {
   const syncedKeys = new Set(Object.values(CONFIG.syncKeys));
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "sync") return;
+    if (CityPreview.isReordering) return;
     if (!Object.keys(changes).some((key) => syncedKeys.has(key))) return;
     State.init().then(() => {
       applyLanguage();
