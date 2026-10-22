@@ -20,27 +20,22 @@
   border-radius: 8px;
   background: var(--bg-card);
   font-size: 11px;
-  transition: all 0.2s ease;
+  transition: none;
   user-select: none;
 }
 
 .current-city-card:hover {
   border-color: var(--text-secondary);
-  background: var(--bg-elevated);
 }
 
 .current-city-card.is-dragging {
-  opacity: 0.4;
+  opacity: 0.35;
   border-style: dashed;
-  background: var(--bg-elevated);
+  border-color: var(--input-focus-border);
 }
 
 .current-cities-list.is-dragging-active .current-city-card * {
   pointer-events: none;
-}
-
-.current-cities-list.is-dragging-active .current-city-card {
-  transition: none !important;
 }
 
 .current-cities-list.is-dragging-active .current-city-card::before {
@@ -58,12 +53,12 @@
 .current-city-card.drag-over-top::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 2px;
+  right: 2px;
   top: -5px;
-  height: 3px;
-  background-color: #1a73e8;
-  border-radius: 1.5px;
+  height: 2px;
+  background-color: var(--input-focus-border);
+  border-radius: 1px;
   z-index: 10;
   pointer-events: none;
 }
@@ -71,12 +66,12 @@
 .current-city-card.drag-over-bottom::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 2px;
+  right: 2px;
   bottom: -5px;
-  height: 3px;
-  background-color: #1a73e8;
-  border-radius: 1.5px;
+  height: 2px;
+  background-color: var(--input-focus-border);
+  border-radius: 1px;
   z-index: 10;
   pointer-events: none;
 }
@@ -103,13 +98,13 @@
   width: 100%;
   min-height: 28px;
   padding: 0 4px;
-  border: 1px solid var(--divider);
+  border: 1px solid var(--input-border);
   border-radius: 7px;
   background: var(--input-bg);
   color: var(--text-primary);
   font-size: 11px;
   outline: none;
-  transition: border-color 0.2s, background-color 0.2s;
+  transition: none;
   user-select: text;
 }
 
@@ -126,7 +121,7 @@
 
 .current-city-card input:focus,
 .current-city-card select:focus {
-  border-color: var(--accent-solid);
+  border-color: var(--input-focus-border);
 }
 
 .current-city-card input.invalid,
@@ -149,7 +144,7 @@
 .remove-city-card-btn {
   width: 20px;
   height: 20px;
-  border: 1px solid var(--divider);
+  border: 1px solid var(--input-border);
   border-radius: 7px;
   background: var(--input-bg);
   color: var(--text-secondary);
@@ -159,13 +154,13 @@
   justify-content: center;
   font-size: 14px;
   line-height: 1;
-  transition: all 0.2s ease;
+  transition: none;
 }
 
 .remove-city-card-btn:hover {
-  color: #ef4444;
-  border-color: #ef4444;
-  background: var(--danger-hover-bg);
+  color: var(--text-primary);
+  border-color: var(--input-focus-border);
+  background: var(--btn-bg-hover);
 }
 
 .city-list-header-group {
@@ -191,39 +186,55 @@
   min-width: 0;
   min-height: 30px;
   padding: 0 8px;
-  border: 1px solid var(--divider);
+  border: 1px solid var(--input-border);
   border-radius: 7px;
   background: var(--input-bg);
   color: var(--text-primary);
   font-size: 12px;
   outline: none;
-  transition: border-color 0.2s, background-color 0.2s;
+  transition: none;
 }
 
 .search-bar-row input:focus {
-  border-color: var(--accent-solid);
+  border-color: var(--input-focus-border);
 }
 
-.search-bar-row button,
+.search-bar-row button {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--btn-primary-bg);
+  border-radius: 7px;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: none;
+}
+
+.search-bar-row button:hover {
+  background: var(--btn-primary-hover-bg);
+  border-color: var(--btn-primary-hover-bg);
+}
+
 .city-list-actions button,
 .city-list-actions .text-button {
   min-height: 30px;
   padding: 0 10px;
-  border: 1px solid var(--divider);
+  border: 1px solid var(--input-border);
   border-radius: 7px;
-  background: var(--btn-bg);
+  background: var(--input-bg);
   color: var(--text-primary);
   font-size: 11px;
   font-weight: 400;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: none;
 }
 
-.search-bar-row button:hover,
 .city-list-actions button:hover,
 .city-list-actions .text-button:hover {
   background: var(--btn-bg-hover);
-  border-color: var(--text-secondary);
+  border-color: var(--input-focus-border);
 }
 
 .current-cities-container {

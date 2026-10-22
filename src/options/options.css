@@ -6,10 +6,25 @@
 
 /* Options-page local tokens. Shared palette lives in ../shared/tokens.css;
    these only cover surfaces unique to this page. */
-:root {
-  --input-bg: var(--bg-elevated);
+:root,
+:root[data-theme="light"] {
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --input-focus-border: #111111;
+  --btn-primary-bg: #111111;
+  --btn-primary-text: #ffffff;
+  --btn-primary-hover-bg: #333333;
   --danger-hover-bg: rgba(239, 68, 68, 0.12);
   --search-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme="dark"] {
+  --input-bg: #18181c;
+  --input-border: rgba(255, 255, 255, 0.16);
+  --input-focus-border: #ffffff;
+  --btn-primary-bg: #f0f0f2;
+  --btn-primary-text: #121214;
+  --btn-primary-hover-bg: #ffffff;
 }
 
 /* Reserve the scrollbar gutter permanently. Without it, a page whose height
@@ -96,7 +111,7 @@ body {
 .header-select {
   min-width: 0;
   /* Solid fill so the closed control never turns translucent-white */
-  background-color: var(--bg-elevated);
+  background-color: var(--input-bg);
 }
 
 /* Settings Cards Layout: 2-column split (Preview on left, Settings on right) */
@@ -225,25 +240,25 @@ details[open]>.collapsible-summary::after {
 
 /* Reset & Secondary Action Buttons */
 .reset-btn {
-  background: var(--btn-bg);
-  border: 1px solid var(--divider);
-  color: var(--text-secondary);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-primary);
   font-size: var(--font-xs);
   padding: 6px 14px;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: none;
   white-space: nowrap;
   flex-shrink: 0;
 
   &:hover {
     color: var(--text-primary);
-    border-color: var(--btn-border-hover);
+    border-color: var(--input-focus-border);
     background: var(--btn-bg-hover);
   }
 
   &:active {
-    transform: scale(0.98);
+    transform: none;
   }
 }
 
@@ -266,8 +281,8 @@ details[open]>.collapsible-summary::after {
 .stepper-btn {
   width: 28px;
   height: 28px;
-  background: var(--btn-bg);
-  border: 1px solid var(--divider);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   color: var(--text-primary);
   border-radius: var(--radius-sm);
   display: flex;
@@ -276,11 +291,11 @@ details[open]>.collapsible-summary::after {
   font-size: 15px;
   font-weight: bold;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: none;
 
   &:hover {
     background: var(--btn-bg-hover);
-    border-color: var(--btn-border-hover);
+    border-color: var(--input-focus-border);
   }
 
   &:active {
@@ -347,8 +362,8 @@ details[open]>.collapsible-summary::after {
 }
 
 .styled-select {
-  background: var(--btn-bg);
-  border: 1px solid var(--divider);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   color: var(--text-primary);
   font-size: var(--font-xs);
   /* Fixed height instead of padding-derived height: every select on the page
@@ -358,14 +373,14 @@ details[open]>.collapsible-summary::after {
   border-radius: var(--radius-sm);
   outline: none;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: none;
 
   &:hover {
-    border-color: var(--btn-border-hover);
+    border-color: var(--input-focus-border);
   }
 
   &:focus {
-    border-color: var(--accent-solid);
+    border-color: var(--input-focus-border);
   }
 }
 
@@ -373,7 +388,7 @@ details[open]>.collapsible-summary::after {
    Without this Chrome renders <option> on a white sheet while the
    surrounding card is dark, leaving light text unreadable. */
 .styled-select option {
-  background-color: var(--bg-elevated);
+  background-color: var(--input-bg);
   color: var(--text-primary);
 }
 
@@ -471,8 +486,8 @@ details[open]>.collapsible-summary::after {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: var(--btn-bg);
-  border: 1px solid var(--divider);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   color: var(--text-primary);
   font-size: var(--font-xs);
   font-weight: 500;
@@ -481,16 +496,16 @@ details[open]>.collapsible-summary::after {
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: all var(--transition-fast);
+  transition: none;
 
   &:hover {
-    background: rgba(234, 74, 170, 0.12);
-    border-color: #ea4aaa;
-    color: #ea4aaa;
+    background: var(--btn-bg-hover);
+    border-color: var(--input-focus-border);
+    color: var(--text-primary);
   }
 
   &:active {
-    transform: scale(0.98);
+    transform: none;
   }
 }
 
