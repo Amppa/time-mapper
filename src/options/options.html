@@ -113,7 +113,7 @@
             <div class="control-group">
               <div class="control-label-wrap">
                 <span class="control-label" data-i18n="showHourLines">顯示小時線</span>
-                <span class="control-desc" data-i18n="showHourLinesDesc">在世界地圖上繪製各時區的小時垂直經度線</span>
+                <span class="control-desc" data-i18n="showHourLinesDesc">在地圖上繪製垂直線，以每兩小時分隔</span>
               </div>
               <label class="switch" title="Show Hour Lines">
                 <input type="checkbox" id="showHourLines" data-setting="showHourLines" aria-label="Show Hour Lines Switch">
@@ -125,8 +125,8 @@
 
             <div class="control-group">
               <div class="control-label-wrap">
-                <span class="control-label" data-i18n="showCityTimes">顯示已選城市時間</span>
-                <span class="control-desc" data-i18n="showCityTimesDesc">在地圖城市圖釘旁即時顯示對應時間標籤</span>
+                <span class="control-label" data-i18n="showCityTimes">顯示城市時間</span>
+                <span class="control-desc" data-i18n="showCityTimesDesc">在已選取的城市上方，顯示當地時間</span>
               </div>
               <label class="switch" title="Show City Times">
                 <input type="checkbox" id="showCityTimes" data-setting="showCityTimes" aria-label="Show City Times Switch">
@@ -269,15 +269,14 @@
 
           <div class="divider"></div>
 
-          <!-- 3. 現在時間線 -->
+          <!-- 3. 本地時間來源 -->
           <div class="control-group">
             <div class="control-label-wrap">
-              <span class="control-label" data-i18n="nowLineMode">現在時間線</span>
-              <span class="control-desc" data-i18n="nowLineModeDesc">設定時間軸中線 (Now-line) 的參考時間依據</span>
+              <span class="control-label" data-i18n="nowLineMode">📍本地時間 來源</span>
             </div>
             <select class="styled-select" id="nowLineModeSelect" aria-label="Now Line Mode">
-              <option value="local" data-i18n="nowLineModeLocal">瀏覽器本地時間</option>
-              <option value="firstCity" data-i18n="nowLineModeFirstCity">第一個城市時間</option>
+              <option value="local" data-i18n="nowLineModeLocal">系統時間（預設）</option>
+              <option value="firstCity" data-i18n="nowLineModeFirstCity">第一個城市</option>
             </select>
           </div>
         </section>

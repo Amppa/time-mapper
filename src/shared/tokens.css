@@ -27,6 +27,11 @@
   --radius-lg: 12px;
   --radius-pill: 999px;
 
+  /* Height shared by the standalone form controls (selects, buttons) so every
+     control in a row sits on the same baseline instead of each one deriving
+     its own box from its font metrics. */
+  --control-height: 28px;
+
   --transition-fast: 0.15s ease;
   --transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-toggle: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -124,6 +129,16 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* Chrome's UA stylesheet gives form controls their own font (Arial 13.33px).
+   Author rules only override the size, so the typeface stays Arial and a
+   12px control renders in a noticeably thinner face than the surrounding
+   text. Inheriting the page stack keeps every control on the same font. */
+input,
+select,
+button {
+  font-family: inherit;
 }
 
 /* ==========================================================================

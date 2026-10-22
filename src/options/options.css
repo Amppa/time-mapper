@@ -90,10 +90,11 @@ body {
   }
 }
 
-/* Compact selects in the header (language / theme) */
+/* Selects in the header (language / theme). They share the base
+   .styled-select box - only the fill differs, so a translucent background
+   never bleeds through the closed control. */
 .header-select {
   min-width: 0;
-  padding: 5px 8px;
   /* Solid fill so the closed control never turns translucent-white */
   background-color: var(--bg-elevated);
 }
@@ -350,7 +351,10 @@ details[open]>.collapsible-summary::after {
   border: 1px solid var(--divider);
   color: var(--text-primary);
   font-size: var(--font-xs);
-  padding: 4px 8px;
+  /* Fixed height instead of padding-derived height: every select on the page
+     ends up exactly --control-height tall, whatever the option text is. */
+  height: var(--control-height);
+  padding: 0 10px;
   border-radius: var(--radius-sm);
   outline: none;
   cursor: pointer;

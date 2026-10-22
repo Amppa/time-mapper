@@ -253,6 +253,13 @@
   pointer-events: none;
   border: 1px solid rgba(0, 0, 0, 0.25);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  gap: 3px;
+}
+
+/* Location pin that marks the badge as the current-time reference */
+.now-knob-top .knob-icon {
+  font-size: 9px;
+  line-height: 1;
 }
 
 /* Scrub Line Knob (Draggable, with [HH:mm  ×]) */

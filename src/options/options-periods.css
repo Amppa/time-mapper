@@ -3,10 +3,12 @@
    Interactive 24-Hour Grid Timeline & Period Boundaries
    ========================================================================== */
 
+/* Numeric select: keeps a stable minimum width and centres the digit.
+   Weight, height, radius and font come from the shared .styled-select
+   base so it matches every other dropdown on the page. */
 .period-count-select {
   min-width: 64px;
   text-align: center;
-  font-weight: 600;
 }
 
 .period-timeline-header {
@@ -47,7 +49,9 @@
 /* Interactive Hour Cell inherits layout, sizing and typography from .hour-cell */
 .interactive-hour-cell {
   cursor: pointer;
-  font-size: 9px;
+  /* Same type size as the preview cells. The settings column is 360px wide
+     against the preview's 760px, so 24 cells get half the room and the
+     tracking stays tight to keep the two-digit labels from touching. */
   letter-spacing: -0.5px;
   transition: background-color 0.15s ease, filter 0.15s ease;
 }
@@ -68,17 +72,18 @@
   z-index: 10;
 }
 
-/* Individual Draggable Divider */
+/* Individual Draggable Divider.
+   The container is the grab strip only; the markers themselves reuse the
+   preview timeline's .timeline-knob / .timeline-knob-bottom classes, so
+   both timelines draw the same handle. The container spans exactly the
+   panel, which is what puts the bottom knob's centre on the panel edge
+   (bottom: -4px on an 8px circle) the same way the preview does it. */
 .timeline-divider {
   position: absolute;
-  top: -8px;
-  bottom: -8px;
+  top: 0;
+  bottom: 0;
   width: 28px;
   transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
   cursor: ew-resize;
   pointer-events: auto;
   touch-action: none;
@@ -97,40 +102,25 @@
   pointer-events: none;
 }
 
-.timeline-divider-knob {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  background: #ffffff;
-  color: #111111;
-  border: 1px solid rgba(0, 0, 0, 0.25);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-  font-size: 10px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+/* The shared knob classes anchor to a zero-width line; the divider is a
+   28px grab strip, so shift the markers back to the line's centre. */
+.timeline-divider .timeline-knob,
+.timeline-divider .timeline-knob-bottom {
+  left: 50%;
 }
 
-.timeline-divider-knob.top-knob {
-  padding: 1px 4px;
-  font-size: 9px;
-  white-space: nowrap;
-  top: -4px;
+/* Divider badge: same box as the preview markers - the shared .timeline-knob
+   metrics plus the now-knob padding - sized for the period icon and the
+   start hour. */
+.timeline-divider .divider-knob-top {
+  padding: 3px 6px;
 }
 
-.timeline-divider-knob.bottom-knob {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  bottom: -4px;
-}
-
-.timeline-divider:hover .timeline-divider-knob,
-.timeline-divider.is-dragging .timeline-divider-knob {
-  transform: scale(1.18);
+.timeline-divider:hover .timeline-knob,
+.timeline-divider:hover .timeline-knob-bottom,
+.timeline-divider.is-dragging .timeline-knob,
+.timeline-divider.is-dragging .timeline-knob-bottom {
+  transform: translateX(-50%) scale(1.18);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
   border-color: var(--accent-solid);
 }

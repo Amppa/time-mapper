@@ -157,7 +157,7 @@ export const TimelinePreview = {
     let topKnob = refs.nowLine.querySelector(".now-knob-top");
     if (!topKnob) {
       refs.nowLine.innerHTML = `
-        <div class="timeline-knob now-knob-top"><span class="knob-time"></span></div>
+        <div class="timeline-knob now-knob-top"><span class="knob-icon">📍</span><span class="knob-time"></span></div>
         <div class="timeline-knob-bottom now-knob-bottom"></div>
       `;
       topKnob = refs.nowLine.querySelector(".now-knob-top");

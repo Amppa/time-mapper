@@ -257,7 +257,7 @@ async function initOptions() {
 
       // Top knob with icon & hour text
       const topKnob = document.createElement("div");
-      topKnob.className = "timeline-divider-knob top-knob";
+      topKnob.className = "timeline-knob divider-knob-top";
       topKnob.textContent = `${meta.icon} ${String(period.start).padStart(2, "0")}:00`;
 
       // Vertical line
@@ -266,7 +266,7 @@ async function initOptions() {
 
       // Bottom knob
       const bottomKnob = document.createElement("div");
-      bottomKnob.className = "timeline-divider-knob bottom-knob";
+      bottomKnob.className = "timeline-knob-bottom";
 
       divider.append(topKnob, line, bottomKnob);
       wireDividerDrag(divider, idx);
